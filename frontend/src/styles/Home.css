@@ -1,0 +1,133 @@
+* {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+
+  box-sizing: border-box;
+}
+
+/* ===================== */
+/* General Wrappers */
+/* ===================== */
+.home-wrapper {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
+  color: white;
+}
+
+/* ===================== */
+/* Splash Screen */
+/* ===================== */
+
+.splash-content {
+  animation: fadeIn 1.5s ease-in-out;
+}
+
+.splash-text {
+  font-size: 2.2rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+  letter-spacing: 1px;
+  color: #e0e0e0;
+}
+
+.splash-logo {
+  width: 220px;
+  animation: zoomInOut 3s ease-in-out infinite;
+}
+
+/* ===================== */
+/* Home Content */
+/* ===================== */
+.main-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.home-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2.5rem;
+  animation: fadeInUp 1.2s ease;
+}
+
+.home-logo {
+  width: 200px;
+  height: auto;
+}
+
+.home-title {
+  font-size: 3.5rem;
+  font-weight: 800;
+  letter-spacing: 2px;
+  color: #f5f5f5;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+}
+
+/* ===================== */
+/* Start Button */
+/* ===================== */
+.nav-link {
+  text-decoration: none;
+}
+
+.start-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.7rem;
+  font-size: 1.3rem;
+  font-weight: 800;
+  padding: 0.5rem 1.5rem;
+  border: 2px solid #fff;
+  border-radius: 50px;
+  background-color: transparent;
+  color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: zoomInOut 3s ease-in-out infinite;
+}
+
+.start-btn:hover {
+  background-color: white;
+  color: #0f0f0f;
+  transform: scale(1.05);
+}
+
+/* ===================== */
+/* Animations */
+/* ===================== */
+@keyframes zoomInOut {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.08);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

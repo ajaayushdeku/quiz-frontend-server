@@ -1,9 +1,10 @@
 import { Route, Routes } from "react-router-dom";
 import "./App.css";
+import { ThemeProvider } from "styled-components";
 import QuizApp from "./components/Fetch";
 import AuthForm from "./components/Login";
 import TeamManager from "./components/Team";
-import TeamGrid from "./components/TeamList";
+import TeamList from "./components/TeamList";
 import RoundGrid from "./components/Category";
 import AdminLayout from "./components/admin/Sidebar";
 import Dashboard from "./pages/admin/Dashboard";
@@ -13,26 +14,151 @@ import Rounds from "./pages/admin/Rounds";
 import Create from "./pages/admin/Create";
 import ManageQuestions from "./pages/admin/ManageQuestions";
 
-function App() {
-  return (
-    <Routes>
-      {/* Public routes */}
-      <Route path="/" element={<AuthForm />} />
-      <Route path="/team" element={<TeamManager />} />
-      <Route path="/quiz" element={<QuizApp />} />
-      <Route path="/team-list" element={<TeamGrid />} />
-      <Route path="/category" element={<RoundGrid />} />
+import Home from "./pages/user/Home";
+import ErrorPage from "./pages/user/ErrorPage";
+import RoundSelect from "./pages/user/RoundSelect";
+import RoundIntro from "./pages/user/RoundIntro";
 
-      {/* Admin routes */}
-      <Route path="/admin" element={<AdminLayout />}>
-        <Route path="dashboard" element={<ManageQuestions />} />
-        <Route path="/manage-questions" element={<Dashboard />} />
-        <Route path="teams" element={<Teams />} />
-        <Route path="questions" element={<Questions />} />
-        <Route path="rounds" element={<Rounds />} />
-        <Route path="create" element={<Create />} />
-      </Route>
-    </Routes>
+import GeneralQuiz from "./components/rounds/GeneralQuiz";
+import SubjectQuiz from "./components/rounds/SubjectQuiz";
+import RapidFireQuiz from "./components/rounds/RapidFireQuiz";
+import BuzzerQuiz from "./components/rounds/BuzzerQuiz";
+import EstimationQuiz from "./components/rounds/EstimationQuiz";
+
+import QuizWrapper from "./components/QuizWrapper";
+
+import ResultsPage from "./pages/user/ResultsPage";
+import QuizMasterLogin from "./pages/user/QuizMasterLogin";
+import QuizSelector from "./pages/user/QuizSelector";
+import { GlobalStyle } from "./GlobalStyle";
+
+import GeneralRound from "./components/quiz_rounds/GeneralRound";
+import SubjectRound from "./components/quiz_rounds/SubjectRound";
+import RapidFireRound from "./components/quiz_rounds/RapidFireRound";
+import BuzzerRound from "./components/quiz_rounds/BuzzerRound";
+import EstimationRound from "./components/quiz_rounds/EstimationRound";
+
+function App() {
+  const theme = {
+    colors: {
+      heading: "#18181d",
+      text: "rgba(29, 29, 29, 0.8)",
+      white: "#fff",
+      black: "#212529",
+      helper: "#8490ff",
+      bg: "#f2f2f2",
+      footer_bg: "rgb(39, 51, 51)",
+      btn: "rgb(44, 55, 61)",
+      border: "rgba(54, 54, 54, 0.5)",
+      hr: "#ffffff",
+      gradient:
+        "linear-gradient(0deg, rgb(132 144 255) 0%, rgb(98 189 252) 100%)",
+      shadow:
+        "rgba(0, 0, 0, 0.02) 0px 1px 3px 0px, rgba(27, 31, 35, 0.15) 0px 0px 0px 1px;",
+      shadowSupport: "rgba(0, 0, 0, 0.16) 0px 1px 4px",
+    },
+    media: {
+      mobile: "768px",
+      tab: "998px",
+    },
+  };
+
+  return (
+    <ThemeProvider theme={theme}>
+      <GlobalStyle />
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<AuthForm />} />
+        <Route path="/team" element={<TeamManager />} />
+        <Route path="/quiz" element={<QuizApp />} />
+        <Route path="/team-list" element={<TeamList />} />
+        <Route path="/category" element={<RoundGrid />} />
+
+        <Route path="/home" element={<Home />} />
+        <Route path="/roundselect/:quizId" element={<RoundSelect />} />
+        <Route path="/error" element={<ErrorPage />} />
+        {/* <Route path="/round/:quizType" element={<RoundIntro />} /> */}
+
+        <Route path="/quizselect" element={<QuizSelector />} />
+        <Route path="/round/:quizId/:roundId" element={<RoundIntro />} />
+
+        <Route
+          path="/quiz/:quizId/round/:roundId/general"
+          element={<GeneralRound />}
+        />
+        <Route
+          path="/quiz/:quizId/round/:roundId/rapidfire"
+          element={<RapidFireRound />}
+        />
+        <Route
+          path="/quiz/:quizId/round/:roundId/buzzer"
+          element={<BuzzerRound />}
+        />
+        <Route
+          path="/quiz/:quizId/round/:roundId/estimation"
+          element={<EstimationRound />}
+        />
+        <Route
+          path="/quiz/:quizId/round/:roundId/subjective"
+          element={<SubjectRound />}
+        />
+
+        {/* Quizzes */}
+        <Route
+          path="/quiz/generalquiz"
+          element={
+            <QuizWrapper quizKey="generalquiz">
+              <GeneralQuiz />
+            </QuizWrapper>
+          }
+        />
+        <Route
+          path="/quiz/subjectquiz"
+          element={
+            <QuizWrapper quizKey="subjectquiz">
+              <SubjectQuiz />
+            </QuizWrapper>
+          }
+        />
+        <Route
+          path="/quiz/estimationquiz"
+          element={
+            <QuizWrapper quizKey="estimationquiz">
+              <EstimationQuiz />
+            </QuizWrapper>
+          }
+        />
+        <Route
+          path="/quiz/rapidfirequiz"
+          element={
+            <QuizWrapper quizKey="rapidfirequiz">
+              <RapidFireQuiz />
+            </QuizWrapper>
+          }
+        />
+        <Route
+          path="/quiz/buzzerquiz"
+          element={
+            <QuizWrapper quizKey="buzzerquiz">
+              <BuzzerQuiz />
+            </QuizWrapper>
+          }
+        />
+
+        {/* Scoreboard */}
+        <Route path="/result" element={<ResultsPage />} />
+
+        {/* Admin routes */}
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route path="dashboard" element={<ManageQuestions />} />
+          <Route path="manage-questions" element={<Dashboard />} />
+          <Route path="teams" element={<Teams />} />
+          <Route path="questions" element={<Questions />} />
+          <Route path="rounds" element={<Rounds />} />
+          <Route path="create" element={<Create />} />
+        </Route>
+      </Routes>
+    </ThemeProvider>
   );
 }
 

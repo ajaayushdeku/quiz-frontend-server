@@ -10,7 +10,6 @@ import { authMiddleware } from "../middleware/auth";
 import cloudinary from "../config/cloudinary";
 import upload from "../middleware/upload";
 
-
 export interface AuthenticatedRequest extends Request {
   user?: {
     id: string;
@@ -43,7 +42,6 @@ router.post(
     }
   }
 );
-
 
 router.get(
   "/get-questions",

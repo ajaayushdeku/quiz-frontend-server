@@ -1,0 +1,80 @@
+/* ======================= */
+/* Options Container Section */
+/* ======================= */
+.quiz-options {
+  width: 80vw;
+  position: relative;
+  top: 2rem;
+}
+
+.options-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 10px;
+  justify-content: center;
+}
+
+.option-btn {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 1rem;
+  margin: 10px 20px;
+  width: 500px; /* smaller for kids' attention span */
+  height: 4rem; /* taller for easy click/tap */
+  padding: 0 1.5rem;
+  font-size: 1.5rem; /* bigger font */
+  font-weight: bold;
+  color: #fff;
+  background-color: transparent;
+  border: 1.55px solid rgba(255, 255, 255, 0.4);
+  border-radius: 1.5rem;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
+    inset 0 0 10px rgba(255, 255, 255, 0.2);
+  backdrop-filter: blur(8px);
+  transition: all 0.3s ease;
+  cursor: pointer;
+}
+
+.option-btn h3 {
+  color: #fff;
+  font-size: 1.5rem;
+  margin: 0;
+}
+
+.option-btn p {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: bold;
+}
+
+.option-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ======================= */
+/* Option States Section */
+/* ======================= */
+.option-correct {
+  background: #4caf50; /* green for correct */
+  color: white;
+}
+
+.option-wrong {
+  background: #f44336; /* red for wrong */
+  color: white;
+}
+
+.option-dim {
+  opacity: 0.6;
+  color: rgb(0, 0, 0);
+  background: #b6b6b6; /* subtle color for unselected options */
+}
+
+.option-dim:hover {
+  transform: none;
+  box-shadow: none;
+  cursor: not-allowed;
+}

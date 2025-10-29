@@ -16,7 +16,7 @@ export default function RoundGrid() {
   useEffect(() => {
     const fetchPoints = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/api/round/points");
+        const res = await axios.get("http://localhost:4000/api/round/points");
         // res.data should be { "General Round": 10, ... }
         setPoints(res.data);
       } catch (err) {

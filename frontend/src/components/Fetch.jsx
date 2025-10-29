@@ -16,9 +16,7 @@ export default function QuizApp() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const res = await axios.get(
-          "http://localhost:3000/api/quiz/questions"
-        );
+        const res = await axios.get("http://localhost:4000/api/quiz/questions");
         setQuestions(res.data.data);
         setFilteredQuestions(res.data.data);
       } catch (err) {

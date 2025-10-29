@@ -7,7 +7,7 @@ export default function TeamManager() {
   const [teams, setTeams] = useState([]);
   const navigate = useNavigate();
 
-  const API_URL = "http://localhost:3000/api/team/teams";
+  const API_URL = "http://localhost:4000/api/team/teams";
 
   // Fetch teams from backend
   const fetchTeams = async () => {

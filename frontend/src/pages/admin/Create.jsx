@@ -22,9 +22,11 @@ export default function AdminCreateUser() {
       const token = localStorage.getItem("token"); // admin token stored on login
 
       const res = await axios.post(
-        "http://localhost:3000/api/auth/admin/register",
+        "http://localhost:4000/api/auth/admin/register",
         formData,
         {
+          withCredentials: true, // ✅ important
+
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -40,93 +42,62 @@ export default function AdminCreateUser() {
   };
 
   return (
-    <div
-      style={{
-        maxWidth: 1000,
-        margin: "50px auto",
-        padding: "180px",
-        backgroundColor: "#f9f9f9ff",
-        borderRadius: "22px",
-        boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-      }}
-    >
-      <h2
-        style={{
-          color: "black",
-          textAlign: "center",
-          marginBottom: "20px",
-          fontWeight: 700,
-          fontSize: "28x",
-        }}
-      >
-        Create Quiz-Master
-      </h2>
+    <section className="create-quiz-round">
+      <h2 className="form-heading">Create Quiz-Master</h2>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: "15px" }}
-      >
-        <input
-          type="text"
-          name="name"
-          value={formData.name}
-          onChange={handleChange}
-          placeholder="Full Name"
-          required
-          style={{
-            padding: "12px",
-            fontSize: "16px",
-            borderRadius: "8px",
-            border: "1px solid #ccc",
-          }}
-        />
+      <form onSubmit={handleSubmit} className="quiz-form">
+        <div className="round-details ">
+          {/* Full Name */}
+          <label className="quiz-label">
+            Full Name:
+            <input
+              type="text"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Full Name"
+              className="quiz-input"
+              required
+            />
+          </label>
 
-        <input
-          type="email"
-          name="email"
-          value={formData.email}
-          onChange={handleChange}
-          placeholder="Email Address"
-          required
-          style={{
-            padding: "12px",
-            fontSize: "16px",
-            borderRadius: "8px",
-            border: "1px solid #fcfbfbff",
-          }}
-        />
+          {/* Email */}
+          <label className="quiz-label">
+            Email Address:
+            <input
+              type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email Address"
+              className="quiz-input"
+              required
+            />
+          </label>
 
-        <input
-          type="password"
-          name="password"
-          value={formData.password}
-          onChange={handleChange}
-          placeholder="Password"
-          required
-          style={{
-            padding: "12px",
-            fontSize: "16px",
-            borderRadius: "8px",
-            border: "1px solid #fbf9f9ff",
-          }}
-        />
+          {/* Password */}
+          <label className="quiz-label">
+            Password:
+            <input
+              type="password"
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className="quiz-input"
+              required
+            />
+          </label>
+        </div>
 
         <button
           type="submit"
-          style={{
-            padding: "14px",
-            fontSize: "16px",
-            borderRadius: "8px",
-            backgroundColor: "#007bff",
-            color: "white",
-            border: "none",
-            cursor: "pointer",
-            fontWeight: "bold",
-          }}
+          className="primary-btn submit-create-btn"
+          style={{ marginTop: "2rem" }}
         >
           Create User
         </button>
       </form>
-    </div>
+    </section>
   );
 }

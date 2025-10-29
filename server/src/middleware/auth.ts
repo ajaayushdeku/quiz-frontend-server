@@ -30,7 +30,7 @@ export const authMiddleware = (roles: string[] = []) => {
       req.user = { id: decoded.id, role: decoded.role };
 
       next();
-    } catch (err) { 
+    } catch (err) {
       console.error("Auth error:", err);
       return res.status(401).json({ message: "Invalid token" });
     }

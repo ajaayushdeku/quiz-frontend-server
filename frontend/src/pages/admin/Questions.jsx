@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import { v4 as uuidv4 } from "uuid";
 import toast, { Toaster } from "react-hot-toast";
+import "../../styles/Dashboard.css";
+import "../../styles/Quiz.css";
 
 export default function QuestionForm() {
   const [formData, setFormData] = useState({
@@ -20,7 +22,7 @@ export default function QuestionForm() {
 
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
-  const API_URL = "http://localhost:3000/api";
+  const API_URL = "http://localhost:4000/api";
 
   // 🟢 Handle field changes
   const handleChange = (e) => {
@@ -120,214 +122,164 @@ export default function QuestionForm() {
   const categories = [
     "Physics",
     "Maths",
+    "Cosmics",
     "Chemistry",
     "Biology",
     "Zoology",
     "Botany",
+    "English",
+    "History",
+    "Geography",
+    "Sports",
+    "General Knowledge",
   ];
 
   return (
-    <div
-      style={{
-        maxWidth: 700,
-        margin: "50px auto",
-        padding: 30,
-        background: "#fff",
-        borderRadius: 10,
-        boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-      }}
-    >
-      <Toaster position="top-center" />
-      <h2 style={{ textAlign: "center", color: "black" }}>Add Question</h2>
+    <section className="create-quiz-round">
+      <h2 className="form-heading">Add Question</h2>
 
-      <form
-        onSubmit={handleSubmit}
-        style={{ display: "flex", flexDirection: "column", gap: 15 }}
-      >
-        {/* Question Text */}
-        <textarea
-          name="text"
-          value={formData.text}
-          onChange={handleChange}
-          placeholder="Question text"
-          required
-          style={{
-            padding: 12,
-            borderRadius: 6,
-            border: "1px solid #ccc",
-            fontSize: 16,
-          }}
-        />
+      <div>
+        <form onSubmit={handleSubmit} className="quiz-form">
+          {/* Question Text */}
+          <label className="quiz-label">
+            Question:
+            <textarea
+              name="text"
+              value={formData.text}
+              onChange={handleChange}
+              placeholder="Question text"
+              className="quiz-input textarea"
+              required
+            />
+          </label>
 
-        {/* Type */}
-        <select
-          value={formData.type}
-          onChange={handleTypeChange}
-          style={{
-            padding: 10,
-            borderRadius: 6,
-            border: "1px solid #ccc",
-          }}
-        >
-          <option value="multiple-choice">Multiple Choice</option>
-          <option value="short-answer">Short Answer</option>
-        </select>
+          {/* Type */}
+          <label className="quiz-label">
+            Type:
+            <select
+              value={formData.type}
+              onChange={handleTypeChange}
+              className="quiz-input select"
+            >
+              <option value="multiple-choice">Multiple Choice</option>
+              <option value="short-answer">Short Answer</option>
+            </select>
+          </label>
 
-        {/* Options */}
-        {formData.options.map((opt, idx) => (
-          <input
-            key={opt.id}
-            type="text"
-            value={opt.text}
-            onChange={(e) => handleOptionChange(idx, e.target.value)}
-            placeholder={`Option ${idx + 1}`}
-            required
-            style={{
-              padding: 10,
-              borderRadius: 6,
-              border: "1px solid #ccc",
-              fontSize: 16,
-            }}
-          />
-        ))}
-
-        {/* Correct Answer */}
-        {formData.type === "multiple-choice" ? (
-          <select
-            value={formData.correctAnswer}
-            onChange={(e) =>
-              setFormData((prev) => ({
-                ...prev,
-                correctAnswer: e.target.value,
-              }))
-            }
-            required
-            style={{
-              padding: 10,
-              borderRadius: 6,
-              border: "1px solid #ccc",
-            }}
-          >
-            <option value="">Select Correct Option</option>
-            {formData.options.map((opt) => (
-              <option key={opt.id} value={opt.id}>
-                {opt.text || "(empty option)"}
-              </option>
-            ))}
-          </select>
-        ) : (
-          <input
-            type="text"
-            placeholder="Correct Answer"
-            value={formData.options[0].text}
-            onChange={(e) => handleOptionChange(0, e.target.value)}
-            required
-            style={{
-              padding: 10,
-              borderRadius: 6,
-              border: "1px solid #ccc",
-            }}
-          />
-        )}
-
-        {/* Points */}
-        <input
-          type="number"
-          name="points"
-          value={formData.points}
-          onChange={handleChange}
-          placeholder="Points"
-          required
-          style={{
-            padding: 10,
-            borderRadius: 6,
-            border: "1px solid #ccc",
-          }}
-        />
-
-        {/* Category */}
-        <select
-          name="category"
-          value={formData.category}
-          onChange={handleChange}
-          required
-          style={{
-            padding: 10,
-            borderRadius: 6,
-            border: "1px solid #ccc",
-          }}
-        >
-          <option value="">Select Category</option>
-          {categories.map((cat) => (
-            <option key={cat} value={cat}>
-              {cat}
-            </option>
-          ))}
-        </select>
-
-        {/* File Upload */}
-        <input
-          type="file"
-          onChange={handleFileChange}
-          accept="image/*,video/*"
-          style={{
-            padding: 10,
-            borderRadius: 6,
-            border: "1px solid #ccc",
-          }}
-        />
-
-        {preview && (
-          <div style={{ position: "relative", display: "inline-block" }}>
-            {file?.type.startsWith("image") ? (
-              <img
-                src={preview}
-                alt="Preview"
-                style={{ maxWidth: 200, borderRadius: 6 }}
+          {/* Options */}
+          {formData.options.map((opt, idx) => (
+            <label key={opt.id} className="quiz-label">
+              Option {idx + 1}:
+              <input
+                type="text"
+                value={opt.text}
+                onChange={(e) => handleOptionChange(idx, e.target.value)}
+                placeholder={`Option ${idx + 1}`}
+                className="quiz-input"
+                required
               />
+            </label>
+          ))}
+
+          {/* Correct Answer */}
+          <label className="quiz-label">
+            Correct Answer:
+            {formData.type === "multiple-choice" ? (
+              <select
+                value={formData.correctAnswer}
+                onChange={(e) =>
+                  setFormData((prev) => ({
+                    ...prev,
+                    correctAnswer: e.target.value,
+                  }))
+                }
+                className="quiz-input select"
+                required
+              >
+                <option value="">Select Correct Option</option>
+                {formData.options.map((opt) => (
+                  <option key={opt.id} value={opt.id}>
+                    {opt.text || "(empty option)"}
+                  </option>
+                ))}
+              </select>
             ) : (
-              <video
-                src={preview}
-                controls
-                style={{ maxWidth: 200, borderRadius: 6 }}
+              <input
+                type="text"
+                value={formData.options[0].text}
+                onChange={(e) => handleOptionChange(0, e.target.value)}
+                className="quiz-input"
+                required
               />
             )}
-            <button
-              type="button"
-              onClick={handleFileRemove}
-              style={{
-                position: "absolute",
-                top: -10,
-                right: -10,
-                background: "red",
-                color: "white",
-                border: "none",
-                borderRadius: "50%",
-                width: 25,
-                height: 25,
-                cursor: "pointer",
-              }}
-            >
-              ×
-            </button>
-          </div>
-        )}
+          </label>
 
-        <button
-          type="submit"
-          style={{
-            padding: 12,
-            borderRadius: 8,
-            border: "none",
-            background: "#007bff",
-            color: "#fff",
-            fontSize: 16,
-            cursor: "pointer",
-          }}
-        >
-          Add Question
-        </button>
-      </form>
-    </div>
+          {/* Points */}
+          <label className="quiz-label">
+            Points:
+            <input
+              type="number"
+              name="points"
+              value={formData.points}
+              onChange={handleChange}
+              placeholder="Points"
+              className="quiz-input"
+              required
+            />
+          </label>
+
+          {/* Category */}
+          <label className="quiz-label">
+            Category:
+            <select
+              name="category"
+              value={formData.category}
+              onChange={handleChange}
+              className="quiz-input select"
+              required
+            >
+              <option value="">Select Category</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
+              ))}
+            </select>
+          </label>
+
+          {/* File Upload */}
+          <label className="quiz-label">
+            Media Upload:
+            <input
+              type="file"
+              onChange={handleFileChange}
+              accept="image/*,video/*"
+              className="quiz-input file-input"
+            />
+          </label>
+
+          {preview && (
+            <div className="media-preview">
+              {file?.type.startsWith("image") ? (
+                <img src={preview} alt="Preview" className="preview-image" />
+              ) : (
+                <video src={preview} controls className="preview-video" />
+              )}
+              <button
+                type="button"
+                onClick={handleFileRemove}
+                className="remove-btn"
+              >
+                ×
+              </button>
+            </div>
+          )}
+
+          <button type="submit" className="primary-btn add-question-btn">
+            Add Question
+          </button>
+        </form>
+      </div>
+    </section>
   );
 }

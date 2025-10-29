@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 export default function TeamGrid() {
   const [teams, setTeams] = useState([]);
   const navigate = useNavigate();
-  const API_URL = "http://localhost:3000/api/team/teams";
+  const API_URL = "http://localhost:4000/api/team/teams";
 
   useEffect(() => {
     const fetchTeams = async () => {
