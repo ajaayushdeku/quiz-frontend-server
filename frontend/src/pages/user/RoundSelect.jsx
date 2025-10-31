@@ -68,11 +68,11 @@ import rapid from "../../assets/images/rapid.png";
 import axios from "axios";
 
 const roundImages = {
-  General: general,
-  Subjective: subject,
-  Estimation: estimate,
-  RapidFire: rapid,
-  Buzzer: buzzer,
+  general_round: general,
+  subject_round: subject,
+  estimation_round: estimate,
+  rapid_fire_round: rapid,
+  buzzer_round: buzzer,
 };
 
 const RoundSelect = () => {
@@ -90,8 +90,18 @@ const RoundSelect = () => {
         const quizzes = res.data.quiz || [];
         const selectedQuiz = quizzes.find((q) => q._id === quizId);
 
-        if (selectedQuiz && selectedQuiz.rounds) {
-          setQuizRounds(selectedQuiz.rounds);
+        const normalizeCategory = (category) =>
+          category.toLowerCase().replace(/\s+/g, "_");
+
+        if (selectedQuiz && Array.isArray(selectedQuiz.rounds)) {
+          const formattedRounds = selectedQuiz.rounds.map((round, idx) => ({
+            _id: round._id,
+            roundNumber: String(idx + 1).padStart(2, "0"),
+            roundTitle: round.name,
+            rules: round.rules || [], // or get from config if needed
+            category: normalizeCategory(round.category) || "General",
+          }));
+          setQuizRounds(formattedRounds);
         }
       } catch (err) {
         console.error("Error fetching quiz rounds:", err);
@@ -115,23 +125,23 @@ const RoundSelect = () => {
         <div className="round-select-header">ROUNDS</div>
         <div className="round-card-lists">
           {quizRounds.map((round, index) => (
-            <div className="round-card" key={round._id}>
+            <div
+              className="round-card"
+              key={round._id}
+              onClick={() => handleRoundSelect(round)}
+            >
               <div className="round-image-wrapper">
                 <img
-                  src={roundImages[round.name] || general}
-                  style={{ filter: "grayscale(1) brightness(0) invert(1)" }}
+                  src={roundImages[round.category] || general}
                   alt={round.name}
                 />
+
+                <h1 className="round-number">
+                  {String(index + 1).padStart(2, "0")}
+                </h1>
               </div>
-              <h1 className="round-number">
-                {String(index + 1).padStart(2, "0")}
-              </h1>
-              <button
-                onClick={() => handleRoundSelect(round)}
-                className="round-select-btn"
-              >
-                <h2 className="round-title">{round.name}</h2>
-              </button>
+
+              <h2 className="round-title">{round.roundTitle}</h2>
             </div>
           ))}
         </div>

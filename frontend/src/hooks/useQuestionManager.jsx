@@ -5,9 +5,10 @@ export function useQuestionManager(initialQuestions = []) {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
 
   useEffect(() => {
+    // Only reset if the content is actually different
     setQuestions(initialQuestions);
     setCurrentQuestionIndex(0);
-  }, [initialQuestions]);
+  }, [initialQuestions.length, initialQuestions]); // safer dependency
 
   const currentQuestion = questions[currentQuestionIndex] || null;
   const isLastQuestion = currentQuestionIndex >= questions.length - 1;

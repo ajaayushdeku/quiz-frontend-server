@@ -83,7 +83,7 @@
 }
 
 .rules-list {
-  height: 60vh;
+  height: 48vh;
   width: 65vw;
   padding: 2rem 5rem;
   border-radius: 1.5rem;
@@ -134,82 +134,115 @@
 }
 
 /* ========================== */
-/* Round Select Section */
+/* Round Select Section (Side-by-Side Layout) */
 /* ========================== */
 .round-select-content {
-  z-index: 1;
+  min-height: 100vh;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
   justify-content: center;
+  gap: 10rem;
   font-size: 2rem;
-  overflow: hidden;
+  text-align: center;
+  color: #ffffffcc;
 }
 
+/* Left: Header Section */
 .round-select-header {
   font-size: 5rem;
   font-weight: 800;
-  margin: 3rem;
-  margin-bottom: 4rem;
-  color: #fff;
+  color: #ffffffcc;
   text-shadow: 0 0 8px #000;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  user-select: none;
+  opacity: 0.9;
 }
 
+/* Right: Vertical Scroll List */
 .round-card-lists {
-  position: relative;
-  color: #fff;
-  display: flex;
-  width: 100vw;
-  flex-direction: row;
-  overflow-x: auto;
-  gap: 2rem;
-  padding-top: 1rem;
-  padding-bottom: 1rem;
-}
-
-.round-card-lists::-webkit-scrollbar {
-  display: none;
-}
-
-.round-card {
-  width: 30vw;
   display: flex;
   flex-direction: column;
-  justify-content: center;
   align-items: center;
-  text-align: center;
+  justify-content: flex-start;
+  height: 80vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  gap: 2rem;
   padding: 1rem;
-  border: 2px dashed #fff4;
-  transition: transform 0.3s ease;
+  scroll-behavior: smooth;
+  width: 30vw;
+  position: relative;
+  top: 2rem;
+}
+
+/* Hide scrollbar */
+.round-card-lists::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+}
+.round-card-lists {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+/* Each Round Card */
+.round-card {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 2px dashed #ffffff60;
   border-radius: 1rem;
+  background: rgba(255, 255, 255, 0.06);
+  transition: all 0.3s ease;
+  cursor: pointer;
 }
 
 .round-card:hover {
   transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.05);
+  background: rgba(255, 255, 255, 0.1);
+  box-shadow: 0 0 20px rgba(255, 255, 255, 0.15);
 }
 
-.round-card .round-number {
-  font-size: 5rem;
-  font-weight: 800;
+/* Image + Round Info */
+.round-image-wrapper {
+  width: 5.5rem;
+  height: 5.5rem;
+  gap: 1.5rem;
+  margin-bottom: 0.5rem;
+  animation: zoomInOut 7s ease-in-out infinite;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  color: #ffffffcc;
+}
+
+.round-image-wrapper img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: grayscale(100) brightness(0) invert(1);
+}
+
+.round-number {
+  font-size: 3rem;
+  font-weight: 700;
+  margin: 0.5rem 0;
 }
 
 .round-title {
-  font-size: 1.8rem;
-  color: #fff;
-  margin-top: 0.5rem;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #ffffffcc;
 }
 
-.round-image-wrapper {
-  position: relative;
-  display: inline-block;
-  top: 2rem;
-  margin-bottom: 1rem;
-  width: 8rem;
-  height: 8rem;
-  animation: zoomInOut 7s ease-in-out infinite;
-}
-
+/* Subtle image animation */
 @keyframes zoomInOut {
   0%,
   100% {
@@ -220,31 +253,76 @@
   }
 }
 
-.round-image-wrapper img {
-  width: 8rem;
-  height: 8rem;
-  object-fit: cover;
-  display: block;
-  border-radius: 0.5rem;
-  z-index: 0;
+/* ========================== */
+/* Responsive adjustments */
+@media (max-width: 1400px) {
+  .round-select-content {
+    gap: 6rem;
+  }
+  .round-select-header {
+    font-size: 4rem;
+  }
+  .round-number {
+    font-size: 2.5rem;
+  }
+  .round-title {
+    font-size: 1.3rem;
+  }
 }
 
-.round-select-btn-container {
-  margin: 2rem 0;
-  position: absolute;
-  bottom: 1rem;
+@media (max-width: 1024px) {
+  .round-select-content {
+    flex-direction: column;
+    gap: 3rem;
+  }
+  .round-select-header {
+    font-size: 3.5rem;
+  }
+  .round-card-lists {
+    width: 80vw;
+    height: auto;
+    max-height: 70vh;
+  }
+  .round-card {
+    height: auto;
+    padding: 2rem 1rem;
+  }
+  .round-number {
+    font-size: 2rem;
+  }
+  .round-title {
+    font-size: 1.2rem;
+  }
 }
 
-.round-select-btn {
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  font-size: 2rem;
-  color: #fff;
-  transition: transform 0.5s ease, color 0.3s ease;
+@media (max-width: 768px) {
+  .round-select-header {
+    font-size: 3rem;
+  }
+  .round-card-lists {
+    width: 90vw;
+    max-height: 60vh;
+  }
+  .round-number {
+    font-size: 1.8rem;
+  }
+  .round-title {
+    font-size: 1rem;
+  }
 }
 
-.round-select-btn:hover {
-  color: #031c4c;
-  transform: scale(1.1);
+@media (max-width: 480px) {
+  .round-select-header {
+    font-size: 2.5rem;
+  }
+  .round-card-lists {
+    width: 95vw;
+    max-height: 50vh;
+  }
+  .round-number {
+    font-size: 1.5rem;
+  }
+  .round-title {
+    font-size: 0.9rem;
+  }
 }

@@ -1,9 +1,9 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUIHelpers } from "./useUIHelpers";
 
 export function useTeamQueue({
   totalTeams = 4,
-  teamNames = ["Alpha", "Bravo", "Charlie", "Delta"], // team names
+  teamNames = ["Ala", "Bravo", "Charlie", "Delta"], // team names
   maxQuestionsPerTeam = 2,
   maxQuestionsPerRound = 1, // limit per round
 }) {
@@ -27,6 +27,27 @@ export function useTeamQueue({
   const [buzzQueue, setBuzzQueue] = useState([]);
 
   const activeTeam = queue[activeIndex];
+
+  // // ---- Update queue and counters when teamNames change ----
+  useEffect(() => {
+    if (!teamNames || teamNames.length === 0) return;
+
+    const limitedNames = teamNames.slice(0, totalTeams);
+
+    setQueue((prevQueue) => {
+      const isDifferent =
+        prevQueue.length !== limitedNames.length ||
+        prevQueue.some((team, idx) => team !== limitedNames[idx]);
+
+      if (isDifferent) {
+        setActiveIndex(0);
+        setTeamCounters(Object.fromEntries(limitedNames.map((t) => [t, 0])));
+        setRoundCounters(Object.fromEntries(limitedNames.map((t) => [t, 0])));
+        return limitedNames;
+      }
+      return prevQueue;
+    });
+  }, [teamNames, totalTeams]);
 
   // ---- Go to next team ----
   const goToNextTeam = () => {

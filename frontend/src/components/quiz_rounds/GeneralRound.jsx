@@ -30,13 +30,16 @@ const { settings } = rulesConfig.general_round;
 const TEAM_TIME_LIMIT = settings.teamTimeLimit;
 const PASS_TIME_LIMIT = settings.passTimeLimit;
 
-const TEAM_NAMES = ["Alpha", "Bravo", "Charlie", "Delta"];
-const TEAM_COLORS = {
-  Alpha: "#f5003dff",
-  Bravo: "#0ab9d4ff",
-  Charlie: "#32be76ff",
-  Delta: "#e5d51eff",
-};
+const COLORS = [
+  "#8d1734ff",
+  "#0ab9d4ff",
+  "#32be76ff",
+  "#e5d51eff",
+  "#ff9800ff",
+  "#9c27b0ff",
+  "#03a9f4ff",
+  "#ffc107ff",
+];
 
 const GeneralRound = ({ onFinish }) => {
   const { quizId, roundId } = useParams();
@@ -46,6 +49,68 @@ const GeneralRound = ({ onFinish }) => {
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [questionDisplay, setQuestionDisplay] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
+
+  const [teams, setTeams] = useState([]);
+
+  // Fetch only the teams on the basis of the current Quiz
+  useEffect(() => {
+    const fetchTeams = async () => {
+      try {
+        console.log("🔍 Fetching teams for quizId:", quizId);
+
+        // Fetch the quiz
+        const quizRes = await axios.get(
+          "http://localhost:4000/api/quiz/get-quiz",
+          { withCredentials: true }
+        );
+
+        const allQuizzes = quizRes.data.quiz || [];
+        const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+
+        if (!currentQuiz) {
+          console.warn("⚠️ No quiz found for this quizId:", quizId);
+          return;
+        }
+
+        const teamIds = currentQuiz.teams || [];
+        if (!teamIds.length) {
+          console.warn("⚠️ No teams found in this quiz.");
+          return;
+        }
+
+        console.log("🎯 Team IDs in quiz:", teamIds);
+
+        // Format teams for easier use in components
+        const formattedTeams = teamIds.map((team, index) => ({
+          id: team._id,
+          name: team.name || `Team ${index + 1}`,
+          // color: optional if you want to assign later
+        }));
+
+        console.log("🧩 Formatted teams:", formattedTeams);
+        setTeams(formattedTeams);
+      } catch (error) {
+        console.error("❌ Fetch Error (teams):", error);
+        showToast("Failed to fetch teams!");
+      }
+    };
+
+    if (quizId) fetchTeams();
+  }, [quizId]);
+
+  // Team colors assignment
+  const generateTeamColors = (teams) => {
+    const teamColors = {};
+    teams.forEach((team, index) => {
+      const color = COLORS[index % COLORS.length]; // cycle colors if more teams than colors
+      teamColors[team.name || `Team${index + 1}`] = color;
+    });
+    return teamColors;
+  };
+
+  const TEAM_COLORS = generateTeamColors(teams);
+  const TEAM_NAMES = teams.map((team) => team.name);
+  const TOTAL_TEAMS = TEAM_NAMES.length;
 
   // 🧠 Fetch questions from MongoDB filtered by round
   useEffect(() => {

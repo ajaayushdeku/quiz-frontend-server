@@ -74,7 +74,7 @@ function App() {
         <Route path="/team-list" element={<TeamList />} />
         <Route path="/category" element={<RoundGrid />} />
 
-        <Route path="/home" element={<Home />} />
+        <Route path="/home/:quizId" element={<Home />} />
         <Route path="/roundselect/:quizId" element={<RoundSelect />} />
         <Route path="/error" element={<ErrorPage />} />
         {/* <Route path="/round/:quizType" element={<RoundIntro />} /> */}

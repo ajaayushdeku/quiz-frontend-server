@@ -24,7 +24,8 @@ const TeamAnswerBoxes = ({
             />
             <Button
               onClick={() => handleSubmit(team)}
-              disabled={teamAnswers[team].trim() === ""}
+              // disabled={teamAnswers[team].trim() === ""}
+              disabled={teamAnswers[team] === ""}
               children="Submit"
               className="submit-button"
             />

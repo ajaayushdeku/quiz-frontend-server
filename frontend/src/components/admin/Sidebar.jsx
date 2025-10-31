@@ -8,7 +8,7 @@ export default function AdminLayout() {
     { name: "Questions", path: "/admin/questions" },
     { name: "Create-Quiz", path: "/admin/rounds" },
     { name: "Create Quiz-Master", path: "/admin/create" },
-    { name: "Start Quiz", path: "/home" },
+    { name: "Start Quiz", path: "/quizselect" },
   ];
 
   return (

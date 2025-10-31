@@ -27,16 +27,8 @@ import { useParams } from "react-router-dom";
 const { settings } = rulesConfig.rapid_fire_round;
 const INITIAL_TIMER = settings.roundTime;
 
-// const TEAM_NAMES = ["Alpha", "Bravo", "Charlie", "Delta"];
-// const TOTAL_TEAMS = TEAM_NAMES.length;
-// const TEAM_COLORS = {
-//   Alpha: "#f5003dff",
-//   Bravo: "#0ab9d4ff",
-//   Charlie: "#32be76ff",
-//   Delta: "#e5d51eff",
-// };
 const COLORS = [
-  "#f5003dff",
+  "#8d1734ff",
   "#0ab9d4ff",
   "#32be76ff",
   "#e5d51eff",
@@ -61,6 +53,8 @@ const RapidFireRound = ({ onFinish }) => {
   const [allTeamsAnswers, setAllTeamsAnswers] = useState([]);
 
   const { showToast } = useUIHelpers();
+
+  // Fetch only the teams on the basis of the current Quiz
   useEffect(() => {
     const fetchTeams = async () => {
       try {
@@ -118,6 +112,7 @@ const RapidFireRound = ({ onFinish }) => {
 
   const TEAM_COLORS = generateTeamColors(teams);
   const TEAM_NAMES = teams.map((team) => team.name);
+  const TOTAL_TEAMS = TEAM_NAMES.length;
 
   // ✅ Fetch only questions belonging to this round
   useEffect(() => {
@@ -220,7 +215,7 @@ const RapidFireRound = ({ onFinish }) => {
   useEffect(() => {
     if (quesFetched.length === 0 || teams.length === 0) return;
     //
-    const maxQuestionsPerTeam = Math.floor(quesFetched.length / teams.length);
+    const maxQuestionsPerTeam = Math.floor(quesFetched.length / TOTAL_TEAMS);
     const teamQuestionSets = {};
     TEAM_NAMES.forEach((team, idx) => {
       const start = idx * maxQuestionsPerTeam;
@@ -232,9 +227,9 @@ const RapidFireRound = ({ onFinish }) => {
 
   // Team Queue
   const { activeTeam, goToNextTeam, activeIndex, queue } = useTeamQueue({
-    totalTeams: teams.length,
+    totalTeams: TOTAL_TEAMS,
     teamNames: TEAM_NAMES,
-    maxQuestionsPerTeam: Math.floor(quesFetched.length / teams.length),
+    maxQuestionsPerTeam: Math.floor(quesFetched.length / TOTAL_TEAMS),
   });
 
   const currentTeamQuestions = teamQuestions[activeTeam] || [];
@@ -252,14 +247,17 @@ const RapidFireRound = ({ onFinish }) => {
 
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 10);
 
+  // Handle answer input change
   const handleInputChange = (e) => setAnswerInput(e.target.value);
 
+  // Normalize answer text
   const normalize = (str) =>
     str
       .replace(/[^\w\s]/gi, "")
       .trim()
       .toLowerCase();
 
+  // Handle Answer Submission
   const handleAnswer = (submitted = false) => {
     if (!currentQuestion) return;
 
@@ -300,6 +298,7 @@ const RapidFireRound = ({ onFinish }) => {
     if (submitted) resetAnswer();
   };
 
+  // Handle Timer End
   useEffect(() => {
     if (timeRemaining === 0 && !finishQus && !finalFinished && roundStarted) {
       setFinishQus(true);
@@ -307,6 +306,7 @@ const RapidFireRound = ({ onFinish }) => {
     }
   }, [timeRemaining, finishQus, finalFinished, roundStarted]);
 
+  // Handle Next Team
   const handleNextTeam = () => {
     const nextTeamIndex = activeIndex + 1;
 
@@ -335,21 +335,26 @@ const RapidFireRound = ({ onFinish }) => {
     setAnsweredQuestions([]);
   };
 
+  /*-- Keyboard Shortcuts --*/
+  // SPACE - Pass to Next Question
   useSpaceKeyPass(() => handleAnswer(false), [currentQuestion]);
   useShiftToShow(() => {
     if (!roundStarted) startRound();
   }, [roundStarted, activeTeam]);
 
+  // SHIFT - Display questions
   const startRound = () => {
     setRoundStarted(true);
     startTimer();
     showToast(`🏁 Team ${activeTeam} started their round!`);
   };
 
+  // Start the round
   useEffect(() => {
     if (!roundStarted) pauseTimer();
   }, [roundStarted]);
 
+  // Hide details
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
     Array.from(details).forEach(
@@ -362,7 +367,7 @@ const RapidFireRound = ({ onFinish }) => {
       <TeamDisplay
         activeTeam={activeTeam}
         timeRemaining={timeRemaining}
-        TEAM_COLORS={generateTeamColors(teams)}
+        TEAM_COLORS={TEAM_COLORS}
         formatTime={formatTime}
         toastMessage="Press 'Space' to Pass to the Next Question"
         headMessage="Answer All the Questions under the time limit (2 mins)!"
