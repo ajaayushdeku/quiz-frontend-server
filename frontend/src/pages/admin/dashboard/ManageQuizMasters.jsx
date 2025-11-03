@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { MdDelete } from "react-icons/md";
 
 export default function ManageQuizMasters() {
   const [quizMasters, setQuizMasters] = useState([]);
@@ -11,6 +12,18 @@ export default function ManageQuizMasters() {
     email: "",
     password: "",
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // number of questions per page
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentQuizMasters = quizMasters.slice(
+    indexOfFirstItem,
+    indexOfLastItem
+  );
+
+  const totalPages = Math.ceil(quizMasters.length / itemsPerPage);
 
   // ✅ Fetch all quiz masters created by admin
   const fetchQuizMasters = async () => {
@@ -84,93 +97,104 @@ export default function ManageQuizMasters() {
   }, []);
 
   return (
-    <div className="p-6 bg-gray-50 min-h-screen">
+    <div className="page-container">
       <Toaster position="top-right" />
 
-      <h1 className="text-2xl font-semibold text-center mb-6 text-gray-800">
-        👑 Manage Quiz Masters
-      </h1>
+      <h2 className="section-heading">Manage Quiz Masters</h2>
 
       {/* Add Quiz Master */}
-      <form
-        onSubmit={createQuizMaster}
-        className="bg-white rounded-xl align-middle shadow p-6 mb-6 border border-gray-200 max-w-lg"
-      >
-        <h2 className="text-lg justify-center font-semibold mb-4">
-          Add New Quiz Master
-        </h2>
-        <div className="grid grid-cols-1  gap-4">
+      {/* <form onSubmit={createQuizMaster} className="form-card">
+        <h2 className="form-title">Add New Quiz Master</h2>
+
+        <div className="form-grid">
           <input
             type="text"
             placeholder="Name"
             value={form.name}
             onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="border border-gray-300 rounded-lg p-2 focus:ring focus:ring-indigo-300"
+            className="form-input"
           />
           <input
             type="email"
             placeholder="Email"
             value={form.email}
             onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="border border-gray-300 rounded-lg p-2 focus:ring focus:ring-indigo-300"
+            className="form-input"
           />
           <input
             type="password"
             placeholder="Password"
             value={form.password}
             onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="border border-gray-300 rounded-lg p-2 focus:ring focus:ring-indigo-300"
+            className="form-input"
           />
-          <button
-            type="submit"
-            disabled={creating}
-            className="bg-indigo-600 text-white py-2 px-4 rounded-lg hover:bg-indigo-700 disabled:opacity-50"
-          >
+
+          <button type="submit" disabled={creating} className="btn-primary">
             {creating ? "Creating..." : "Create"}
           </button>
         </div>
-      </form>
+      </form> */}
 
       {/* Quiz Masters Table */}
-      <div className="bg-white rounded-xl shadow border border-gray-200 p-6">
-        <h2 className="text-lg font-semibold mb-4">Existing Quiz Masters</h2>
+      <div className="table-card">
+        <h2 className="table-title">Existing Quiz Masters</h2>
 
         {loading ? (
-          <p className="text-gray-500">Loading...</p>
-        ) : quizMasters.length === 0 ? (
-          <p className="text-gray-500">No quiz masters found.</p>
+          <p className="table-message">Loading...</p>
+        ) : currentQuizMasters.length === 0 ? (
+          <p className="table-message">No quiz masters found.</p>
         ) : (
-          <div className="overflow-x-auto">
-            <table className="min-w-full border border-gray-200 text-sm">
-              <thead className="bg-gray-100 text-gray-700">
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
                 <tr>
-                  <th className="py-2 px-4 text-left">Name</th>
-                  <th className="py-2 px-4 text-left">Email</th>
-                  <th className="py-2 px-4 text-left">Role</th>
-                  <th className="py-2 px-4 text-center">Actions</th>
+                  <th>Name</th>
+                  <th>Email</th>
+                  <th>Role</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {quizMasters.map((master) => (
-                  <tr
-                    key={master._id}
-                    className="border-t hover:bg-gray-50 transition"
-                  >
-                    <td className="py-2 px-4">{master.name}</td>
-                    <td className="py-2 px-4">{master.email}</td>
-                    <td className="py-2 px-4">{master.role}</td>
-                    <td className="py-2 px-4 text-center">
+                {currentQuizMasters.map((master) => (
+                  <tr key={master._id}>
+                    <td>{master.name}</td>
+                    <td>{master.email}</td>
+                    <td>{master.role}</td>
+                    <td>
                       <button
                         onClick={() => deleteQuizMaster(master._id)}
-                        className="bg-red-500 text-white py-1 px-3 rounded hover:bg-red-600"
+                        className="btn-danger"
                       >
-                        Delete
+                        Delete <MdDelete className="btn-icon" />
                       </button>
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+
+            {/* Table Page Buttons */}
+            <div className="pagination-container">
+              <button
+                className="pagination-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                Previous
+              </button>
+
+              <span className="pagination-info">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                className="pagination-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next
+              </button>
+            </div>
           </div>
         )}
       </div>

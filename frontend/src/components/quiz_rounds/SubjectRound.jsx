@@ -20,7 +20,7 @@ import TimerControls from "../quiz_components/TimerControls";
 
 import { formatTime } from "../../utils/formatTime";
 import rulesConfig from "../../config/rulesConfig";
-import useSpaceKeyPass from "../../hooks/useSpaceKeyPass";
+import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
 import axios from "axios";
 import { useParams } from "react-router-dom";
@@ -296,8 +296,8 @@ const SubjectRound = ({ onFinish }) => {
     setQuestionDisplay(false);
   };
 
-  // SPACE to pass
-  useSpaceKeyPass(handlePass, [
+  // Ctrl to pass
+  useCtrlKeyPass(handlePass, [
     activeTeam,
     secondHand,
     currentQuestion,

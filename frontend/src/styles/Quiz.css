@@ -352,7 +352,8 @@
 
 #toast-container {
   position: fixed;
-  bottom: 40px;
+  /* bottom: 40px; */
+  left: 2rem;
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -388,7 +389,9 @@
 /* Finished Message */
 .finished-msg {
   text-align: center;
-  margin: 2rem auto;
+  margin: 2rem;
+  position: absolute;
+  top: 1rem;
 }
 .finished-msg h1 {
   font-size: 3rem;

@@ -92,7 +92,7 @@ export default function AdminCreateUser() {
 
         <button
           type="submit"
-          className="primary-btn submit-create-btn"
+          className="primary-btn add-question-btn"
           style={{ marginTop: "2rem" }}
         >
           Create User

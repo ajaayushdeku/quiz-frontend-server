@@ -1,9 +1,10 @@
 import { useEffect } from "react";
 
-const useSpaceKeyPass = (callback, deps = []) => {
+const useCtrlKeyPass = (callback, deps = []) => {
   useEffect(() => {
     const onKey = (e) => {
-      if (e.code === "Space") {
+      if (e.ctrlKey && !e.repeat) {
+        // Ctrl key pressed
         e.preventDefault();
         callback();
       }
@@ -14,4 +15,4 @@ const useSpaceKeyPass = (callback, deps = []) => {
   }, deps);
 };
 
-export default useSpaceKeyPass;
+export default useCtrlKeyPass;

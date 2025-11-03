@@ -23,7 +23,7 @@ import TimerControls from "../quiz_components/TimerControls";
 
 import { formatTime } from "../../utils/formatTime";
 import rulesConfig from "../../config/rulesConfig";
-import useSpaceKeyPass from "../../hooks/useSpaceKeyPass";
+import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
 
 const { settings } = rulesConfig.general_round;
@@ -300,8 +300,8 @@ const GeneralRound = ({ onFinish }) => {
   };
 
   /*-- Keyboard shortcuts --*/
-  // SPACE to pass
-  useSpaceKeyPass(handlePass, [
+  // Ctrl to pass
+  useCtrlKeyPass(handlePass, [
     activeTeam,
     secondHand,
     currentQuestion,
@@ -350,7 +350,7 @@ const GeneralRound = ({ onFinish }) => {
         timeRemaining={timeRemaining}
         TEAM_COLORS={TEAM_COLORS}
         formatTime={formatTime}
-        toastMessage=" Press 'Space' to Pass The Question"
+        toastMessage=" Press 'Ctrl' to Pass The Question"
         passEnable={true}
       />
 

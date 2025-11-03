@@ -53,8 +53,8 @@ h4 {
   color: #ccc;
   text-decoration: none;
   font-weight: 520;
-  transition: all 0.3s ease;
   border-left: 4px solid transparent;
+  transition: all 0.3s ease;
 }
 
 .menu-link:hover {
@@ -84,9 +84,7 @@ h4 {
 }
 
 .content-box {
-  /* border: 2px dashed #c3c2c2; */
   padding: 25px;
-
   min-height: 80vh;
 }
 
@@ -129,9 +127,9 @@ button:hover {
 .create-quiz-question,
 .create-quiz-round,
 .manage-container {
-  max-width: 800px;
+  max-width: 100%;
   margin: auto;
-  padding: 30px;
+  padding: 5rem;
   background: #fff;
   border-radius: 8px;
   display: flex;
@@ -151,6 +149,7 @@ button:hover {
   font-size: 14px;
   width: 100%;
 }
+
 .team-input {
   padding: 1rem 2rem;
   border-radius: 6px;
@@ -242,7 +241,7 @@ button:hover {
   padding: 12px 16px;
   background: #f9fafb;
   border-radius: 8px;
-  transition: transform 0.2s, box-shadow 0.2s;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .table-row:hover {
@@ -259,6 +258,7 @@ button:hover {
 
 /* ============================= */
 /* Responsive */
+/* ============================= */
 @media (max-width: 768px) {
   .side-menu {
     width: 180px;
@@ -293,6 +293,7 @@ button:hover {
 
 .round-form {
   margin-top: 3rem;
+  margin-bottom: 3rem;
   border-top: 2px dashed rgb(169, 167, 167);
   padding-top: 3rem;
 }
@@ -308,8 +309,7 @@ button:hover {
   font-size: 1rem;
   color: #464646;
   width: 92%;
-  /* border: 2px dashed rgb(162, 162, 162); */
-  padding: 1rem 0rem;
+  padding: 1rem 0;
 }
 
 .choose-rule {
@@ -320,16 +320,15 @@ button:hover {
 }
 
 .quiz-input {
-  margin: 1rem 0rem 0rem 0rem;
+  margin: 1rem 0 0 0;
   padding: 0.6rem 1rem;
   border-radius: 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
   background-color: rgba(136, 136, 136, 0.05);
   color: #7a7a7a;
   font-size: 1rem;
-  transition: all 0.3s ease;
   outline: none;
   border: 1px solid #ccc;
+  transition: all 0.3s ease;
   width: 100%;
 }
 
@@ -338,25 +337,20 @@ button:hover {
   align-items: center;
   margin-bottom: 1rem;
 }
+
 .team-input {
   padding: 0.6rem 1rem;
   border-radius: 0.6rem;
-  border: 1px solid rgba(255, 255, 255, 0.3);
+  border: 1px solid #ccc;
   background-color: rgba(136, 136, 136, 0.05);
   color: #7a7a7a;
   font-size: 1rem;
-  transition: all 0.3s ease;
-  outline: none;
-  border: 1px solid #ccc;
   margin-right: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
 }
 
-.quiz-input:hover {
-  border-color: #9d9d9d;
-  box-shadow: 0 0 10px rgba(116, 116, 116, 0.5);
-  background-color: rgba(230, 224, 224, 0.1);
-}
-
+.quiz-input:hover,
 .quiz-input:focus {
   border-color: #9d9d9d;
   box-shadow: 0 0 10px rgba(116, 116, 116, 0.5);
@@ -369,24 +363,7 @@ button:hover {
   padding: 0.5rem 1rem;
 }
 
-.add-team-btn {
-  margin: 1rem;
-  background-color: #007bff;
-  color: wheat;
-  font-weight: 700;
-}
-
-.textarea {
-  min-height: 30px;
-  resize: vertical;
-  background-color: rgba(136, 136, 136, 0.05);
-}
-
-.select {
-  appearance: none;
-  cursor: pointer;
-}
-
+/* File & Media */
 .file-input {
   cursor: pointer;
   border: 1px dashed rgba(255, 255, 255, 0.3);
@@ -441,23 +418,26 @@ button:hover {
 }
 
 .add-team-btn {
-  background-color: transparent; /* fully transparent */
-  color: rgb(1, 64, 255);
-  display: flex; /* needed for align-items to work */
-  align-items: center; /* vertical alignment */
-  justify-content: center; /* horizontal alignment */
+  background-color: transparent;
+  color: rgb(0, 170, 255);
+  display: flex;
+  align-items: center;
+  justify-content: center;
   margin: auto;
   width: 100%;
   padding: 10px;
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.2s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
 }
 
 .add-team-btn:hover {
-  transform: scale(1.1); /* slightly enlarge on hover */
+  transform: scale(1.1);
 }
 
+/* Add Question Button */
 .add-question-btn {
   margin-top: 1.5rem;
   width: 100%;
@@ -480,6 +460,27 @@ button:hover {
   color: #fff;
 }
 
+.create-question-btn {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 1.2rem;
+  padding: 0.7rem 1.5rem;
+  background: linear-gradient(135deg, #4efb5f, #32be76ff);
+  color: #000;
+  font-weight: 700;
+  border-radius: 0.8rem;
+  transition: all 0.3s ease;
+}
+
+.create-question-btn:hover {
+  background: linear-gradient(135deg, #32be76ff, #4efb5f);
+  transform: scale(1.05);
+  color: #fff;
+}
+
 .question-round-container {
   max-height: 20rem;
   overflow-y: auto;
@@ -488,8 +489,13 @@ button:hover {
   padding: 1rem;
   background: #f9f9f9;
   display: flex;
-  gap: 0.75rem;
   flex-direction: column;
+  gap: 0.75rem;
+}
+
+.question-item {
+  display: flex;
+  flex-direction: row;
 }
 
 /* ============================= */
@@ -509,9 +515,8 @@ button:hover {
 .manage-table th,
 .manage-table td {
   padding: 16px 18px;
-  text-align: left;
+  text-align: center;
   background: #fff;
-
   font-size: 15px;
   vertical-align: middle;
 }
@@ -523,17 +528,17 @@ button:hover {
 }
 
 .manage-table tr {
-  transition: transform 0.2s, box-shadow 0.2s;
+  background-color: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
 .manage-table tr th {
   font-size: 1rem;
-
   text-align: center;
 }
 
 .manage-table tr:hover {
-  background-color: #f9fafb;
+  /* background-color: #f9fafb; */
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -563,8 +568,8 @@ button:hover {
   font-size: 14px;
   font-weight: 600;
   max-width: 80px;
-  border: none;
   text-align: center;
+  border: none;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.3s ease, transform 0.2s ease;
@@ -574,7 +579,20 @@ button:hover {
   transform: translateY(-1px);
 }
 
+.btns-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
 /* Color Variants */
+.btn-icon {
+  font-size: 1.2rem;
+  display: flex;
+  align-items: center;
+  justify-self: center;
+}
+
 .edit-btn {
   background: #007bff;
   color: #fff;
@@ -591,7 +609,7 @@ button:hover {
 }
 
 .cancel-btn {
-  background: #9ca3af;
+  background: #ff791a;
   color: #fff;
 }
 
@@ -608,5 +626,375 @@ button:hover {
 }
 
 .cancel-btn:hover {
-  background: #6b7280;
+  background: #df6d1b;
+}
+
+.main-content {
+  width: 100%;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+}
+
+.option-card {
+  background-color: #ffffff;
+  border: 2px solid #cccccc;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.option-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+}
+
+.card-icon {
+  width: 48px;
+  height: 48px;
+  margin-bottom: 15px;
+  color: #22c55e;
+}
+
+.card-title {
+  font-size: 22px;
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+
+.card-description {
+  color: #666;
+  font-size: 15px;
+}
+
+.section-content {
+  margin-top: 40px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .card-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ====== Page Layout ====== */
+.page-container {
+  width: 100%;
+  background-color: #ffffff;
+  min-height: 80vh;
+  padding: 30px;
+  border: 2px solid #cccccc;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.page-heading {
+  text-align: center;
+  font-size: 26px;
+  font-weight: 600;
+  color: #1f2937;
+  margin-bottom: 25px;
+}
+
+/* ====== Form Section ====== */
+.form-card {
+  background-color: #fff;
+  border: 1px solid #e5e7eb;
+  border-radius: 14px;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
+  padding: 25px;
+  max-width: 500px;
+  margin: 30px auto 30px auto;
+}
+
+.form-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-align: center;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 15px;
+}
+
+.form-input {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 15px;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+}
+
+/* ====== Buttons ====== */
+.btn-primary {
+  background-color: #4f46e5;
+  color: #fff;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  flex-direction: row;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+/* ====== Table Section ====== */
+.table-card {
+  background-color: #fff;
+  padding: 50px;
+  /* margin-top: 2rem; */
+  border-radius: 12px;
+}
+
+/* Headings and messages */
+.table-title {
+  font-size: 18px;
+  font-weight: 600;
+  margin-bottom: 15px;
+}
+
+.table-message {
+  color: #6b7280;
+  font-size: 15px;
+}
+
+/* Table container */
+.table-scroll {
+  overflow-x: auto;
+}
+
+/* Base table style */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+  table-layout: fixed;
+  min-width: 700px; /* ensures structure on smaller screens */
+}
+
+.data-table th,
+.data-table td {
+  border: 1px solid #e5e7eb;
+  padding: 10px 12px;
+  text-align: left;
+  height: 60px;
+  vertical-align: middle;
+  word-wrap: break-word;
+}
+
+/* Column widths */
+.data-table th:nth-child(1),
+.data-table td:nth-child(1) {
+  width: 40%;
+}
+
+.data-table th:nth-child(2),
+.data-table td:nth-child(2) {
+  width: 15%;
+}
+
+.data-table th:nth-child(3),
+.data-table td:nth-child(3) {
+  width: 20%;
+}
+
+.data-table th:nth-child(4),
+.data-table td:nth-child(4) {
+  width: 15%;
+}
+
+.data-table th:nth-child(5),
+.data-table td:nth-child(5) {
+  width: 10%;
+  text-align: center;
+}
+
+.data-table th {
+  background-color: #f3f4f6;
+  color: #374151;
+  font-weight: 600;
+}
+
+.data-table tr:hover {
+  background-color: #f9fafb;
+  transition: background-color 0.2s ease;
+}
+
+/* Limit question cell height */
+.data-table td:nth-child(1) {
+  max-height: 60px;
+  overflow-y: auto;
+}
+
+/* ============================
+   RESPONSIVE DESIGN
+============================ */
+
+/* Medium screens (tablets) */
+@media (max-width: 992px) {
+  .table-card {
+    padding: 30px;
+  }
+
+  .data-table {
+    font-size: 13px;
+  }
+
+  .data-table th,
+  .data-table td {
+    height: 50px;
+    padding: 8px 10px;
+  }
+
+  .data-table th:nth-child(1),
+  .data-table td:nth-child(1) {
+    width: 45%;
+  }
+}
+
+/* Small screens (mobile) */
+@media (max-width: 600px) {
+  .table-card {
+    padding: 20px;
+  }
+
+  .table-title {
+    font-size: 16px;
+  }
+
+  .data-table {
+    font-size: 12px;
+    min-width: 500px; /* allow horizontal scroll */
+  }
+
+  .data-table th,
+  .data-table td {
+    padding: 6px 8px;
+    height: 45px;
+  }
+
+  .data-table th:nth-child(1),
+  .data-table td:nth-child(1) {
+    width: 50%;
+  }
+
+  .data-table th:nth-child(2),
+  .data-table td:nth-child(2),
+  .data-table th:nth-child(3),
+  .data-table td:nth-child(3),
+  .data-table th:nth-child(4),
+  .data-table td:nth-child(4),
+  .data-table th:nth-child(5),
+  .data-table td:nth-child(5) {
+    width: auto;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 400px) {
+  .data-table {
+    font-size: 11px;
+    min-width: 450px;
+  }
+
+  .table-card {
+    padding: 15px;
+  }
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 1rem;
+}
+
+.pagination-btn {
+  background-color: #0bc4ae;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+}
+
+.pagination-btn:hover {
+  background-color: #09798f;
+}
+
+.pagination-btn:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-weight: 500;
+  color: #374151;
+}
+
+.step-navigation {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 20px;
+}
+
+.step-item {
+  width: 25%;
+  text-align: center;
+  padding: 8px;
+  border-radius: 6px;
+  background-color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.step-nav-buttons {
+  display: flex;
+  justify-content: space-between;
 }

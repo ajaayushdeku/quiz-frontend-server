@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
+import { MdEdit, MdDelete, MdSave, MdCancel } from "react-icons/md";
 
 export default function ManageQuestions() {
   const [questions, setQuestions] = useState([]);
@@ -12,6 +13,15 @@ export default function ManageQuestions() {
     correctOptionId: "",
     correctAnswerText: "",
   });
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5; // number of questions per page
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentQuestions = questions.slice(indexOfFirstItem, indexOfLastItem);
+
+  const totalPages = Math.ceil(questions.length / itemsPerPage);
 
   // Fetch all questions on mount
   useEffect(() => {
@@ -147,149 +157,175 @@ export default function ManageQuestions() {
   };
 
   return (
-    <div className="manage-container">
+    <div className="page-container">
       <Toaster position="top-center" />
+
       <h2 className="section-heading">Manage Questions</h2>
 
-      {questions.length === 0 ? (
-        <p className="no-data">No questions found.</p>
+      {currentQuestions.length === 0 ? (
+        <p className="table-message">No questions found.</p>
       ) : (
-        <div className="table-wrapper">
-          <table className="manage-table">
-            <thead>
-              <tr>
-                <th>Question</th>
-                <th>Category</th>
-                <th>Options</th>
-                <th>Correct Answer</th>
-                <th className="text-center">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {questions.map((q) => (
-                <tr key={q._id}>
-                  {/* Question */}
-                  <td>
-                    {editingId === q._id ? (
-                      <input
-                        type="text"
-                        value={editedQuestion.text}
-                        onChange={(e) =>
-                          setEditedQuestion((prev) => ({
-                            ...prev,
-                            text: e.target.value,
-                          }))
-                        }
-                        className="form-input"
-                      />
-                    ) : (
-                      q.question
-                    )}
-                  </td>
-
-                  {/* Category */}
-                  <td>
-                    {editingId === q._id ? (
-                      <input
-                        type="text"
-                        value={editedQuestion.category}
-                        onChange={(e) =>
-                          setEditedQuestion((prev) => ({
-                            ...prev,
-                            category: e.target.value,
-                          }))
-                        }
-                        className="form-input"
-                      />
-                    ) : (
-                      q.category
-                    )}
-                  </td>
-
-                  {/* Options */}
-                  <td>
-                    {editingId === q._id
-                      ? editedQuestion.options.map((opt, idx) => (
-                          <input
-                            key={opt.id || idx}
-                            type="text"
-                            value={opt.text}
-                            onChange={(e) =>
-                              handleOptionChange(idx, e.target.value)
-                            }
-                            className="form-input mb-2"
-                          />
-                        ))
-                      : q.options.map((opt, i) => (
-                          <div
-                            key={opt.id || i}
-                            className={
-                              q.correctOptionId === opt.id ? "text-green" : ""
-                            }
-                          >
-                            {i + 1}. {opt.text}
-                          </div>
-                        ))}
-                  </td>
-
-                  {/* Correct Answer */}
-                  <td>
-                    {editingId === q._id ? (
-                      <input
-                        type="text"
-                        value={editedQuestion.correctAnswerText}
-                        onChange={(e) =>
-                          setEditedQuestion((prev) => ({
-                            ...prev,
-                            correctAnswerText: e.target.value,
-                          }))
-                        }
-                        className="form-input"
-                      />
-                    ) : (
-                      q.options.find((opt) => opt.id === q.correctOptionId)
-                        ?.text || "-"
-                    )}
-                  </td>
-
-                  {/* Actions */}
-                  <td className="actions">
-                    {editingId === q._id ? (
-                      <>
-                        <button
-                          onClick={() => handleSave(q._id)}
-                          className="action-btn save-btn"
-                        >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => setEditingId(null)}
-                          className="action-btn cancel-btn"
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button
-                          onClick={() => handleEdit(q)}
-                          className="action-btn edit-btn"
-                        >
-                          Edit
-                        </button>
-                        <button
-                          onClick={() => handleDelete(q._id)}
-                          className="action-btn delete-btn"
-                        >
-                          Delete
-                        </button>
-                      </>
-                    )}
-                  </td>
+        <div className="table-card">
+          <div className="table-scroll">
+            <table className="data-table">
+              <thead>
+                <tr>
+                  <th>Question</th>
+                  <th>Category</th>
+                  <th>Options</th>
+                  <th>Correct Answer</th>
+                  <th className="text-center">Actions</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {currentQuestions.map((q) => (
+                  <tr key={q._id}>
+                    {/* Question */}
+                    <td>
+                      {editingId === q._id ? (
+                        <input
+                          type="text"
+                          value={editedQuestion.text}
+                          onChange={(e) =>
+                            setEditedQuestion((prev) => ({
+                              ...prev,
+                              text: e.target.value,
+                            }))
+                          }
+                          className="form-input"
+                        />
+                      ) : (
+                        q.question
+                      )}
+                    </td>
+
+                    {/* Category */}
+                    <td>
+                      {editingId === q._id ? (
+                        <input
+                          type="text"
+                          value={editedQuestion.category}
+                          onChange={(e) =>
+                            setEditedQuestion((prev) => ({
+                              ...prev,
+                              category: e.target.value,
+                            }))
+                          }
+                          className="form-input"
+                        />
+                      ) : (
+                        q.category
+                      )}
+                    </td>
+
+                    {/* Options */}
+                    <td>
+                      {editingId === q._id
+                        ? editedQuestion.options.map((opt, idx) => (
+                            <input
+                              key={opt.id || idx}
+                              type="text"
+                              value={opt.text}
+                              onChange={(e) =>
+                                handleOptionChange(idx, e.target.value)
+                              }
+                              className="form-input option-input"
+                            />
+                          ))
+                        : q.options.map((opt, i) => (
+                            <div
+                              key={opt.id || i}
+                              className={
+                                q.correctOptionId === opt.id ? "text-green" : ""
+                              }
+                            >
+                              {i + 1}. {opt.text}
+                            </div>
+                          ))}
+                    </td>
+
+                    {/* Correct Answer */}
+                    <td>
+                      {editingId === q._id ? (
+                        <input
+                          type="text"
+                          value={editedQuestion.correctAnswerText}
+                          onChange={(e) =>
+                            setEditedQuestion((prev) => ({
+                              ...prev,
+                              correctAnswerText: e.target.value,
+                            }))
+                          }
+                          className="form-input"
+                        />
+                      ) : (
+                        q.options.find((opt) => opt.id === q.correctOptionId)
+                          ?.text || "-"
+                      )}
+                    </td>
+
+                    {/* Actions */}
+                    <td className="text-center">
+                      {editingId === q._id ? (
+                        <div className="btns-container">
+                          <button
+                            onClick={() => handleSave(q._id)}
+                            className="action-btn save-btn"
+                          >
+                            <MdSave className="btn-icon" />
+                          </button>
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="action-btn cancel-btn"
+                          >
+                            <MdCancel className="btn-icon" />
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="btns-container">
+                          <button
+                            onClick={() => handleEdit(q)}
+                            className="action-btn edit-btn"
+                          >
+                            <MdEdit className="btn-icon" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(q._id)}
+                            className="action-btn delete-btn"
+                          >
+                            <MdDelete className="btn-icon" />
+                          </button>
+                        </div>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+
+            {/* Table Page Buttons */}
+            <div className="pagination-container">
+              <button
+                className="pagination-btn"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((prev) => prev - 1)}
+              >
+                Previous
+              </button>
+
+              <span className="pagination-info">
+                Page {currentPage} of {totalPages}
+              </span>
+
+              <button
+                className="pagination-btn"
+                disabled={currentPage === totalPages}
+                onClick={() => setCurrentPage((prev) => prev + 1)}
+              >
+                Next
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

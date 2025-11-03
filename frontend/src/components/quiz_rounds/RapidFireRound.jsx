@@ -11,7 +11,7 @@ import { useUIHelpers } from "../../hooks/useUIHelpers";
 import { useQuestionManager } from "../../hooks/useQuestionManager";
 import { useTypewriter } from "../../hooks/useTypewriter";
 import { useTeamQueue } from "../../hooks/useTeamQueue";
-import useSpaceKeyPass from "../../hooks/useSpaceKeyPass";
+import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
 
 import rulesConfig from "../../config/rulesConfig";
@@ -336,8 +336,8 @@ const RapidFireRound = ({ onFinish }) => {
   };
 
   /*-- Keyboard Shortcuts --*/
-  // SPACE - Pass to Next Question
-  useSpaceKeyPass(() => {
+  // Ctrl - Pass to Next Question
+  useCtrlKeyPass(() => {
     if (!finishQus && !finalFinished && roundStarted) {
       handleAnswer(false);
     }
@@ -374,7 +374,7 @@ const RapidFireRound = ({ onFinish }) => {
         timeRemaining={timeRemaining}
         TEAM_COLORS={TEAM_COLORS}
         formatTime={formatTime}
-        toastMessage="Press 'Space' to Pass to the Next Question"
+        toastMessage="Press 'P' to Pass to the Next Question"
         headMessage="Answer All the Questions under the time limit (2 mins)!"
         lowTimer={30}
         midTimer={60}
