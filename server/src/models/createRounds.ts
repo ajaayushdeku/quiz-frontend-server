@@ -2,9 +2,15 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 
 export interface IRound extends Document {
   name: string;
-  category: "general round" | "subject round" | "estimation round" | "rapid fire round" | "buzzer round";
+  category:
+    | "general round"
+    | "subject round"
+    | "estimation round"
+    | "rapid fire round"
+    | "buzzer round";
   timeLimitType: "perRound" | "perQuestion";
   timeLimitValue: number;
+  points: number;
   rules: {
     enablePass: boolean;
     enableNegative: boolean;
@@ -34,6 +40,7 @@ const RoundSchema = new Schema<IRound>(
       required: true,
     },
     timeLimitValue: { type: Number, required: true },
+    points: { type: Number, default: 0 },
     rules: {
       enablePass: { type: Boolean, default: false },
       enableNegative: { type: Boolean, default: false },

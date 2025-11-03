@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import Question from "../models/question";
-import Quiz from "../models/createRounds"; // Make sure you have a Quiz model
 
 interface AuthenticatedRequest extends Request {
   user?: { id: string; role?: string; email?: string };
@@ -11,7 +11,6 @@ interface AuthenticatedRequest extends Request {
   };
 }
 
-// Create a new question
 export const createQuestion = async (
   req: AuthenticatedRequest,
   res: Response
@@ -20,9 +19,43 @@ export const createQuestion = async (
     const user = req.user;
     if (!user) return res.status(401).json({ message: "Unauthorized" });
 
-    const { text, options, correctAnswer, points, category } = req.body;
-    if (!text || !options?.length || !correctAnswer || !category) {
+    let { text, options, correctAnswer, category } = req.body;
+
+    if (!text || !options || !correctAnswer || !category) {
       return res.status(400).json({ message: "Missing required fields" });
+    }
+
+    // ✅ Handle case where options might be a string (from form-data)
+    if (typeof options === "string") {
+      try {
+        options = JSON.parse(options);
+      } catch {
+        // If not valid JSON, split by commas as fallback
+        options = options.split(",").map((opt: string) => opt.trim());
+      }
+    }
+
+    // ✅ Ensure options is an array
+    if (!Array.isArray(options) || options.length === 0) {
+      return res.status(400).json({ message: "Options must be an array" });
+    }
+
+    // ✅ Convert each option to object with _id
+    const optionsWithIds = options.map((opt: any) => ({
+      _id: new mongoose.Types.ObjectId(),
+      text: typeof opt === "string" ? opt : opt.text,
+    }));
+
+    // ✅ Find correct option
+    const correctOption = optionsWithIds.find(
+      (opt) =>
+        opt.text.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
+    );
+
+    if (!correctOption) {
+      return res
+        .status(400)
+        .json({ message: "Correct answer must match one of the options" });
     }
 
     let finalMedia = null;
@@ -38,16 +71,16 @@ export const createQuestion = async (
 
     const question = new Question({
       text,
-      options,
-      correctAnswer,
-      points,
+      options: optionsWithIds,
+      correctAnswer: correctOption._id.toString(),
+
       category,
       media: finalMedia,
       adminId: user.id,
     });
 
     await question.save();
-    return res.status(201).json(question);
+    return res.status(201).json({ success: true, question });
   } catch (err) {
     console.error("Error creating question:", err);
     return res.status(500).json({
@@ -110,7 +143,6 @@ export const createQuestion = async (
 //   }
 // };
 
-// Get questions for the current admin
 export const getQuestions = async (
   req: AuthenticatedRequest,
   res: Response
@@ -119,7 +151,9 @@ export const getQuestions = async (
     const adminId = req.user?.id;
     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
 
-    const questions = await Question.find({ adminId }).lean();
+    const questions = await Question.find({ adminId })
+      .populate("correctAnswer", "text")
+      .lean();
 
     if (!questions || questions.length === 0) {
       return res.status(404).json({ message: "No questions found" });
@@ -137,5 +171,53 @@ export const getQuestions = async (
       message: "Server error while fetching questions",
       error: err instanceof Error ? err.message : String(err),
     });
+  }
+};
+// Update question
+export const updateQuestion = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const adminId = req.user?.id;
+    const { id } = req.params;
+
+    const updated = await Question.findOneAndUpdate(
+      { _id: id, adminId },
+      req.body,
+      { new: true }
+    );
+
+    if (!updated)
+      return res
+        .status(404)
+        .json({ message: "Question not found or unauthorized" });
+
+    res.status(200).json({ message: "✅ Question updated", question: updated });
+  } catch (error) {
+    console.error("Error updating question:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+// Delete question
+export const deleteQuestion = async (
+  req: AuthenticatedRequest,
+  res: Response
+) => {
+  try {
+    const adminId = req.user?.id;
+    const { id } = req.params;
+
+    const deleted = await Question.findOneAndDelete({ _id: id, adminId });
+    if (!deleted)
+      return res
+        .status(404)
+        .json({ message: "Question not found or unauthorized" });
+
+    res.status(200).json({ message: "✅ Question deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting question:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

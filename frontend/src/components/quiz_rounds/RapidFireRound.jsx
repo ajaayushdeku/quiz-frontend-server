@@ -337,7 +337,12 @@ const RapidFireRound = ({ onFinish }) => {
 
   /*-- Keyboard Shortcuts --*/
   // SPACE - Pass to Next Question
-  useSpaceKeyPass(() => handleAnswer(false), [currentQuestion]);
+  useSpaceKeyPass(() => {
+    if (!finishQus && !finalFinished && roundStarted) {
+      handleAnswer(false);
+    }
+  }, [currentQuestion, finishQus, finalFinished, roundStarted]);
+
   useShiftToShow(() => {
     if (!roundStarted) startRound();
   }, [roundStarted, activeTeam]);

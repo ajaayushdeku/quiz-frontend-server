@@ -137,7 +137,12 @@ const RoundIntro = () => {
               <div className="round-label">ROUND</div>
             </div>
             <div className="round-title-container">
-              <p>{roundInfo.roundTitle}</p>
+              <p>
+                {roundInfo.roundTitle}
+                <p style={{ fontSize: "2rem", padding: "0" }}>
+                  "{roundInfo.category.toUpperCase().replace("_", " ")}"
+                </p>
+              </p>
             </div>
           </div>
           <div className="round-next-btn-container">

@@ -11,7 +11,7 @@ export interface AuthRequest extends Request {
   };
 }
 
-// 🟢 Create Round(s)
+//  Create Round(s)
 export const createRound = async (req: AuthRequest, res: Response) => {
   try {
     const adminId = req.user?.id;
@@ -25,16 +25,27 @@ export const createRound = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "No rounds provided" });
     }
 
-    // ✅ Validate each round
+    //  Validate each round input
     for (const round of rounds) {
-      if (!round.name || !round.timeLimitValue) {
+      if (
+        !round.name ||
+        !round.timeLimitValue ||
+        !round.category ||
+        !round.timeLimitType
+      ) {
         return res.status(400).json({
-          message: "Each round must have name and time value",
+          message:
+            "Each round must include name, category, time limit type, and time limit value",
         });
       }
-    }
 
-    // ✅ Check for duplicate round names under same admin
+      if (typeof round.points !== "number" || round.points < 0) {
+        return res
+          .status(400)
+          .json({ message: "Each round must include valid points" });
+      }
+    }
+    //  Check for duplicate round names under same admin
     const names = rounds.map((r) => r.name);
     const existing = await Round.find({ name: { $in: names }, adminId });
     if (existing.length > 0) {
@@ -45,7 +56,7 @@ export const createRound = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // ✅ Prevent reusing questions across rounds
+    //  Prevent reusing questions across rounds
     const usedQuestionIds: string[] = [];
     for (const r of rounds) {
       if (r.questions?.length) {
@@ -95,6 +106,8 @@ export const createRound = async (req: AuthRequest, res: Response) => {
         }
       }
     }
+
+    //  Prevent duplicate categories under same admin
     const categories = rounds.map((r) => r.category);
     const existingCategories = await Round.find({
       adminId,
@@ -108,13 +121,14 @@ export const createRound = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // ✅ Create all rounds
+    //  Create all rounds
     const newRounds = await Round.insertMany(
       rounds.map((r) => ({
         name: r.name,
         category: r.category,
         timeLimitType: r.timeLimitType,
         timeLimitValue: r.timeLimitValue,
+        points: r.points,
         adminId,
         rules: {
           enablePass: r.rules?.enablePass || false,
@@ -124,7 +138,7 @@ export const createRound = async (req: AuthRequest, res: Response) => {
       }))
     );
 
-    // ✅ Update each question to link to its round
+    //  Update each question to link to its round
     for (const round of newRounds) {
       if (round.questions?.length) {
         await Question.updateMany(
@@ -144,7 +158,7 @@ export const createRound = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// 🟡 Get All Rounds for Admin
+//  Get All Rounds for Admin
 export const getRounds = async (req: AuthRequest, res: Response) => {
   try {
     const adminId = req.user?.id;
@@ -156,7 +170,7 @@ export const getRounds = async (req: AuthRequest, res: Response) => {
 
     const rounds = await Round.find({ adminId })
       .populate("questions", "text category points") // show questions info
-      .populate("adminId", "name email")
+      .populate("adminId", "name email role")
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -169,7 +183,7 @@ export const getRounds = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// 🔴 Delete a Round by ID
+//  Delete a Round by ID
 export const deleteRound = async (req: AuthRequest, res: Response) => {
   try {
     const roundId = req.params.id;

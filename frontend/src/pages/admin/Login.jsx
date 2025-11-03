@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import "../styles/Quiz.css";
+import "../../styles/Quiz.css";
 
 export default function AuthForm() {
   const [isRegister, setIsRegister] = useState(false);

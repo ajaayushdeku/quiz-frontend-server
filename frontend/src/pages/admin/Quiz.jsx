@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { quizData } from "../lib/dummy";
+import { quizData } from "../../lib/dummy";
 
 // Simple single-file React quiz app.
 export default function QuizApp() {

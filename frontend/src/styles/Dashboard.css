@@ -309,7 +309,7 @@ button:hover {
   color: #464646;
   width: 92%;
   /* border: 2px dashed rgb(162, 162, 162); */
-  padding: 1rem 2rem;
+  padding: 1rem 0rem;
 }
 
 .choose-rule {
@@ -320,7 +320,7 @@ button:hover {
 }
 
 .quiz-input {
-  margin-top: 0.5rem;
+  margin: 1rem 0rem 0rem 0rem;
   padding: 0.6rem 1rem;
   border-radius: 0.6rem;
   border: 1px solid rgba(255, 255, 255, 0.3);
@@ -329,6 +329,26 @@ button:hover {
   font-size: 1rem;
   transition: all 0.3s ease;
   outline: none;
+  border: 1px solid #ccc;
+  width: 100%;
+}
+
+.team-input-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.team-input {
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  background-color: rgba(136, 136, 136, 0.05);
+  color: #7a7a7a;
+  font-size: 1rem;
+  transition: all 0.3s ease;
+  outline: none;
+  border: 1px solid #ccc;
+  margin-right: 1rem;
 }
 
 .quiz-input:hover {
@@ -341,6 +361,19 @@ button:hover {
   border-color: #9d9d9d;
   box-shadow: 0 0 10px rgba(116, 116, 116, 0.5);
   background-color: rgba(230, 224, 224, 0.1);
+}
+
+.remove-team-btn {
+  background-color: rgb(182, 8, 8);
+  color: wheat;
+  padding: 0.5rem 1rem;
+}
+
+.add-team-btn {
+  margin: 1rem;
+  background-color: #007bff;
+  color: wheat;
+  font-weight: 700;
 }
 
 .textarea {
@@ -407,6 +440,24 @@ button:hover {
   transform: scale(1.2);
 }
 
+.add-team-btn {
+  background-color: transparent; /* fully transparent */
+  color: rgb(1, 64, 255);
+  display: flex; /* needed for align-items to work */
+  align-items: center; /* vertical alignment */
+  justify-content: center; /* horizontal alignment */
+  margin: auto;
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.add-team-btn:hover {
+  transform: scale(1.1); /* slightly enlarge on hover */
+}
+
 .add-question-btn {
   margin-top: 1.5rem;
   width: 100%;
@@ -427,6 +478,18 @@ button:hover {
   background: linear-gradient(135deg, #32be76ff, #4efb5f);
   transform: scale(1.05);
   color: #fff;
+}
+
+.question-round-container {
+  max-height: 20rem;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 1rem;
+  padding: 1rem;
+  background: #f9f9f9;
+  display: flex;
+  gap: 0.75rem;
+  flex-direction: column;
 }
 
 /* ============================= */

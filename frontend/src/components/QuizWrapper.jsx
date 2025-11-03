@@ -1,38 +1,90 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-import { getRoundSequence } from "../config/roundSequence";
+import React, { useState, useEffect } from "react";
+import { useNavigate, useParams } from "react-router-dom";
+import axios from "axios";
 import rulesConfig from "../config/rulesConfig";
 
-const QuizWrapper = ({ quizKey, children }) => {
+const QuizWrapper = ({ children }) => {
   const navigate = useNavigate();
-  const roundSequence = getRoundSequence();
+  const { quizId, roundId } = useParams();
 
-  // Common state for all rounds
-  const [teamScores, setTeamScores] = useState({
-    Alpha: 0,
-    Bravo: 0,
-    Charlie: 0,
-    Delta: 0,
-  });
+  const [roundSequence, setRoundSequence] = useState([]);
+  const [currentRoundIndex, setCurrentRoundIndex] = useState(-1);
+  const [loading, setLoading] = useState(true);
 
+  const [teams, setTeams] = useState([]);
+  const [teamScores, setTeamScores] = useState({});
   const [teamData, setTeamData] = useState({
-    activeTeam: "Alpha",
-    teamQueue: ["Alpha", "Bravo", "Charlie", "Delta"],
+    activeTeam: "",
+    teamQueue: [],
   });
 
-  // Called when a round finishes
-  const handleRoundComplete = () => {
-    const currentIndex = roundSequence.indexOf(quizKey);
-    const nextRound = roundSequence[currentIndex + 1];
+  // ✅ Fetch quiz data (rounds + teams)
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
+          withCredentials: true,
+        });
 
+        const allQuizzes = res.data.quiz || [];
+        const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+        if (!currentQuiz) {
+          console.warn("⚠️ No quiz found for quizId:", quizId);
+          setLoading(false);
+          return;
+        }
+
+        // ✅ Get rounds
+        const rounds = currentQuiz.rounds || [];
+        setRoundSequence(rounds);
+        const idx = rounds.findIndex((r) => r._id === roundId);
+        setCurrentRoundIndex(idx);
+
+        // ✅ Get teams
+        const teamList = currentQuiz.teams || [];
+        const formattedTeams = teamList.map((team, i) => ({
+          id: team._id,
+          name: team.name || `Team ${i + 1}`,
+        }));
+
+        setTeams(formattedTeams);
+
+        // Initialize scores
+        const initialScores = {};
+        formattedTeams.forEach((t) => (initialScores[t.name] = 0));
+        setTeamScores(initialScores);
+
+        // Initialize teamData
+        setTeamData({
+          activeTeam: formattedTeams[0]?.name || "",
+          teamQueue: formattedTeams.map((t) => t.name),
+        });
+      } catch (error) {
+        console.error("❌ Failed to fetch quiz data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (quizId && roundId) fetchQuizData();
+  }, [quizId, roundId]);
+
+  // ✅ Move to next round intro
+  const handleRoundComplete = () => {
+    if (!roundSequence.length || currentRoundIndex === -1) {
+      navigate("/result");
+      return;
+    }
+
+    const nextRound = roundSequence[currentRoundIndex + 1];
     if (nextRound) {
-      navigate(`/round/${nextRound}`);
+      navigate(`/round/${quizId}/${nextRound._id}/`);
     } else {
-      navigate("/result"); // Last round finished
+      navigate(`/result/${quizId}`); // last round done
     }
   };
 
-  // Function to update team score
+  // ✅ Update score
   const updateTeamScore = (team, points) => {
     setTeamScores((prev) => ({
       ...prev,
@@ -40,13 +92,17 @@ const QuizWrapper = ({ quizKey, children }) => {
     }));
   };
 
+  if (loading) return <div>Loading...</div>;
+
+  // ✅ Pass shared data to all rounds
   return React.cloneElement(children, {
     onFinish: handleRoundComplete,
     teamScores,
     updateTeamScore,
     teamData,
     setTeamData,
-    roundSettings: rulesConfig[quizKey]?.settings || {},
+    teams,
+    roundSettings: rulesConfig[roundId]?.settings || {},
   });
 };
 

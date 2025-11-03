@@ -998,7 +998,7 @@
 .quiz-select-container {
   display: flex;
   gap: 2rem;
-  overflow-x: auto;
+  /* overflow-x: auto; */
   padding-bottom: 1rem;
   scroll-behavior: smooth;
   border-radius: 1rem;
@@ -1011,7 +1011,7 @@
 
 .quiz-card {
   min-width: 25rem;
-  background: #1e1e1e;
+  background: #5b56563d;
   border-radius: 1rem;
   padding: 1.5rem 3.5rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -1025,19 +1025,19 @@
 .quiz-card:hover {
   transform: scale(1.05);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
-  background: #2a2a2a;
+  /* background: #2a2a2a; */
   border-radius: 1rem;
 }
 
 .quiz-card-header {
-  border-bottom: 1px solid #444;
+  border-bottom: 1px solid #999999;
   padding-bottom: 0.5rem;
 }
 
 .quiz-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #fff;
+  color: #ccc;
 }
 
 .quiz-card-body {
@@ -1055,7 +1055,7 @@
 
 .quiz-rounds,
 .quiz-teams {
-  border-bottom: 2px solid #444;
+  border-bottom: 2px solid #242424;
   margin-top: 2rem;
   height: 25vh;
   overflow: auto;
@@ -1094,6 +1094,7 @@
     max-height: 80vh;
     width: 90%;
     margin: auto;
+    z-index: -1;
   }
 
   .quiz-card {

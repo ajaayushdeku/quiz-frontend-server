@@ -7,6 +7,7 @@ import playerRoutes from "./routes/player";
 import teamRoutes from "./routes/team";
 import rounds from "./routes/round";
 import quizRoutes from "./routes/quiz";
+import quizMasterRoutes from "./routes/manageQuizMaster";
 import dotenv from "dotenv";
 import path from "path";
 import cookieParser from "cookie-parser";
@@ -33,6 +34,7 @@ app.use("/api/player", playerRoutes);
 app.use("/api/team", teamRoutes);
 app.use("/api/round", rounds);
 app.use("/api/quiz", quizRoutes);
+app.use("/api/quizMaster", quizMasterRoutes);
 
 // test route in app.ts (temporarily)
 app.get("/api/test-cloudinary", (req, res) => {
@@ -46,6 +48,5 @@ app.post("/api/test-body", (req, res) => {
   console.log("Body received at /api/test-body:", req.body);
   res.json(req.body);
 });
-
 
 export default app;

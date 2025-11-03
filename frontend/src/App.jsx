@@ -2,17 +2,17 @@ import { Route, Routes } from "react-router-dom";
 import "./App.css";
 import { ThemeProvider } from "styled-components";
 import QuizApp from "./components/Fetch";
-import AuthForm from "./components/Login";
+import AuthForm from "./pages/admin/Login";
 import TeamManager from "./components/Team";
-import TeamList from "./components/TeamList";
+import TeamList from "./pages/admin/TeamList";
 import RoundGrid from "./components/Category";
-import AdminLayout from "./components/admin/Sidebar";
+import AdminLayout from "./pages/admin/Sidebar";
 import Dashboard from "./pages/admin/Dashboard";
 import Questions from "./pages/admin/Questions";
 import Teams from "./pages/admin/Team";
 import Rounds from "./pages/admin/Rounds";
 import Create from "./pages/admin/Create";
-import ManageQuestions from "./pages/admin/ManageQuestions";
+import ManageQuestions from "./pages/admin/dashboard/ManageQuestions";
 
 import Home from "./pages/user/Home";
 import ErrorPage from "./pages/user/ErrorPage";
@@ -84,23 +84,43 @@ function App() {
 
         <Route
           path="/quiz/:quizId/round/:roundId/general"
-          element={<GeneralRound />}
+          element={
+            <QuizWrapper quizKey="general">
+              <GeneralRound />
+            </QuizWrapper>
+          }
         />
         <Route
           path="/quiz/:quizId/round/:roundId/rapidfire"
-          element={<RapidFireRound />}
+          element={
+            <QuizWrapper quizKey="rapidfire">
+              <RapidFireRound />
+            </QuizWrapper>
+          }
         />
         <Route
           path="/quiz/:quizId/round/:roundId/buzzer"
-          element={<BuzzerRound />}
+          element={
+            <QuizWrapper quizKey="buzzer">
+              <BuzzerRound />
+            </QuizWrapper>
+          }
         />
         <Route
           path="/quiz/:quizId/round/:roundId/estimation"
-          element={<EstimationRound />}
+          element={
+            <QuizWrapper quizKey="estimation">
+              <EstimationRound />
+            </QuizWrapper>
+          }
         />
         <Route
           path="/quiz/:quizId/round/:roundId/subjective"
-          element={<SubjectRound />}
+          element={
+            <QuizWrapper quizKey="subjective">
+              <SubjectRound />
+            </QuizWrapper>
+          }
         />
 
         {/* Quizzes */}
@@ -146,7 +166,7 @@ function App() {
         />
 
         {/* Scoreboard */}
-        <Route path="/result" element={<ResultsPage />} />
+        <Route path="/result/:quizId" element={<ResultsPage />} />
 
         {/* Admin routes */}
         <Route path="/admin" element={<AdminLayout />}>

@@ -395,7 +395,7 @@ const GeneralRound = ({ onFinish }) => {
       ) : (
         <FinishDisplay
           onFinish={onFinish}
-          message={"🎉 General Round Finished!"}
+          message={"General Round Finished!"}
         />
       )}
 

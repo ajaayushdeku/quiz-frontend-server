@@ -16,7 +16,6 @@ export default function QuestionForm() {
       { id: uuidv4(), text: "" },
     ],
     correctAnswer: "",
-    points: 0,
     category: "",
   });
 
@@ -24,13 +23,11 @@ export default function QuestionForm() {
   const [preview, setPreview] = useState(null);
   const API_URL = "http://localhost:4000/api";
 
-  // 🟢 Handle field changes
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
-  // 🟢 Handle type change
   const handleTypeChange = (e) => {
     const type = e.target.value;
     setFormData((prev) => ({
@@ -49,16 +46,15 @@ export default function QuestionForm() {
     }));
   };
 
-  // 🟢 Handle options change
   const handleOptionChange = (index, value) => {
     const newOptions = [...formData.options];
     newOptions[index].text = value;
     setFormData((prev) => ({ ...prev, options: newOptions }));
   };
 
-  // 🟢 Handle media
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
+    if (!selectedFile) return;
     setFile(selectedFile);
     setPreview(URL.createObjectURL(selectedFile));
   };
@@ -68,26 +64,26 @@ export default function QuestionForm() {
     setPreview(null);
   };
 
-  // 🟢 Submit question
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     try {
       const payload = new FormData();
       payload.append("text", formData.text);
+      payload.append("category", formData.category);
+
       payload.append(
         "options",
-        JSON.stringify(formData.options.map((opt) => opt.text))
+        JSON.stringify(formData.options.map((opt) => ({ text: opt.text })))
       );
 
       const correctAnswerValue =
         formData.type === "multiple-choice"
-          ? formData.correctAnswer
+          ? formData.options.find((o) => o.id === formData.correctAnswer)
+              ?.text || ""
           : formData.options[0].text;
 
       payload.append("correctAnswer", correctAnswerValue);
-      payload.append("points", formData.points.toString());
-      payload.append("category", formData.category);
-
       if (file) payload.append("media", file);
 
       await axios.post(`${API_URL}/question/create-question`, payload, {
@@ -97,7 +93,6 @@ export default function QuestionForm() {
 
       toast.success("✅ Question added successfully!");
 
-      // Reset form
       setFormData({
         text: "",
         type: "multiple-choice",
@@ -108,14 +103,15 @@ export default function QuestionForm() {
           { id: uuidv4(), text: "" },
         ],
         correctAnswer: "",
-        points: 0,
         category: "",
       });
       setFile(null);
       setPreview(null);
     } catch (err) {
-      console.error(err);
-      toast.error(err.response?.data?.message || "❌ Failed to add question.");
+      console.error("Error creating question:", err);
+      toast.error(
+        err.response?.data?.message || "❌ Failed to add question. Try again."
+      );
     }
   };
 
@@ -215,7 +211,7 @@ export default function QuestionForm() {
           </label>
 
           {/* Points */}
-          <label className="quiz-label">
+          {/* <label className="quiz-label">
             Points:
             <input
               type="number"
@@ -226,7 +222,7 @@ export default function QuestionForm() {
               className="quiz-input"
               required
             />
-          </label>
+          </label> */}
 
           {/* Category */}
           <label className="quiz-label">

@@ -3,8 +3,10 @@ import { Router, Request, Response, NextFunction } from "express";
 import {
   //createQuiz,
   createQuestion,
+  deleteQuestion,
   //getQuizzes,
   getQuestions,
+  updateQuestion,
 } from "../controller/questionController";
 import { authMiddleware } from "../middleware/auth";
 import cloudinary from "../config/cloudinary";
@@ -55,6 +57,39 @@ router.get(
     }
   }
 );
+router.put("/update/:id", authMiddleware(["admin"]), async (req, res, next) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    await updateQuestion(authReq, res);
+  } catch (err) {
+    next(err);
+  }
+});
+router.delete(
+  "/delete/:id",
+  authMiddleware(["admin"]),
+  async (req, res, next) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      await deleteQuestion(authReq, res);
+    } catch (err) {
+      next(err);
+    }
+  }
+);
+
+// router.patch(
+//   "/update/:id",
+//   authMiddleware(["admin"]),
+//   async (req, res, next) => updateQuestion
+// );
+
+// // ✅ Delete a question by ID
+// router.delete(
+//   "/delete/:id",
+//   authMiddleware(["admin"]),
+//   async (req, res, next) => deleteQuestion
+// );
 
 export default router;
 // -----------------------------

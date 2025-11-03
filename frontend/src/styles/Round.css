@@ -118,6 +118,7 @@
   margin: 2rem 0;
   position: absolute;
   bottom: 1rem;
+  z-index: 200;
 }
 
 .round-next-btn {

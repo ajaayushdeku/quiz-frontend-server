@@ -322,6 +322,14 @@ const BuzzerRound = ({ onFinish }) => {
     }
   }, [questionDisplay]);
 
+  // Hide components when quiz round completes
+  useEffect(() => {
+    const details = document.getElementsByClassName("detail-info");
+    Array.from(details).forEach((el) => {
+      el.style.display = quizCompleted ? "none" : "block";
+    });
+  }, [quizCompleted]);
+
   return (
     <div className="quiz-container">
       <TeamDisplay
