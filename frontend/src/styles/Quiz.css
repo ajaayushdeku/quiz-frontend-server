@@ -393,6 +393,11 @@
   position: absolute;
   top: 1rem;
 }
+.turn-finished-msg {
+  text-align: center;
+  margin: 2rem;
+}
+
 .finished-msg h1 {
   font-size: 3rem;
 }

@@ -19,12 +19,6 @@ import ErrorPage from "./pages/user/ErrorPage";
 import RoundSelect from "./pages/user/RoundSelect";
 import RoundIntro from "./pages/user/RoundIntro";
 
-import GeneralQuiz from "./components/rounds/GeneralQuiz";
-import SubjectQuiz from "./components/rounds/SubjectQuiz";
-import RapidFireQuiz from "./components/rounds/RapidFireQuiz";
-import BuzzerQuiz from "./components/rounds/BuzzerQuiz";
-import EstimationQuiz from "./components/rounds/EstimationQuiz";
-
 import QuizWrapper from "./components/QuizWrapper";
 
 import ResultsPage from "./pages/user/ResultsPage";
@@ -120,48 +114,6 @@ function App() {
           element={
             <QuizWrapper quizKey="subjective">
               <SubjectRound />
-            </QuizWrapper>
-          }
-        />
-
-        {/* Quizzes */}
-        <Route
-          path="/quiz/generalquiz"
-          element={
-            <QuizWrapper quizKey="generalquiz">
-              <GeneralQuiz />
-            </QuizWrapper>
-          }
-        />
-        <Route
-          path="/quiz/subjectquiz"
-          element={
-            <QuizWrapper quizKey="subjectquiz">
-              <SubjectQuiz />
-            </QuizWrapper>
-          }
-        />
-        <Route
-          path="/quiz/estimationquiz"
-          element={
-            <QuizWrapper quizKey="estimationquiz">
-              <EstimationQuiz />
-            </QuizWrapper>
-          }
-        />
-        <Route
-          path="/quiz/rapidfirequiz"
-          element={
-            <QuizWrapper quizKey="rapidfirequiz">
-              <RapidFireQuiz />
-            </QuizWrapper>
-          }
-        />
-        <Route
-          path="/quiz/buzzerquiz"
-          element={
-            <QuizWrapper quizKey="buzzerquiz">
-              <BuzzerQuiz />
             </QuizWrapper>
           }
         />

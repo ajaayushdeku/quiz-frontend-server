@@ -1,6 +1,7 @@
 import axios from "axios";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa6";
-import { useState, useEffect, use } from "react";
 
 import "../../styles/Quiz.css";
 import "../../styles/ButtonQuiz.css";
@@ -22,7 +23,6 @@ import FinishDisplay from "../common/FinishDisplay";
 import AnswerTextBox from "../common/AnswerTextBox";
 import TeamDisplay from "../quiz_components/TeamDisplay";
 import QuestionCard from "../quiz_components/QuestionCard";
-import { useParams } from "react-router-dom";
 
 const { settings } = rulesConfig.rapid_fire_round;
 const INITIAL_TIMER = settings.roundTime;
@@ -54,123 +54,63 @@ const RapidFireRound = ({ onFinish }) => {
 
   const { showToast } = useUIHelpers();
 
-  // Fetch only the teams on the basis of the current Quiz
-  useEffect(() => {
-    const fetchTeams = async () => {
-      try {
-        console.log("🔍 Fetching teams for quizId:", quizId);
+  const [roundPoints, setRoundPoints] = useState([]);
+  const [roundTime, setRoundTime] = useState(INITIAL_TIMER);
+  const [reduceBool, setReduceBool] = useState(false);
 
-        // Fetch the quiz
+  // ---------------- Fetching Data from DB ----------------
+  useEffect(() => {
+    const fetchQuizData = async () => {
+      try {
+        console.log(
+          "🔍 Fetching quiz data for quizId:",
+          quizId,
+          "roundId:",
+          roundId
+        );
+
         const quizRes = await axios.get(
           "http://localhost:4000/api/quiz/get-quiz",
           { withCredentials: true }
         );
 
         const allQuizzes = quizRes.data.quiz || [];
-        const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+        const currentQuiz = allQuizzes.find(
+          (q) => q._id === quizId || q.rounds.some((r) => r._id === roundId)
+        );
 
-        if (!currentQuiz) {
-          console.warn("⚠️ No quiz found for this quizId:", quizId);
-          return;
-        }
+        if (!currentQuiz) return console.warn("⚠️ Quiz not found");
 
+        // ----------- Teams -----------
         const teamIds = currentQuiz.teams || [];
-        if (!teamIds.length) {
-          console.warn("⚠️ No teams found in this quiz.");
-          return;
-        }
-
-        console.log("🎯 Team IDs in quiz:", teamIds);
-
-        // Format teams for easier use in components
         const formattedTeams = teamIds.map((team, index) => ({
           id: team._id,
           name: team.name || `Team ${index + 1}`,
-          // color: optional if you want to assign later
+          points: team.points || 0,
         }));
-
         console.log("🧩 Formatted teams:", formattedTeams);
         setTeams(formattedTeams);
-      } catch (error) {
-        console.error("❌ Fetch Error (teams):", error);
-        showToast("Failed to fetch teams!");
-      }
-    };
 
-    if (quizId) fetchTeams();
-  }, [quizId]);
-
-  // Team colors assignment
-  const generateTeamColors = (teams) => {
-    const teamColors = {};
-    teams.forEach((team, index) => {
-      const color = COLORS[index % COLORS.length]; // cycle colors if more teams than colors
-      teamColors[team.name || `Team${index + 1}`] = color;
-    });
-    return teamColors;
-  };
-
-  const TEAM_COLORS = generateTeamColors(teams);
-  const TEAM_NAMES = teams.map((team) => team.name);
-  const TOTAL_TEAMS = TEAM_NAMES.length;
-
-  // ✅ Fetch only questions belonging to this round
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log("🔍 Fetching questions for roundId:", roundId);
-
-        // 1️⃣ Fetch the quiz that contains this round
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quiz",
-          {
-            withCredentials: true,
-          }
-        );
-
-        // Finding the current Quiz throught the useParams roundId (i.e., the roundId in the URL)
-        const allQuizzes = quizRes.data.quiz || [];
-        const currentQuiz = allQuizzes.find((q) =>
-          q.rounds.some((r) => r._id === roundId)
-        );
-
-        if (!currentQuiz) {
-          console.warn("⚠️ No quiz found containing this roundId:", roundId);
-          return;
-        }
-
-        // 2️⃣ Find the round object
+        // ----------- Round -----------
         const round = currentQuiz.rounds.find((r) => r._id === roundId);
-        if (!round) {
-          console.warn("⚠️ Round not found:", roundId);
-          return;
-        }
+        if (!round) return console.warn("⚠️ Round not found:", roundId);
 
-        console.log(
-          "🎯 Found round:",
-          round.name,
-          "| Questions:",
-          round.questions
-        );
+        setRoundPoints(round.points || 10);
+        setRoundTime(round.timeLimitValue || TEAM_TIME_LIMIT);
+        if (round?.rules?.enableNegative) setReduceBool(true);
 
-        // 3️⃣ Fetch all questions from DB
+        // ----------- Questions -----------
         const questionRes = await axios.get(
           "http://localhost:4000/api/question/get-questions",
           { withCredentials: true }
         );
 
         const allQuestions = questionRes.data.data || [];
-        console.log("📦 All questions:", allQuestions.length);
-
-        // 4️⃣ Filter only questions belonging to this round
         const filteredQuestions = allQuestions.filter((q) =>
           round.questions.includes(q._id)
         );
 
-        console.log("🧾 Filtered questions for this round:", filteredQuestions);
-
-        // 5️⃣ Format questions
-        const formatted = filteredQuestions.map((q) => {
+        const formattedQuestions = filteredQuestions.map((q) => {
           const optionsArray =
             typeof q.options[0] === "string"
               ? JSON.parse(q.options[0])
@@ -194,45 +134,80 @@ const RapidFireRound = ({ onFinish }) => {
               correctIndex >= 0
                 ? mappedOptions[correctIndex].id
                 : mappedOptions[0].id,
-            points: q.points || 10,
             mediaType: q.mediaType || q.media?.type || "none",
             mediaUrl: q.mediaUrl || q.media?.url || "",
           };
         });
 
-        console.log("🧩 Formatted questions:", formatted);
-        setQuesFetched(formatted);
+        console.log("🧩 Formatted questions:", formattedQuestions);
+        setQuesFetched(formattedQuestions);
       } catch (error) {
         console.error("❌ Fetch Error:", error);
-        showToast("Failed to fetch round questions!");
+        showToast("Failed to fetch quiz data!");
       }
     };
 
-    fetchData();
-  }, [roundId]);
+    if (quizId && roundId) fetchQuizData();
+  }, [quizId, roundId]);
 
-  // Divide questions among teams
-  useEffect(() => {
-    if (quesFetched.length === 0 || teams.length === 0) return;
-    //
-    const maxQuestionsPerTeam = Math.floor(quesFetched.length / TOTAL_TEAMS);
-    const teamQuestionSets = {};
-    TEAM_NAMES.forEach((team, idx) => {
-      const start = idx * maxQuestionsPerTeam;
-      const end = start + maxQuestionsPerTeam;
-      teamQuestionSets[team] = quesFetched.slice(start, end);
+  // ---------------- Team Color Assignment ----------------
+  const generateTeamColors = (teams) => {
+    const teamColors = {};
+    teams.forEach((team, index) => {
+      const color = COLORS[index % COLORS.length]; // cycle colors if more teams than colors
+      teamColors[team.name || `Team${index + 1}`] = color;
     });
+    return teamColors;
+  };
+
+  const TEAM_COLORS = generateTeamColors(teams);
+
+  // ---------------- Divide Question Equally Among Teams ----------------
+  useEffect(() => {
+    if (!quesFetched.length || !teams.length) return;
+
+    const teamArray = teams;
+    const maxQuestionsPerTeam = Math.floor(
+      quesFetched.length / teamArray.length
+    );
+    const teamQuestionSets = {};
+
+    teamArray.forEach((team) => {
+      teamQuestionSets[team.name] = [];
+    });
+
+    let questionIndex = 0;
+    teamArray.forEach((team) => {
+      for (let i = 0; i < maxQuestionsPerTeam; i++) {
+        if (questionIndex < quesFetched.length) {
+          teamQuestionSets[team.name].push(quesFetched[questionIndex]);
+          questionIndex++;
+        }
+      }
+    });
+
+    while (questionIndex < quesFetched.length) {
+      const team = teamArray[questionIndex % teamArray.length];
+      teamQuestionSets[team.name].push(quesFetched[questionIndex]);
+      questionIndex++;
+    }
+
     setTeamQuestions(teamQuestionSets);
   }, [quesFetched, teams]);
 
+  // ---------------- Hooks ----------------
   // Team Queue
   const { activeTeam, goToNextTeam, activeIndex, queue } = useTeamQueue({
-    totalTeams: TOTAL_TEAMS,
-    teamNames: TEAM_NAMES,
-    maxQuestionsPerTeam: Math.floor(quesFetched.length / TOTAL_TEAMS),
+    totalTeams: teams.length,
+    teams: teams,
+    maxQuestionsPerTeam: Math.floor(quesFetched.length / teams.length),
   });
 
-  const currentTeamQuestions = teamQuestions[activeTeam] || [];
+  const activeTeamName =
+    typeof activeTeam === "string" ? activeTeam : activeTeam?.name || ""; //Ensure activeTeam is a string (team name) or get its name if it's an object
+  const currentTeamQuestions = teamQuestions[activeTeamName] || [];
+
+  // Question Manager Hook
   const { currentQuestion, nextQuestion, resetQuestion, isLastQuestion } =
     useQuestionManager(currentTeamQuestions);
 
@@ -241,24 +216,24 @@ const RapidFireRound = ({ onFinish }) => {
   );
 
   const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
-    INITIAL_TIMER,
+    roundTime,
     true
   );
 
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 10);
 
-  // Handle answer input change
+  // ---------------- Handle Answer/Input Change ----------------
   const handleInputChange = (e) => setAnswerInput(e.target.value);
 
-  // Normalize answer text
+  // ---------------- Normalize Answer Text ----------------
   const normalize = (str) =>
     str
       .replace(/[^\w\s]/gi, "")
       .trim()
       .toLowerCase();
 
-  // Handle Answer Submission
-  const handleAnswer = (submitted = false) => {
+  // ---------------- Handle Answer Submission ----------------
+  const handleAnswer = async (submitted = false) => {
     if (!currentQuestion) return;
 
     const correctAnswerText =
@@ -286,6 +261,35 @@ const RapidFireRound = ({ onFinish }) => {
       ]);
     }
 
+    // ✅ Update score in DB
+    if (submitted && activeTeam?.id) {
+      if (!isCorrect && !reduceBool) {
+        showToast(
+          `❌ Wrong answer! No points deducted for team ${activeTeam?.name}`
+        );
+      } else {
+        const endpoint = isCorrect
+          ? `http://localhost:4000/api/team/teams/${activeTeam.id}/add`
+          : `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`;
+
+        try {
+          await axios.patch(
+            endpoint,
+            { points: Number(roundPoints) || 0 },
+            { withCredentials: true }
+          );
+          showToast(
+            `${
+              isCorrect ? "✅ Added" : "❌ Reduced"
+            } ${roundPoints} points for team ${activeTeamName}`
+          );
+        } catch (err) {
+          console.error("⚠️ Failed to update team score:", err);
+          showToast("Failed to update team score! Check console.");
+        }
+      }
+    }
+
     if (isLastQuestion) {
       setFinishQus(true);
       pauseTimer();
@@ -298,7 +302,7 @@ const RapidFireRound = ({ onFinish }) => {
     if (submitted) resetAnswer();
   };
 
-  // Handle Timer End
+  // ---------------- Handle Timer End ----------------
   useEffect(() => {
     if (timeRemaining === 0 && !finishQus && !finalFinished && roundStarted) {
       setFinishQus(true);
@@ -306,18 +310,17 @@ const RapidFireRound = ({ onFinish }) => {
     }
   }, [timeRemaining, finishQus, finalFinished, roundStarted]);
 
-  // Handle Next Team
+  // ---------------- Handle Next Team ----------------
   const handleNextTeam = () => {
-    const nextTeamIndex = activeIndex + 1;
-
     setAllTeamsAnswers((prev) => [
       ...prev,
-      { team: activeTeam, answers: answeredQuestions },
+      { team: activeTeamName, answers: answeredQuestions },
     ]);
 
+    const nextTeamIndex = activeIndex + 1;
     if (nextTeamIndex < queue.length) {
       showToast(
-        `🎯 Team ${activeTeam} finished! Next: Team ${queue[nextTeamIndex]}`
+        `🎯 Team ${activeTeamName} finished! Next: Team ${queue[nextTeamIndex]}`
       );
     } else {
       showToast("🏁 All teams finished the quiz!");
@@ -335,7 +338,7 @@ const RapidFireRound = ({ onFinish }) => {
     setAnsweredQuestions([]);
   };
 
-  /*-- Keyboard Shortcuts --*/
+  // ---------------- Keyboard Shortcuts ----------------
   // Ctrl - Pass to Next Question
   useCtrlKeyPass(() => {
     if (!finishQus && !finalFinished && roundStarted) {
@@ -343,23 +346,23 @@ const RapidFireRound = ({ onFinish }) => {
     }
   }, [currentQuestion, finishQus, finalFinished, roundStarted]);
 
+  // SHIFT - Display questions
   useShiftToShow(() => {
     if (!roundStarted) startRound();
   }, [roundStarted, activeTeam]);
 
-  // SHIFT - Display questions
+  // Start the round
   const startRound = () => {
     setRoundStarted(true);
     startTimer();
-    showToast(`🏁 Team ${activeTeam} started their round!`);
+    showToast(`🏁 Team ${activeTeamName} started their round!`);
   };
 
-  // Start the round
   useEffect(() => {
     if (!roundStarted) pauseTimer();
   }, [roundStarted]);
 
-  // Hide details
+  // ---------------- Hide Components on Finish ----------------
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
     Array.from(details).forEach(
@@ -367,6 +370,7 @@ const RapidFireRound = ({ onFinish }) => {
     );
   }, [finalFinished]);
 
+  // ---------------- Render ----------------
   return (
     <section className="quiz-container">
       <TeamDisplay
@@ -412,8 +416,8 @@ const RapidFireRound = ({ onFinish }) => {
           message="Rapid Fire Round Finished!"
         />
       ) : (
-        <div className="finished-msg">
-          <h1>Team {activeTeam} Finished!</h1>
+        <div className="turn-finished-msg">
+          <h1>Team {activeTeam?.name} Finished!</h1>
           <Button className="next-team-btn" onClick={handleNextTeam}>
             NEXT TEAM's TURN
           </Button>
@@ -422,9 +426,12 @@ const RapidFireRound = ({ onFinish }) => {
             <div className="team-answer-summary">
               <h3
                 className="team-answer-title"
-                style={{ color: TEAM_COLORS[activeTeam], fontWeight: "bold" }}
+                style={{
+                  color: TEAM_COLORS[activeTeamName],
+                  fontWeight: "bold",
+                }}
               >
-                Team {activeTeam}'s Answer Summary:
+                Team {activeTeam?.name}'s Answer Summary:
               </h3>
               <div className="team-answer-grid">
                 {answeredQuestions.map((q, index) => (

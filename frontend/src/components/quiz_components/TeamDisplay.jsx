@@ -29,11 +29,11 @@ const TeamDisplay = ({
             <h2
               className="team-name detail-info"
               style={{
-                color: TEAM_COLORS?.[activeTeam],
+                color: TEAM_COLORS?.[activeTeam?.name],
                 // textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
               }}
             >
-              <RiTeamFill /> Team {activeTeam || "-"}
+              <RiTeamFill /> Team {activeTeam?.name || "-"}
             </h2>
             {timeRemaining !== undefined && (
               <div
@@ -77,7 +77,7 @@ const TeamDisplay = ({
             {passEnable ? (
               <>
                 {secondHand ? <FaHandPeace /> : <FaHandPointUp />} - {handLabel}{" "}
-                - Team {activeTeam}
+                - Team {activeTeam?.name || "-"}
               </>
             ) : (
               <>{headMessage}</>

@@ -3,74 +3,74 @@ import { useUIHelpers } from "./useUIHelpers";
 
 export function useTeamQueue({
   totalTeams = 4,
-  teamNames = ["Ala", "Bravo", "Charlie", "Delta"], // team names
+  teams = [
+    { id: "1", name: "Ala", points: 0 },
+    { id: "2", name: "Bravo", points: 0 },
+    { id: "3", name: "Charlie", points: 0 },
+    { id: "4", name: "Delta", points: 0 },
+  ],
   maxQuestionsPerTeam = 2,
-  maxQuestionsPerRound = 1, // limit per round
+  maxQuestionsPerRound = 1,
 }) {
   const { showToast } = useUIHelpers();
 
-  // Initialize queue with team names
-  const [queue, setQueue] = useState(teamNames.slice(0, totalTeams));
+  // Limit teams
+  const limitedTeams = teams.slice(0, totalTeams);
+
+  const [queue, setQueue] = useState(limitedTeams);
   const [activeIndex, setActiveIndex] = useState(0);
 
-  // Counters using team names as keys
+  // Counters keyed by team id
   const [teamCounters, setTeamCounters] = useState(
-    Object.fromEntries(queue.map((name) => [name, 0]))
+    Object.fromEntries(limitedTeams.map((t) => [t.id, 0]))
   );
   const [roundCounters, setRoundCounters] = useState(
-    Object.fromEntries(queue.map((name) => [name, 0]))
+    Object.fromEntries(limitedTeams.map((t) => [t.id, 0]))
   );
 
   const [secondHand, setSecondHand] = useState(false);
-
-  // Buzzer queue
   const [buzzQueue, setBuzzQueue] = useState([]);
 
-  const activeTeam = queue[activeIndex];
+  const activeTeam = queue[activeIndex]; // {id, name, points}
 
-  // // ---- Update queue and counters when teamNames change ----
+  // ---- Sync queue & counters if teams change ----
   useEffect(() => {
-    if (!teamNames || teamNames.length === 0) return;
+    if (!teams || teams.length === 0) return;
 
-    const limitedNames = teamNames.slice(0, totalTeams);
+    const limited = teams.slice(0, totalTeams);
 
     setQueue((prevQueue) => {
       const isDifferent =
-        prevQueue.length !== limitedNames.length ||
-        prevQueue.some((team, idx) => team !== limitedNames[idx]);
+        prevQueue.length !== limited.length ||
+        prevQueue.some((team, idx) => team.id !== limited[idx].id);
 
       if (isDifferent) {
         setActiveIndex(0);
-        setTeamCounters(Object.fromEntries(limitedNames.map((t) => [t, 0])));
-        setRoundCounters(Object.fromEntries(limitedNames.map((t) => [t, 0])));
-        return limitedNames;
+        setTeamCounters(Object.fromEntries(limited.map((t) => [t.id, 0])));
+        setRoundCounters(Object.fromEntries(limited.map((t) => [t.id, 0])));
+        return limited;
       }
       return prevQueue;
     });
-  }, [teamNames, totalTeams]);
+  }, [teams, totalTeams]);
 
-  // ---- Go to next team ----
+  // ---- Move to next team ----
   const goToNextTeam = () => {
     setTeamCounters((prev) => {
       const updated = { ...prev };
 
       if (!secondHand) {
-        updated[activeTeam] += 1;
+        updated[activeTeam.id] += 1;
 
         setRoundCounters((roundPrev) => {
           const roundUpdated = { ...roundPrev };
-          roundUpdated[activeTeam] += 1;
+          roundUpdated[activeTeam.id] += 1;
 
-          // Check if team reached max questions per round
-          if (roundUpdated[activeTeam] >= maxQuestionsPerRound) {
-            // If last team in queue finished first-hand round, reverse queue
+          if (roundUpdated[activeTeam.id] >= maxQuestionsPerRound) {
             if (activeIndex === queue.length - 1) {
               const reversedQueue = [...queue].reverse();
               setQueue(reversedQueue);
               setActiveIndex(0);
-              // showToast(
-              //   `All teams finished first-hand questions — order reversed. Next: Team ${reversedQueue[0]}`
-              // );
             } else {
               nextIndex();
             }
@@ -90,13 +90,12 @@ export function useTeamQueue({
   // ---- Increment active index ----
   const nextIndex = () => {
     let next = activeIndex + 1;
-    let newQueue = [...queue];
+    const newQueue = [...queue];
 
     if (next >= queue.length) {
-      // Reverse order after first-hand round
       newQueue.reverse();
       next = 0;
-      setRoundCounters(Object.fromEntries(newQueue.map((t) => [t, 0])));
+      setRoundCounters(Object.fromEntries(newQueue.map((t) => [t.id, 0])));
     }
 
     setQueue(newQueue);
@@ -112,10 +111,10 @@ export function useTeamQueue({
     return nextTeam;
   };
 
-  // ---- Buzzer queue functions ----
-  const addToBuzzQueue = (teamName) => {
-    if (!buzzQueue.includes(teamName)) {
-      setBuzzQueue((prev) => [...prev, teamName]);
+  // ---- Buzzer queue ----
+  const addToBuzzQueue = (teamId) => {
+    if (!buzzQueue.includes(teamId)) {
+      setBuzzQueue((prev) => [...prev, teamId]);
       return true;
     }
     return false;
@@ -125,7 +124,7 @@ export function useTeamQueue({
     if (buzzQueue.length > 0) {
       const [next, ...rest] = buzzQueue;
       setBuzzQueue(rest);
-      return next;
+      return queue.find((t) => t.id === next) || null;
     }
     return null;
   };

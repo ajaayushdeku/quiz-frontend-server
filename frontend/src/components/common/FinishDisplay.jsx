@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
-import logo from "../../assets/images/logo.png";
 import "../../styles/Quiz.css";
 
 const FinishDisplay = ({ onFinish, message }) => {
@@ -20,7 +19,12 @@ const FinishDisplay = ({ onFinish, message }) => {
         const currentQuiz = quizzes.find((q) => q._id === quizId);
 
         if (currentQuiz && currentQuiz.teams) {
-          setTeams(currentQuiz.teams);
+          const formattedTeams = currentQuiz.teams.map((team, idx) => ({
+            id: team._id || idx,
+            name: team.name || `Team ${idx + 1}`,
+            points: team.points || 0,
+          }));
+          setTeams(formattedTeams);
         } else {
           console.warn("⚠️ No teams found for this quiz.");
         }
@@ -36,23 +40,49 @@ const FinishDisplay = ({ onFinish, message }) => {
 
   if (loading) return <div>Loading scores...</div>;
 
+  // Determine the highest score
+  const maxPoints = Math.max(...teams.map((t) => t.points));
+
   return (
     <div className="finished-msg">
       <h1>🎉 {message}! </h1>
-      <button onClick={onFinish} className="next-quiz-btn">
-        NEXT QUIZ
+      <button onClick={onFinish} className="next-quiz-btn primary-btn">
+        NEXT ROUND
       </button>
 
+      <p>Here are the currents scores:</p>
       <div className="score-board" style={{ margin: "20px 0" }}>
-        <p>Here are the current scores:</p>
         <div className="team-score-list" style={{ marginTop: 15 }}>
           {teams.length > 0 ? (
-            teams.map((team, index) => (
-              <div className="team-details" key={index}>
-                <div className="team-title">{team.name}</div>
-                <div className="team-score">{team.score || 0}</div>
-              </div>
-            ))
+            teams
+              .sort((a, b) => b.points - a.points)
+              .map((team) => {
+                const isWinner = team.points === maxPoints && maxPoints > 0;
+                return (
+                  <div
+                    className="team-details"
+                    key={team.id}
+                    style={{
+                      borderRadius: 8,
+                      backgroundColor: isWinner ? "#ffdf61fb" : "#37363607",
+                      boxShadow: isWinner
+                        ? "0 0 10px gold"
+                        : "0 0 3px rgba(0,0,0,0.1)",
+                      fontWeight: isWinner ? "bold" : "normal",
+                    }}
+                  >
+                    <div className="team-title">
+                      {isWinner ? "👑 " : ""} {team.name}
+                    </div>
+                    <div
+                      className="team-score"
+                      style={{ color: isWinner ? "#1c1c1cff" : "#f6f6f6" }}
+                    >
+                      {team.points}
+                    </div>
+                  </div>
+                );
+              })
           ) : (
             <p>No team data available.</p>
           )}
