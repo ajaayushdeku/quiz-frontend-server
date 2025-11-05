@@ -3,6 +3,7 @@ import logo from "../../assets/images/logo.png";
 import { formatTime } from "../../utils/formatTime";
 import { FaHandPeace, FaHandPointUp } from "react-icons/fa6";
 import { RiTeamFill } from "react-icons/ri";
+import "../../styles/TeamDisplay.css";
 
 const TeamDisplay = ({
   activeTeam,
@@ -20,7 +21,7 @@ const TeamDisplay = ({
 }) => {
   return (
     <header className="quiz-header">
-      <div className="toast-msg detail-info">{toastMessage}</div>
+      <div className="info-msg detail-info">{toastMessage}</div>
 
       {/* If estimationEnable is true, show all teams instead of one */}
       {!estimationEnable ? (

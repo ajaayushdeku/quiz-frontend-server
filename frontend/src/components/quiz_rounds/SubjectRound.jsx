@@ -56,6 +56,8 @@ const SubjectRound = ({ onFinish }) => {
   const [roundTime, setRoundTime] = useState(TEAM_TIME_LIMIT);
   const [reduceBool, setReduceBool] = useState(false);
 
+  const [scoreMessage, setScoreMessage] = useState();
+
   // ---------------- Fetching Data from DB ----------------
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -252,6 +254,12 @@ const SubjectRound = ({ onFinish }) => {
             activeTeam?.name || "Unknown"
           }`
         );
+
+        const msg = `${
+          isCorrect ? "✅ Added" : "❌ Reducted"
+        } ${roundPoints} points for ${activeTeam?.name} !   `;
+
+        setScoreMessage(msg);
       } catch (err) {
         console.error(
           `⚠️ Failed to update score for team ${activeTeam?.name} at ${endpoint}:`,
@@ -274,6 +282,7 @@ const SubjectRound = ({ onFinish }) => {
         nextQuestion();
         resetTimer(roundTime);
         resetAnswer();
+        setScoreMessage("");
       }
 
       setQuestionDisplay(false);
@@ -355,6 +364,9 @@ const SubjectRound = ({ onFinish }) => {
         formatTime={formatTime}
         toastMessage=" Press 'Space' to Pass The Question"
         passEnable={true}
+        lowTimer={roundTime / 3}
+        midTimer={roundTime / 2}
+        highTimer={roundTime}
       />
 
       {/* Quiz Section */}

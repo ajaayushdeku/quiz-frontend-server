@@ -47,51 +47,113 @@ const BuzzerRound = ({ onFinish }) => {
 
   const [teams, setTeams] = useState([]);
 
+  const [teamAnswer, setTeamAnswer] = useState("");
+  const [questionAnswered, setQuestionAnswered] = useState(false);
+  const [buzzerPressed, setBuzzerPressed] = useState(null);
+  const [teamQueue, setTeamQueue] = useState([]);
+  const [quizCompleted, setQuizCompleted] = useState(false);
+  const [questionDisplay, setQuestionDisplay] = useState(false); // new state
+
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [correctAnswerValue, setCorrectAnswerValue] = useState("");
+
+  const [roundPoints, setRoundPoints] = useState([]);
+  const [roundTime, setRoundTime] = useState(TIMER);
+  const [reduceBool, setReduceBool] = useState(false);
+
+  const [scoreMessage, setScoreMessage] = useState([]);
+
   // Fetch only the teams on the basis of the current Quiz
   useEffect(() => {
-    const fetchTeams = async () => {
+    const fetchQuizData = async () => {
       try {
-        console.log("🔍 Fetching teams for quizId:", quizId);
+        console.log(
+          "🔍 Fetching quiz data for quizId:",
+          quizId,
+          "roundId:",
+          roundId
+        );
 
-        // Fetch the quiz
         const quizRes = await axios.get(
           "http://localhost:4000/api/quiz/get-quiz",
           { withCredentials: true }
         );
 
         const allQuizzes = quizRes.data.quiz || [];
-        const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+        const currentQuiz = allQuizzes.find(
+          (q) => q._id === quizId || q.rounds.some((r) => r._id === roundId)
+        );
 
-        if (!currentQuiz) {
-          console.warn("⚠️ No quiz found for this quizId:", quizId);
-          return;
-        }
+        if (!currentQuiz) return console.warn("⚠️ Quiz not found");
 
+        // ----------- Teams -----------
         const teamIds = currentQuiz.teams || [];
-        if (!teamIds.length) {
-          console.warn("⚠️ No teams found in this quiz.");
-          return;
-        }
-
-        console.log("🎯 Team IDs in quiz:", teamIds);
-
-        // Format teams for easier use in components
         const formattedTeams = teamIds.map((team, index) => ({
           id: team._id,
           name: team.name || `Team ${index + 1}`,
-          // color: optional if you want to assign later
+          points: team.points || 0,
         }));
-
         console.log("🧩 Formatted teams:", formattedTeams);
         setTeams(formattedTeams);
+
+        // ----------- Round -----------
+        const round = currentQuiz.rounds.find((r) => r._id === roundId);
+        if (!round) return console.warn("⚠️ Round not found:", roundId);
+
+        setRoundPoints(round.points || 10);
+        setRoundTime(round.timeLimitValue || TEAM_TIME_LIMIT);
+        if (round?.rules?.enableNegative) setReduceBool(true);
+
+        // ----------- Questions -----------
+        const questionRes = await axios.get(
+          "http://localhost:4000/api/question/get-questions",
+          { withCredentials: true }
+        );
+
+        const allQuestions = questionRes.data.data || [];
+        const filteredQuestions = allQuestions.filter((q) =>
+          round.questions.includes(q._id)
+        );
+
+        const formattedQuestions = filteredQuestions.map((q) => {
+          const optionsArray =
+            typeof q.options[0] === "string"
+              ? JSON.parse(q.options[0])
+              : q.options;
+
+          const mappedOptions = optionsArray.map((opt, idx) => ({
+            id: String.fromCharCode(97 + idx),
+            text: typeof opt === "string" ? opt : opt.text || "",
+            originalId: opt._id || null,
+          }));
+
+          const correctIndex = mappedOptions.findIndex(
+            (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
+          );
+
+          return {
+            id: q._id,
+            question: q.text,
+            options: mappedOptions,
+            correctOptionId:
+              correctIndex >= 0
+                ? mappedOptions[correctIndex].id
+                : mappedOptions[0].id,
+            mediaType: q.mediaType || q.media?.type || "none",
+            mediaUrl: q.mediaUrl || q.media?.url || "",
+          };
+        });
+
+        console.log("🧩 Formatted questions:", formattedQuestions);
+        setQuesFetched(formattedQuestions);
       } catch (error) {
-        console.error("❌ Fetch Error (teams):", error);
-        showToast("Failed to fetch teams!");
+        console.error("❌ Fetch Error:", error);
+        showToast("Failed to fetch quiz data!");
       }
     };
 
-    if (quizId) fetchTeams();
-  }, [quizId]);
+    if (quizId && roundId) fetchQuizData();
+  }, [quizId, roundId]);
 
   // Team colors assignment
   const generateTeamColors = (teams) => {
@@ -104,104 +166,6 @@ const BuzzerRound = ({ onFinish }) => {
   };
 
   const TEAM_COLORS = generateTeamColors(teams);
-  const TEAM_NAMES = teams.map((team) => team.name);
-  const TOTAL_TEAMS = TEAM_NAMES.length;
-
-  // Fetch questions from MongoDB
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        console.log("🔍 Fetching questions for roundId:", roundId);
-
-        // 1️⃣ Fetch the quiz that contains this round
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quiz",
-          { withCredentials: true }
-        );
-
-        const allQuizzes = quizRes.data.quiz || [];
-        const currentQuiz = allQuizzes.find((q) =>
-          q.rounds.some((r) => r._id === roundId)
-        );
-
-        if (!currentQuiz) {
-          console.warn("⚠️ No quiz found containing this roundId:", roundId);
-          return;
-        }
-
-        // 2️⃣ Find the round object
-        const round = currentQuiz.rounds.find((r) => r._id === roundId);
-        if (!round) {
-          console.warn("⚠️ Round not found:", roundId);
-          return;
-        }
-
-        console.log(
-          "🎯 Found round:",
-          round.name,
-          "| Questions:",
-          round.questions
-        );
-
-        // 3️⃣ Fetch all questions from DB
-        const questionRes = await axios.get(
-          "http://localhost:4000/api/question/get-questions",
-          { withCredentials: true }
-        );
-
-        const allQuestions = questionRes.data.data || [];
-        console.log("📦 All questions:", allQuestions.length);
-
-        // 4️⃣ Filter questions for this round
-        const filteredQuestions = allQuestions.filter((q) =>
-          round.questions.includes(q._id)
-        );
-
-        console.log("🧾 Filtered questions for this round:", filteredQuestions);
-
-        // 5️⃣ Format questions
-        const formatted = filteredQuestions.map((q) => {
-          const optionsArray =
-            typeof q.options[0] === "string"
-              ? JSON.parse(q.options[0])
-              : q.options;
-
-          const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx), // 'a', 'b', 'c',...
-            text: typeof opt === "string" ? opt : opt.text || "",
-            originalId: opt._id || null,
-          }));
-
-          const correctIndex = mappedOptions.findIndex(
-            (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
-          );
-
-          return {
-            id: q._id,
-            category: q.category || "General",
-            question: q.text || "No question provided",
-            options: mappedOptions,
-            correctOptionId:
-              correctIndex >= 0
-                ? mappedOptions[correctIndex].id
-                : mappedOptions[0].id,
-            points: q.points || 10,
-            mediaType: q.mediaType || q.media?.type || "none",
-            mediaUrl: q.mediaUrl || q.media?.url || "",
-            round: round.name || "General",
-          };
-        });
-
-        console.log("🧩 Formatted questions:", formatted);
-        setQuesFetched(formatted);
-      } catch (error) {
-        console.error("❌ Fetch Error:", error);
-        showToast("Failed to fetch round questions!");
-      }
-    };
-
-    if (roundId) fetchData();
-  }, [roundId]);
 
   const {
     questions,
@@ -216,61 +180,59 @@ const BuzzerRound = ({ onFinish }) => {
 
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 50);
 
-  const [teamAnswer, setTeamAnswer] = useState("");
-  const [questionAnswered, setQuestionAnswered] = useState(false);
-  const [buzzerPressed, setBuzzerPressed] = useState(null);
-  const [teamQueue, setTeamQueue] = useState([]);
-  const [quizCompleted, setQuizCompleted] = useState(false);
-  const [questionDisplay, setQuestionDisplay] = useState(false); // new state
-
-  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
-  const [correctAnswerValue, setCorrectAnswerValue] = useState("");
+  const [activeTeam, setActiveTeam] = useState();
 
   const handleBuzzer = (teamName) => {
-    if (teamQueue.includes(teamName)) return;
+    // Ignore if team already in queue
+    if (teamQueue.find((t) => t.name === teamName)) return;
+
+    const teamObj = teams.find((t) => t.name === teamName);
+    if (!teamObj) return;
 
     setTeamQueue((prevQueue) => {
-      const newQueue = [...prevQueue, teamName];
-      if (!buzzerPressed) {
-        setBuzzerPressed(teamName);
-        resetTimer(TIMER);
+      const newQueue = [...prevQueue, teamObj]; // store full object
+      if (!activeTeam) {
+        setActiveTeam(teamObj); // set current active team
+        setBuzzerPressed(teamObj.name);
+        resetTimer(roundTime);
         startTimer();
-        showToast(`Team ${teamName} pressed the buzzer!`);
-      } else {
-        showToast(`Team ${teamName} pressed too!`);
       }
       return newQueue;
     });
+
+    showToast(`Team ${teamObj.name} pressed the buzzer!`);
   };
 
   const moveToNextTeamOrQuestion = () => {
-    if (teamQueue.length > 1) {
-      // Shift the queue to the next team
-      const [, ...rest] = teamQueue;
-      setBuzzerPressed(rest[0]);
-      setTeamQueue(rest);
-      resetTimer(TIMER);
-      startTimer();
-      setTeamAnswer("");
-      showToast(`Team ${rest[0]} now answers!`);
-    } else {
-      // Last team or only one team left
-      const correctOption = currentQuestion.options.find(
-        (opt) => opt.id === currentQuestion.correctOptionId
-      );
+    if (teamQueue.length > 0) {
+      const [current, ...rest] = teamQueue;
 
-      // Clear the last team from buzzer
-      setBuzzerPressed(null);
-      setTeamQueue([]);
-      setTeamAnswer("");
+      if (rest.length > 0) {
+        // Move to next team in the queue
+        const nextTeam = rest[0];
+        setActiveTeam(nextTeam); // update active team object
+        setBuzzerPressed(nextTeam.name);
+        setTeamQueue(rest);
+        resetTimer(roundTime);
+        startTimer();
+        setTeamAnswer("");
+        showToast(`Team ${nextTeam.name} now answers!`);
+      } else {
+        // Last team answered, show correct answer
+        const correctOption = currentQuestion.options.find(
+          (opt) => opt.id === currentQuestion.correctOptionId
+        );
 
-      // Show correct answer immediately
-      setCorrectAnswerValue(correctOption?.text || "");
-      setShowCorrectAnswer(true);
-      pauseTimer();
+        setCorrectAnswerValue(correctOption?.text || "");
+        setShowCorrectAnswer(true);
+        setActiveTeam(null);
+        setBuzzerPressed(null);
+        setTeamQueue([]);
+        setTeamAnswer("");
+        pauseTimer();
 
-      // If last question, mark quiz completed
-      if (isLastQuestion) setQuizCompleted(true);
+        if (isLastQuestion) setQuizCompleted(true);
+      }
     }
   };
 
@@ -281,36 +243,61 @@ const BuzzerRound = ({ onFinish }) => {
     }
   }, [timeRemaining, buzzerPressed]);
 
-  const handleSubmit = () => {
-    if (!buzzerPressed) return;
+  const handleSubmit = async () => {
+    if (!buzzerPressed || !currentQuestion) return;
 
-    // Find the correct option's text
+    const teamObj = teams.find((t) => t.name === buzzerPressed);
+    if (!teamObj) return;
+
     const correctOption = currentQuestion.options.find(
       (opt) => opt.id === currentQuestion.correctOptionId
     );
+    const correctValue = correctOption?.text || "";
 
     const isCorrect =
-      teamAnswer.trim().toLowerCase() === correctOption.text.toLowerCase();
+      teamAnswer.trim().toLowerCase() === correctValue.toLowerCase();
+
+    const endpoint = isCorrect
+      ? `http://localhost:4000/api/team/teams/${teamObj.id}/add`
+      : reduceBool
+      ? `http://localhost:4000/api/team/teams/${teamObj.id}/reduce`
+      : null;
+
+    if (endpoint) {
+      try {
+        await axios.patch(
+          endpoint,
+          { points: Number(currentQuestion.points) || 10 },
+          { withCredentials: true }
+        );
+
+        const msg = `${isCorrect ? "✅ Added" : "❌ Reduced"} ${
+          currentQuestion.points || 10
+        } points for ${teamObj.name}!`;
+
+        setScoreMessage((prev) => [...prev, msg]);
+      } catch (err) {
+        console.error(`⚠️ Failed to update score for ${teamObj.name}:`, err);
+        showToast(`⚠️ Failed to update score for ${teamObj.name}`);
+      }
+    }
 
     if (isCorrect) {
-      showToast(`✅ Correct! Team ${buzzerPressed} answered right.`);
-      setQuestionAnswered(true);
+      // Correct answer, show answer and reset queue
+      setCorrectAnswerValue(correctValue);
       setShowCorrectAnswer(true);
-      setCorrectAnswerValue(correctOption.text);
       setTeamAnswer("");
       setTeamQueue([]);
       setBuzzerPressed(null);
       pauseTimer();
+      setQuestionAnswered(true);
 
-      if (isLastQuestion) {
-        setQuizCompleted(true);
-      }
+      if (isLastQuestion) setQuizCompleted(true);
     } else {
-      showToast(`❌ Wrong! Team ${buzzerPressed} answered incorrectly.`);
+      // Wrong answer, move to next team
       moveToNextTeamOrQuestion();
+      setTeamAnswer("");
     }
-
-    setTeamAnswer("");
   };
 
   const handleAnswerChange = (e) => setTeamAnswer(e.target.value);
@@ -332,16 +319,25 @@ const BuzzerRound = ({ onFinish }) => {
 
   return (
     <div className="quiz-container">
+      {scoreMessage && (
+        <div className="score-message-list detail-info">
+          {scoreMessage.map((msg, i) => (
+            <div key={i} className="score-message">
+              {msg}
+            </div>
+          ))}
+        </div>
+      )}
+
       <TeamDisplay
-        teams={TEAM_NAMES}
         TEAM_COLORS={TEAM_COLORS}
         toastMessage="Press 'Buzzer' to Answer the Question"
         timeRemaining={timeRemaining}
-        activeTeam={buzzerPressed}
+        activeTeam={activeTeam}
         headMessage="Answer Question within 10 seconds"
-        lowTimer={3}
-        midTimer={5}
-        highTimer={10}
+        lowTimer={roundTime / 3}
+        midTimer={roundTime / 2}
+        highTimer={roundTime}
       />
 
       {!quizCompleted ? (
@@ -383,12 +379,14 @@ const BuzzerRound = ({ onFinish }) => {
                     if (!isLastQuestion) {
                       nextQuestion();
                       setQuestionAnswered(false);
+                      setActiveTeam(null);
                       setTeamAnswer("");
                       setTeamQueue([]);
                       setQuestionDisplay(false);
                       setShowCorrectAnswer(false);
                       setCorrectAnswerValue("");
-                      resetTimer(TIMER);
+                      resetTimer(roundTime);
+                      setScoreMessage([]);
                     } else {
                       setQuizCompleted(true);
                     }
@@ -413,7 +411,7 @@ const BuzzerRound = ({ onFinish }) => {
             )}
 
             <BuzzerButton
-              teamNames={TEAM_NAMES}
+              teams={teams}
               teamColors={TEAM_COLORS}
               buzzerIcon={buzzer}
               buzzerPressed={buzzerPressed}

@@ -58,6 +58,8 @@ const RapidFireRound = ({ onFinish }) => {
   const [roundTime, setRoundTime] = useState(INITIAL_TIMER);
   const [reduceBool, setReduceBool] = useState(false);
 
+  const [scoreMessage, setScoreMessage] = useState([]);
+
   // ---------------- Fetching Data from DB ----------------
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -278,11 +280,12 @@ const RapidFireRound = ({ onFinish }) => {
             { points: Number(roundPoints) || 0 },
             { withCredentials: true }
           );
-          showToast(
-            `${
-              isCorrect ? "✅ Added" : "❌ Reduced"
-            } ${roundPoints} points for team ${activeTeamName}`
-          );
+
+          const msg = `${
+            isCorrect ? "✅ Added" : "❌ Reducted"
+          } ${roundPoints} points for ${activeTeam?.name} !   `;
+
+          setScoreMessage((prev) => [...prev, msg]);
         } catch (err) {
           console.error("⚠️ Failed to update team score:", err);
           showToast("Failed to update team score! Check console.");
@@ -336,6 +339,7 @@ const RapidFireRound = ({ onFinish }) => {
     setRoundStarted(false);
     setAnswerInput("");
     setAnsweredQuestions([]);
+    setScoreMessage([]);
   };
 
   // ---------------- Keyboard Shortcuts ----------------
@@ -373,6 +377,16 @@ const RapidFireRound = ({ onFinish }) => {
   // ---------------- Render ----------------
   return (
     <section className="quiz-container">
+      {scoreMessage && (
+        <div className="score-message-list detail-info">
+          {scoreMessage.map((msg, i) => (
+            <div key={i} className="score-message">
+              {msg}
+            </div>
+          ))}
+        </div>
+      )}
+
       <TeamDisplay
         activeTeam={activeTeam}
         timeRemaining={timeRemaining}
@@ -380,9 +394,9 @@ const RapidFireRound = ({ onFinish }) => {
         formatTime={formatTime}
         toastMessage="Press 'P' to Pass to the Next Question"
         headMessage="Answer All the Questions under the time limit (2 mins)!"
-        lowTimer={30}
-        midTimer={60}
-        highTimer={120}
+        lowTimer={roundTime / 3}
+        midTimer={roundTime / 2}
+        highTimer={roundTime}
       />
 
       {!roundStarted && !finalFinished ? (

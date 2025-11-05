@@ -5,7 +5,6 @@ import "../../styles/Dashboard.css";
 
 export default function CreateQuiz() {
   const [step, setStep] = useState(1);
-
   const [quizName, setQuizName] = useState("");
   const [teams, setTeams] = useState([{ name: "" }]);
   const [numRounds, setNumRounds] = useState(1);
@@ -17,6 +16,7 @@ export default function CreateQuiz() {
       timeLimitValue: 30,
       points: 0,
       rules: { enablePass: false, enableNegative: false },
+      regulation: { description: "" },
       questions: [],
     },
   ]);
@@ -65,6 +65,7 @@ export default function CreateQuiz() {
           timeLimitValue: 30,
           points: 0,
           rules: { enablePass: false, enableNegative: false },
+          regulation: { description: "" },
           questions: [],
         });
       }
@@ -75,6 +76,12 @@ export default function CreateQuiz() {
   const handleRoundChange = (index, field, value) => {
     const updated = [...rounds];
     updated[index][field] = value;
+    setRounds(updated);
+  };
+
+  const handleRegulationChange = (index, value) => {
+    const updated = [...rounds];
+    updated[index].regulation.description = value;
     setRounds(updated);
   };
 
@@ -175,11 +182,15 @@ export default function CreateQuiz() {
 
       if (round.points === "" || round.points < 0)
         return toast.error(`Enter valid points for Round ${i + 1}`);
+
+      if (!round.regulation.description.trim())
+        return toast.error(`Enter regulation for Round ${i + 1}`);
+
       // Rules validation: at least one must be enabled
-      if (!round.rules.enablePass && !round.rules.enableNegative)
-        return toast.error(
-          `Please enable at least one rule for Round ${i + 1}`
-        );
+      // if (!round.rules.enablePass && !round.rules.enableNegative)
+      //   return toast.error(
+      //     `Please enable at least one rule for Round ${i + 1}`
+      //   );
 
       if (!round.questions || round.questions.length === 0)
         return toast.error(`Select at least one question for Round ${i + 1}`);
@@ -208,6 +219,7 @@ export default function CreateQuiz() {
           timeLimitValue: 30,
           points: 0,
           rules: { enablePass: false, enableNegative: false },
+          regulation: { description: "" },
           questions: [],
         },
       ]);
@@ -402,6 +414,26 @@ export default function CreateQuiz() {
                       handleRoundChange(index, "points", e.target.value)
                     }
                     className="quiz-input"
+                  />
+                </label>
+
+                <label className="quiz-label">
+                  Regulation Descriptions:
+                  <textarea
+                    value={round.regulation.description}
+                    onChange={(e) =>
+                      handleRegulationChange(index, e.target.value)
+                    }
+                    placeholder="Enter any special rules or regulation for this round..."
+                    className="quiz-input"
+                    // style={{
+                    //   width: "100%",
+                    //   padding: 10,
+                    //   borderRadius: 6,
+                    //   border: "1px solid #ccc",
+                    //   marginBottom: 10,
+                    //   minHeight: 60,
+                    // }}
                   />
                 </label>
 

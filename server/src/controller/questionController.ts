@@ -16,8 +16,8 @@ export const createQuestion = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const user = req.user;
-    if (!user) return res.status(401).json({ message: "Unauthorized" });
+    const adminId = req.user;
+    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
 
     let { text, options, correctAnswer, category } = req.body;
 
@@ -76,7 +76,7 @@ export const createQuestion = async (
 
       category,
       media: finalMedia,
-      adminId: user.id,
+      adminId,
     });
 
     await question.save();

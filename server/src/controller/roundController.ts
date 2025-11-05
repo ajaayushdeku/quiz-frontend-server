@@ -22,7 +22,10 @@ export const createRound = async (req: AuthRequest, res: Response) => {
     }
 
     if (!rounds || !Array.isArray(rounds) || rounds.length === 0) {
-      return res.status(400).json({ message: "No rounds provided" });
+      return res.status(400).json({
+        message:
+          "Each round must include name, category, time limit type, and time limit value",
+      });
     }
 
     //  Validate each round input
@@ -133,6 +136,9 @@ export const createRound = async (req: AuthRequest, res: Response) => {
         rules: {
           enablePass: r.rules?.enablePass || false,
           enableNegative: r.rules?.enableNegative || false,
+        },
+        regulation: {
+          description: r.regulation?.description || "",
         },
         questions: r.questions || [],
       }))

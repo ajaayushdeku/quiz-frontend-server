@@ -3,6 +3,7 @@ import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import Button from "../../components/common/Button";
 import "../../styles/Quiz.css";
+import "../../styles/QuizSelector.css";
 import { BsFillPatchQuestionFill } from "react-icons/bs";
 import { RiEthFill, RiTeamFill } from "react-icons/ri";
 

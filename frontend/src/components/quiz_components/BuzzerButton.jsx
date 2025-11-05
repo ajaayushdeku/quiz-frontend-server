@@ -2,8 +2,8 @@ import React from "react";
 import "../../styles/Quiz.css";
 
 const BuzzerButton = ({
-  teamNames,
-  teamColors,
+  teams, // now using full team objects [{id, name}, ...]
+  teamColors = {},
   buzzerIcon,
   buzzerPressed,
   teamQueue,
@@ -12,20 +12,20 @@ const BuzzerButton = ({
 }) => {
   return (
     <section className="buzzer-btn-container">
-      {teamNames.map((teamName) => (
+      {Object.values(teams).map((team) => (
         <button
-          key={teamName}
+          key={team.id}
           className="buzzer-btn"
-          onClick={() => handleBuzzer(teamName)}
+          onClick={() => handleBuzzer(team.name)}
           disabled={
             disabled ||
             (buzzerPressed &&
-              buzzerPressed !== teamName &&
-              teamQueue.includes(teamName))
+              buzzerPressed !== team.name &&
+              teamQueue.includes(team.name))
           }
-          style={{ background: teamColors[teamName] }}
+          style={{ background: teamColors[team.name] || "#333" }}
         >
-          Team {teamName}{" "}
+          Team {team.name}{" "}
           <img src={buzzerIcon} alt="buzzer" className="buzzer-icon" />
         </button>
       ))}
