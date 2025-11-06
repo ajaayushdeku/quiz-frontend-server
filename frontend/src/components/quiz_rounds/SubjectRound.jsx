@@ -58,6 +58,8 @@ const SubjectRound = ({ onFinish }) => {
 
   const [scoreMessage, setScoreMessage] = useState();
 
+  const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
+
   // ---------------- Fetching Data from DB ----------------
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -81,6 +83,11 @@ const SubjectRound = ({ onFinish }) => {
 
         if (!currentQuiz) return console.warn("⚠️ Quiz not found");
 
+        const roundIndex = currentQuiz.rounds.findIndex(
+          (r) => r._id === roundId
+        );
+        setCurrentRoundNumber(roundIndex + 1); // round number = index + 1
+
         // ----------- Teams -----------
         const teamIds = currentQuiz.teams || [];
         const formattedTeams = teamIds.map((team, index) => ({
@@ -94,6 +101,11 @@ const SubjectRound = ({ onFinish }) => {
         // ----------- Round -----------
         const round = currentQuiz.rounds.find((r) => r._id === roundId);
         if (!round) return console.warn("⚠️ Round not found:", roundId);
+
+        // Store the round number dynamically
+        setCurrentRoundNumber(
+          currentQuiz.rounds.findIndex((r) => r._id === roundId) + 1
+        );
 
         setRoundPoints(round.points || 10);
         setRoundTime(round.timeLimitValue || TEAM_TIME_LIMIT);
@@ -211,6 +223,83 @@ const SubjectRound = ({ onFinish }) => {
     if (!isRunning && timeRemaining === 0) handlePass();
   }, [isRunning, timeRemaining]);
 
+  //---------------- ✅ Submit pass to DB ----------------
+  const submitAnswer = async (passed = false, optionId = null) => {
+    if (!activeTeam?.id || !quizId || !roundId || !currentQuestion?.id) {
+      console.warn("⚠️ Missing required data for submit!");
+      return;
+    }
+
+    const isCorrect = passed
+      ? false // Passing is not correct
+      : optionId === currentQuestion.correctOptionId;
+
+    const answerId = passed
+      ? null // No answer stored
+      : currentQuestion.options.find((opt) => opt.id === optionId)?.originalId;
+
+    const payload = {
+      quizId,
+      roundNumber: currentRoundNumber,
+      teamId: activeTeam.id,
+      questionId: currentQuestion.id,
+      answerId,
+      isPassed: passed,
+    };
+
+    console.log("📤 Submitting to DB:", payload);
+
+    try {
+      const res = await axios.post(
+        "http://localhost:4000/api/history/submit-ans",
+        payload,
+        { withCredentials: true }
+      );
+      console.log("✅ Submitted:", res.data);
+    } catch (err) {
+      console.error("❌ Submit failed:", err.response?.data || err.message);
+      showToast("Failed to record answer!");
+      return;
+    }
+
+    // ---------------- Update team score ----------------
+    if (!passed) {
+      // Only update points if not passed
+      if (!isCorrect && !reduceBool) {
+        showToast(
+          `❌ Wrong answer! No points deducted for team ${activeTeam?.name}`
+        );
+        return;
+      }
+
+      const endpoint = isCorrect
+        ? `http://localhost:4000/api/team/teams/${activeTeam.id}/add`
+        : `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`;
+
+      try {
+        await axios.patch(
+          endpoint,
+          { points: Number(roundPoints) || 0 },
+          { withCredentials: true }
+        );
+
+        const msg = `${
+          isCorrect ? "✅ Added" : "❌ Reduced"
+        } ${roundPoints} points for ${activeTeam?.name} !`;
+
+        setScoreMessage(msg);
+        showToast(msg);
+      } catch (err) {
+        console.error("⚠️ Failed to update score:", err);
+        showToast("Failed to update team score! Check console.");
+      }
+    } else {
+      // Passed question
+      showToast(`⏩ Question passed! 0 points for team ${activeTeam?.name}`);
+      setScoreMessage(`⏩ Question passed! 0 points`);
+    }
+  };
+
   // ---------------- Option Selection ----------------
   const handleOptionSelection = (optionId) => {
     selectAnswer(optionId);
@@ -219,57 +308,8 @@ const SubjectRound = ({ onFinish }) => {
     const isCorrect = optionId === currentQuestion.correctOptionId;
     console.log("📝 Selected Option:", optionId, "Correct:", isCorrect);
 
-    //---------------- ✅ Update team score in DB ----------------
-    const updateScore = async () => {
-      if (!activeTeam?.id) {
-        console.warn("⚠️ No active team selected!");
-        return;
-      }
-
-      try {
-        const action = isCorrect ? "✅ Added" : "❌ Reduced";
-
-        // Only reduce points if the round allows negative scoring
-        if (!isCorrect && !reduceBool) {
-          showToast(
-            `❌ Wrong answer! No points deducted for team ${activeTeam?.name}`
-          );
-          return;
-        }
-
-        const endpoint = isCorrect
-          ? `http://localhost:4000/api/team/teams/${activeTeam.id}/add`
-          : `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`;
-
-        await axios.patch(
-          endpoint,
-          {
-            points: Number(roundPoints) || 0, // ensure numeric
-          },
-          { withCredentials: true }
-        );
-
-        showToast(
-          `${action} ${roundPoints} points for team ${
-            activeTeam?.name || "Unknown"
-          }`
-        );
-
-        const msg = `${
-          isCorrect ? "✅ Added" : "❌ Reducted"
-        } ${roundPoints} points for ${activeTeam?.name} !   `;
-
-        setScoreMessage(msg);
-      } catch (err) {
-        console.error(
-          `⚠️ Failed to update score for team ${activeTeam?.name} at ${endpoint}:`,
-          err
-        );
-        showToast("Failed to update team score! Check console.");
-      }
-    };
-
-    updateScore(); // Call update immediately
+    // ✅ Submit pass to DB
+    submitAnswer(false, optionId);
 
     showToast(isCorrect ? "✅ Correct!" : "❌ Wrong Answer!");
 
@@ -290,8 +330,11 @@ const SubjectRound = ({ onFinish }) => {
   };
 
   // ---------------- Pass Handling ----------------
-  const handlePass = () => {
+  const handlePass = async () => {
     if (!questionDisplay) return;
+
+    // ✅ Submit pass to DB
+    submitAnswer(true, null);
 
     if (!secondHand) {
       setSecondHand(true);

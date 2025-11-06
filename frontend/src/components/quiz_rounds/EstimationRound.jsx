@@ -50,6 +50,9 @@ const EstimationRound = ({ onFinish }) => {
   // const [roundTime, setRoundTime] = useState(INITIAL_TIMER);
   const [reduceBool, setReduceBool] = useState(false);
 
+  const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
+
+  //---------------- Fetch the Data from the DB ----------------
   useEffect(() => {
     const fetchQuizData = async () => {
       if (!quizId || !roundId) return;
@@ -62,7 +65,7 @@ const EstimationRound = ({ onFinish }) => {
           roundId
         );
 
-        // 1️⃣ Fetch all quizzes
+        //---------------- 1️⃣ Fetch all quizzes ----------------
         const quizRes = await axios.get(
           "http://localhost:4000/api/quiz/get-quiz",
           {
@@ -83,7 +86,7 @@ const EstimationRound = ({ onFinish }) => {
 
         console.log("🎯 Current Quiz:", currentQuiz.name);
 
-        // 2️⃣ Extract and format teams
+        //---------------- 2️⃣ Extract and format teams ----------------
         const teamIds = currentQuiz.teams || [];
         if (!teamIds.length) {
           console.warn("⚠️ No teams found in this quiz.");
@@ -95,18 +98,23 @@ const EstimationRound = ({ onFinish }) => {
         console.log("🧩 Formatted Teams:", formattedTeams);
         setTeams(formattedTeams);
 
-        // 3️⃣ Find the current round
+        //---------------- 3️⃣ Find the current round ----------------
         const round = currentQuiz.rounds.find((r) => r._id === roundId);
         if (!round) {
-          console.warn("⚠️ Round not found in this quiz:", roundId);
+          console.warn("⚠️ Round not found:", roundId);
           return;
         }
+
+        //---------------- Store the round number dynamically ----------------
+        setCurrentRoundNumber(
+          currentQuiz.rounds.findIndex((r) => r._id === roundId) + 1
+        );
 
         setRoundPoints(round.points || 10);
         // setRoundTime(round.timeLimitValue || TEAM_TIME_LIMIT);
         if (round?.rules?.enableNegative) setReduceBool(true);
 
-        // 4️⃣ Fetch all questions
+        //---------------- 4️⃣ Fetch all questions ----------------
         const questionRes = await axios.get(
           "http://localhost:4000/api/question/get-questions",
           {
@@ -120,14 +128,14 @@ const EstimationRound = ({ onFinish }) => {
         const allQuestions = questionRes.data.data || [];
         console.log("📦 Total questions fetched:", allQuestions.length);
 
-        // 5️⃣ Filter questions belonging to this round
+        //---------------- 5️⃣ Filter questions belonging to this round ----------------
         const filteredQuestions = allQuestions.filter((q) =>
           round.questions.includes(q._id)
         );
 
         console.log("🧾 Filtered questions for this round:", filteredQuestions);
 
-        // 6️⃣ Format questions properly
+        //---------------- 6️⃣ Format questions properly ----------------
         const formatted = filteredQuestions.map((q) => {
           const optionsArray =
             typeof q.options[0] === "string"
@@ -159,7 +167,7 @@ const EstimationRound = ({ onFinish }) => {
           };
         });
 
-        // 7️⃣ For estimation rounds, only include numeric questions
+        //---------------- 7️⃣ For estimation rounds, only include numeric questions ----------------
         const estimationNumericQuestions = formatted.filter((q) => {
           const correctOption = q.options.find(
             (opt) => opt.id === q.correctOptionId
@@ -182,7 +190,7 @@ const EstimationRound = ({ onFinish }) => {
     fetchQuizData();
   }, [quizId, roundId]);
 
-  // Team colors assignment
+  //---------------- Team colors assignment ----------------
   const generateTeamColors = (teams) => {
     const teamColors = {};
     teams.forEach((team, index) => {
@@ -203,6 +211,7 @@ const EstimationRound = ({ onFinish }) => {
 
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 40);
 
+  //---------------- Move to the Next Question ----------------
   const moveToNextQuestion = () => {
     if (isLastQuestion) {
       setQuizCompleted(true);
@@ -216,13 +225,14 @@ const EstimationRound = ({ onFinish }) => {
     }
   };
 
+  //---------------- Handle Answer Change ----------------
   const handleAnswerChange = (team, value) =>
     setTeamAnswers((prev) => ({ ...prev, [team]: value }));
 
-  // Store which teams have submitted for the current question
+  //---------------- Store which teams have submitted for the current question ----------------
   const [submittedTeams, setSubmittedTeams] = useState([]);
 
-  // Reset answers & submissions when the question changes
+  //---------------- Reset answers & submissions when the question changes ----------------
   useEffect(() => {
     setTeamAnswers({});
     setSubmittedTeams([]);
@@ -230,28 +240,34 @@ const EstimationRound = ({ onFinish }) => {
     setCorrectAnswerValue(null);
   }, [currentQuestion]);
 
-  const handleSubmit = async (team) => {
-    const answer = teamAnswers[team]?.trim();
-    if (!answer) return showToast(`${team}, please enter your answer first!`);
+  //---------------- Handle Submit ----------------
+  const handleSubmit = async (teamName) => {
+    const answerRaw = teamAnswers[teamName]?.trim();
 
-    // Prevent double submission
-    if (submittedTeams.includes(team)) {
-      showToast(`⚠️ ${team} has already submitted!`);
+    // 🧩 Validation
+    if (!answerRaw) {
+      showToast(`${teamName}, please enter your answer first!`);
       return;
     }
 
-    // Mark this team as submitted
-    setSubmittedTeams((prev) => [...prev, team]);
-    showToast(`(*°▽°*) ${team} submitted their answer!`);
+    if (submittedTeams.includes(teamName)) {
+      showToast(`⚠️ ${teamName} has already submitted!`);
+      return;
+    }
 
-    // Check if all teams have submitted
+    // ✅ Mark this team as submitted
+    setSubmittedTeams((prev) => [...prev, teamName]);
+    showToast(`(*°▽°*) ${teamName} submitted their answer!`);
+
+    // 🧠 Check if all teams have submitted
     const allTeamsSubmitted = teams.every((t) =>
-      [...submittedTeams, team].includes(t.name)
+      [...submittedTeams, teamName].includes(t.name)
     );
+    if (!allTeamsSubmitted) return; // wait until all teams submit
 
-    if (!allTeamsSubmitted || !currentQuestion) return;
-
-    // ✅ All teams submitted → evaluate
+    // ===============================
+    // 🧮 Evaluate all team answers
+    // ===============================
     const correctOption = currentQuestion.options.find(
       (opt) => opt.id === currentQuestion.correctOptionId
     );
@@ -259,20 +275,81 @@ const EstimationRound = ({ onFinish }) => {
     setCorrectAnswerValue(correctValue);
     setShowCorrectAnswer(true);
 
-    // Find closest team(s)
+    // Find smallest difference between team answers and correct value
     let minDiff = Infinity;
     Object.entries(teamAnswers).forEach(([tName, ans]) => {
-      const diff = Math.abs(parseFloat(ans) - correctValue);
-      if (diff < minDiff) minDiff = diff;
+      const parsed = parseFloat(ans);
+      if (!isNaN(parsed)) {
+        const diff = Math.abs(parsed - correctValue);
+        if (diff < minDiff) minDiff = diff;
+      }
     });
 
+    // Find team(s) whose answer(s) are closest
     const closestTeams = Object.entries(teamAnswers)
-      .filter(
-        ([tName, ans]) => Math.abs(parseFloat(ans) - correctValue) === minDiff
-      )
+      .filter(([tName, ans]) => {
+        const parsed = parseFloat(ans);
+        return !isNaN(parsed) && Math.abs(parsed - correctValue) === minDiff;
+      })
       .map(([tName]) => tName);
 
-    // Update scores
+    console.log("Closest Teams:", closestTeams);
+
+    // ===============================
+    // 💾 Submit all team answers to DB
+    // ===============================
+    for (const t of teams) {
+      const teamAnswer = parseFloat(teamAnswers[t.name]);
+      if (isNaN(teamAnswer)) continue;
+
+      // Find closest option object
+      const closestOption = currentQuestion.options.reduce((prev, opt) => {
+        const optVal = parseFloat(opt.text);
+        return Math.abs(optVal - teamAnswer) <
+          Math.abs(parseFloat(prev.text) - teamAnswer)
+          ? opt
+          : prev;
+      }, currentQuestion.options[0]);
+
+      // ✅ Safely get the correct option's originalId
+      const correctOption = currentQuestion.options.find(
+        (opt) => opt.id === currentQuestion.correctOptionId
+      );
+
+      const finalAnswerId = closestTeams.includes(t.name)
+        ? correctOption?.originalId // <-- use originalId for DB
+        : closestOption?.originalId || null;
+
+      const payload = {
+        quizId,
+        roundNumber: currentRoundNumber,
+        teamId: t.id,
+        questionId: currentQuestion.id,
+        answerId: finalAnswerId, // ✅ closest team → correct answerId
+        isPassed: false,
+      };
+
+      console.log("Submitting payload for", t.name, payload);
+
+      try {
+        await axios.post(
+          "http://localhost:4000/api/history/submit-ans",
+          payload,
+          { withCredentials: true }
+        );
+        console.log(`✅ ${t.name} answer submitted`);
+      } catch (err) {
+        console.error(
+          `❌ Failed to submit ${t.name}:`,
+          err.response?.data || err.message
+        );
+        showToast(`Failed to record answer for ${t.name}!`);
+      }
+    }
+
+    // ===============================
+    // 🏆 Update team scores
+    // ===============================
     for (const t of teams) {
       const isClosest = closestTeams.includes(t.name);
       const endpoint = isClosest
@@ -290,9 +367,9 @@ const EstimationRound = ({ onFinish }) => {
           { withCredentials: true }
         );
 
-        const msg = `${
-          isClosest ? "✅ Added" : "❌ Reducted"
-        } ${roundPoints} points for ${t.name} !   `;
+        const msg = isClosest
+          ? `✅ Added +${roundPoints} points for ${t.name}!`
+          : `❌ Reduced -5 points for ${t.name}!`;
 
         setScoreMessage((prev) => [...prev, msg]);
       } catch (err) {
@@ -301,23 +378,22 @@ const EstimationRound = ({ onFinish }) => {
       }
     }
 
+    // 🎯 Final message
     showToast(
-      `🎯 ╰(*°▽°*)╯ Team${
-        closestTeams.length > 1 ? "s" : ""
-      } ${closestTeams.join(", ")} ${
-        closestTeams.length > 1 ? "were" : "was"
-      } closest!`
+      `🎯 Team${closestTeams.length > 1 ? "s" : ""} ${closestTeams.join(
+        ", "
+      )} ${closestTeams.length > 1 ? "were" : "was"} closest!`
     );
   };
 
-  // SHIFT key to show the question
+  //---------------- SHIFT key to show the question ----------------
   useShiftToShow(() => {
     if (!questionDisplay) {
       setQuestionDisplay(true);
     }
   }, [questionDisplay]);
 
-  // When all question finishes, hide components
+  //---------------- When all question finishes, hide components ----------------
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
     Array.from(details).forEach(
@@ -325,6 +401,7 @@ const EstimationRound = ({ onFinish }) => {
     );
   }, [quizCompleted]);
 
+  //---------------- Renders ----------------
   return (
     <div className="quiz-container">
       {scoreMessage && (

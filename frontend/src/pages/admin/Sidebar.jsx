@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
 
 export default function AdminLayout() {
@@ -11,12 +11,22 @@ export default function AdminLayout() {
     { name: "Start Quiz", path: "/quizselect" },
   ];
 
+  const [collapsed, setCollapsed] = useState(false);
+
+  const toggleSidebar = () => setCollapsed(!collapsed);
+
   return (
     <div className="main-dash-container">
       <div className="dash-content">
         {/* Sidebar */}
-        <div className="side-menu">
-          <h2 className="heading">Admin</h2>
+        <div className={`side-menu ${collapsed ? "collapsed" : ""}`}>
+          <div className="side-menu-header">
+            <h2 className="heading">Admin</h2>
+            <div className="hamburger" onClick={() => setCollapsed(!collapsed)}>
+              &#9776;
+            </div>
+          </div>
+
           {menuItems.map((item) => (
             <NavLink
               key={item.name}
@@ -25,7 +35,7 @@ export default function AdminLayout() {
                 `menu-link ${isActive ? "active" : ""}`
               }
             >
-              {item.name.toUpperCase()}
+              <span className="link-text">{item.name.toUpperCase()}</span>
             </NavLink>
           ))}
         </div>

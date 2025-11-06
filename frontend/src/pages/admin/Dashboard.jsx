@@ -32,6 +32,17 @@ export default function Dashboard() {
               View, add, and edit questions in the quiz database.
             </p>
           </div>
+
+          <div
+            className="option-card"
+            onClick={() => navigate("manage-quizzes")}
+          >
+            <HelpCircle className="card-icon" />
+            <h2 className="card-title">Manage Quizzes</h2>
+            <p className="card-description">
+              View your quizzes in the quiz database.
+            </p>
+          </div>
         </div>
 
         <div className="section-content">

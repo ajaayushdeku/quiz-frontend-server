@@ -60,6 +60,8 @@ const RapidFireRound = ({ onFinish }) => {
 
   const [scoreMessage, setScoreMessage] = useState([]);
 
+  const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
+
   // ---------------- Fetching Data from DB ----------------
   useEffect(() => {
     const fetchQuizData = async () => {
@@ -82,6 +84,11 @@ const RapidFireRound = ({ onFinish }) => {
         );
 
         if (!currentQuiz) return console.warn("⚠️ Quiz not found");
+
+        const roundIndex = currentQuiz.rounds.findIndex(
+          (r) => r._id === roundId
+        );
+        setCurrentRoundNumber(roundIndex + 1); // round number = index + 1
 
         // ----------- Teams -----------
         const teamIds = currentQuiz.teams || [];
@@ -236,63 +243,95 @@ const RapidFireRound = ({ onFinish }) => {
 
   // ---------------- Handle Answer Submission ----------------
   const handleAnswer = async (submitted = false) => {
-    if (!currentQuestion) return;
+    if (!currentQuestion || !activeTeam?.id || !quizId || !roundId) return;
 
-    const correctAnswerText =
-      currentQuestion.options?.find(
-        (opt) => opt.id === currentQuestion.correctOptionId
-      )?.text || "";
+    let selectedOption = currentQuestion.options.find(
+      (opt) => normalize(opt.text) === normalize(answerInput)
+    );
 
-    let isCorrect = false;
+    // If no match, still send the "first option" as fallback (or your backend can handle "wrong")
+    const answerId =
+      selectedOption?.originalId || currentQuestion.options[0]?.originalId;
 
-    if (submitted) {
-      isCorrect = normalize(answerInput) === normalize(correctAnswerText);
-      showToast(isCorrect ? "✅ Correct!" : "❌ Wrong Answer!");
+    const isCorrect = selectedOption
+      ? selectedOption.id === currentQuestion.correctOptionId
+      : false;
+
+    // Track locally
+    setAnsweredQuestions((prev) => [
+      ...prev,
+      {
+        id: currentQuestion.id,
+        question: currentQuestion.question,
+        correctAnswer:
+          currentQuestion.options?.find(
+            (opt) => opt.id === currentQuestion.correctOptionId
+          )?.text || "",
+        isCorrect,
+      },
+    ]);
+
+    // Submit to DB
+    try {
+      const payload = {
+        quizId,
+        roundNumber: currentRoundNumber,
+        teamId: activeTeam.id,
+        questionId: currentQuestion.id,
+        answerId, // always a valid ID
+        isPassed: false,
+      };
+
+      console.log("📤 Rapid Fire Submit Payload:", payload);
+
+      await axios.post(
+        "http://localhost:4000/api/history/submit-ans",
+        payload,
+        { withCredentials: true }
+      );
+
+      console.log("✅ Answer submitted successfully");
+    } catch (error) {
+      console.error(
+        "❌ Failed to submit answer:",
+        error.response?.data || error.message
+      );
+      showToast("Error saving answer to DB");
+      return;
     }
 
-    const exists = answeredQuestions.some((q) => q.id === currentQuestion.id);
-    if (!exists) {
-      setAnsweredQuestions((prev) => [
-        ...prev,
-        {
-          id: currentQuestion.id,
-          question: currentQuestion.question,
-          correctAnswer: correctAnswerText,
-          isCorrect,
-        },
-      ]);
-    }
+    // Update team score
+    if (!isCorrect && !reduceBool) {
+      showToast(
+        `❌ Wrong answer! No points deducted for team ${activeTeam?.name}`
+      );
+    } else {
+      const endpoint = isCorrect
+        ? `http://localhost:4000/api/team/teams/${activeTeam.id}/add`
+        : `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`;
 
-    // ✅ Update score in DB
-    if (submitted && activeTeam?.id) {
-      if (!isCorrect && !reduceBool) {
-        showToast(
-          `❌ Wrong answer! No points deducted for team ${activeTeam?.name}`
+      try {
+        await axios.patch(
+          endpoint,
+          { points: Number(roundPoints) || 0 },
+          { withCredentials: true }
         );
-      } else {
-        const endpoint = isCorrect
-          ? `http://localhost:4000/api/team/teams/${activeTeam.id}/add`
-          : `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`;
 
-        try {
-          await axios.patch(
-            endpoint,
-            { points: Number(roundPoints) || 0 },
-            { withCredentials: true }
-          );
+        const msg = `${
+          isCorrect
+            ? `✅ Added +${roundPoints} points for ${activeTeam?.name} !`
+            : `❌ Reduced -5 points for ${activeTeam?.name} !`
+        } `;
 
-          const msg = `${
-            isCorrect ? "✅ Added" : "❌ Reducted"
-          } ${roundPoints} points for ${activeTeam?.name} !   `;
-
-          setScoreMessage((prev) => [...prev, msg]);
-        } catch (err) {
-          console.error("⚠️ Failed to update team score:", err);
-          showToast("Failed to update team score! Check console.");
-        }
+        setScoreMessage((prev) => [...prev, msg]);
+        showToast(msg);
+      } catch (err) {
+        console.error("⚠️ Failed to update team score:", err);
+        showToast("Failed to update team score! Check console.");
       }
     }
 
+    // Next question
     if (isLastQuestion) {
       setFinishQus(true);
       pauseTimer();

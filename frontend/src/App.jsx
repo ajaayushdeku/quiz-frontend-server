@@ -32,6 +32,7 @@ import RapidFireRound from "./components/quiz_rounds/RapidFireRound";
 import BuzzerRound from "./components/quiz_rounds/BuzzerRound";
 import EstimationRound from "./components/quiz_rounds/EstimationRound";
 import ManageQuizMasters from "./pages/admin/dashboard/ManageQuizMasters";
+import ManageQuizzes from "./pages/admin/dashboard/ManageQuizzes";
 
 function App() {
   const theme = {
@@ -124,6 +125,7 @@ function App() {
         {/* Admin routes */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route path="dashboard" element={<Dashboard />}>
+            <Route path="manage-quizzes" element={<ManageQuizzes />} />
             <Route path="manage-questions" element={<ManageQuestions />} />
             <Route path="manage-quizmasters" element={<ManageQuizMasters />} />
           </Route>
