@@ -1,68 +1,3 @@
-// import React, { useState } from "react";
-// import { FaArrowRight } from "react-icons/fa";
-// import { useNavigate, useParams } from "react-router-dom";
-// import rulesConfig from "../../config/rulesConfig";
-// import "../../styles/Round.css";
-// import "../../styles/Quiz.css";
-
-// const RoundIntro = () => {
-//   const { quizType } = useParams();
-//   const navigate = useNavigate();
-//   const [showIntro, setShowIntro] = useState(true);
-
-//   const roundInfo = rulesConfig[quizType];
-
-//   if (!roundInfo) return <h2>Round not found</h2>;
-
-//   return (
-//     <section>
-//       {/* Round Screen */}
-//       {showIntro ? (
-//         <section className="main-container">
-//           <div className="content">
-//             <div className="round-number-container">
-//               <h1>{roundInfo.roundNumber}</h1>
-//               <div className="round-label">ROUND</div>
-//             </div>
-//             <div className="round-title-container">
-//               <p>{roundInfo.roundTitle}</p>
-//             </div>
-//           </div>
-//           <div className="round-next-btn-container">
-//             <button
-//               className="round-next-btn"
-//               onClick={() => setShowIntro(false)}
-//             >
-//               <FaArrowRight />
-//             </button>
-//           </div>
-//         </section>
-//       ) : (
-//         <div className="main-container" id="about">
-//           <div className="round-rules-content">
-//             <div className="rules-box">
-//               <div className="rules-heading">RULES</div>
-//               <div className="rules-list">
-//                 {roundInfo.rules.map((rule, index) => (
-//                   <li key={index}>{rule}</li>
-//                 ))}
-//               </div>
-//             </div>
-//           </div>
-//           <div className="round-next-btn-container">
-//             <button
-//               className="round-next-btn"
-//               onClick={() => navigate(`/quiz/${quizType}`)}
-//             >
-//               <FaArrowRight />
-//             </button>
-//           </div>
-//         </div>
-//       )}
-//     </section>
-//   );
-// };
-
 // export default RoundIntro;
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
@@ -86,7 +21,7 @@ const RoundIntro = () => {
           withCredentials: true,
         });
 
-        const quizzes = res.data.quiz || [];
+        const quizzes = res.data.quizzes || [];
         const selectedQuiz = quizzes.find((q) => q._id === quizId);
         const selectedRound = selectedQuiz?.rounds.find(
           (r) => r._id === roundId
@@ -124,10 +59,16 @@ const RoundIntro = () => {
   }, [quizId, roundId]);
 
   if (!roundInfo)
-    return <p className="text-gray-400 mt-4">Loading round info...</p>;
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p>Loading round info...</p>
+        </div>
+      </section>
+    );
 
   return (
-    <section>
+    <section className="home-wrapper">
       {/* Round Screen */}
       {showIntro ? (
         <section className="main-container">

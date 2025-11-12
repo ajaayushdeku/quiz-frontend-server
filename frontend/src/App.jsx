@@ -33,6 +33,9 @@ import BuzzerRound from "./components/quiz_rounds/BuzzerRound";
 import EstimationRound from "./components/quiz_rounds/EstimationRound";
 import ManageQuizMasters from "./pages/admin/dashboard/ManageQuizMasters";
 import ManageQuizzes from "./pages/admin/dashboard/ManageQuizzes";
+import History from "./pages/admin/History";
+import QuizHistory from "./pages/admin/dashboard/QuizHistory";
+import TeamStats from "./pages/admin/dashboard/TeamStats";
 
 function App() {
   const theme = {
@@ -134,6 +137,10 @@ function App() {
           <Route path="questions" element={<Questions />} />
           <Route path="rounds" element={<Rounds />} />
           <Route path="create" element={<Create />} />
+          <Route path="history" element={<History />}>
+            <Route path="quiz-history" element={<QuizHistory />} />
+            <Route path="team-stats" element={<TeamStats />} />
+          </Route>
         </Route>
       </Routes>
     </ThemeProvider>

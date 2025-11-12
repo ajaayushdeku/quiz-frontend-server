@@ -59,8 +59,12 @@ export function useTeamQueue({
     setTeamCounters((prev) => {
       const updated = { ...prev };
 
+      if (!activeTeam) return updated; // ✅ Prevent crash if undefined
+
       if (!secondHand) {
-        updated[activeTeam.id] += 1;
+        if (updated[activeTeam.id] !== undefined) {
+          updated[activeTeam.id] += 1;
+        }
 
         setRoundCounters((roundPrev) => {
           const roundUpdated = { ...roundPrev };

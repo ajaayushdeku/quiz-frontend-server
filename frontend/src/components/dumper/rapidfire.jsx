@@ -142,25 +142,20 @@ const RapidFireRound = ({ onFinish }) => {
             originalId: opt._id || null,
           }));
 
-          // Find correct option
           const correctIndex = mappedOptions.findIndex(
             (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
           );
-
-          // If correctOption not in options, maybe shortAnswer
-          const correctOptionId =
-            correctIndex >= 0
-              ? mappedOptions[correctIndex].id
-              : mappedOptions[0]?.id || null;
 
           return {
             id: q._id,
             question: q.text,
             options: mappedOptions,
-            correctOptionId,
-            mediaType: q.media?.type || "none",
-            mediaUrl: q.media?.url || "",
-            shortAnswer: q.shortAnswer || null,
+            correctOptionId:
+              correctIndex >= 0
+                ? mappedOptions[correctIndex].id
+                : mappedOptions[0].id,
+            mediaType: q.mediaType || q.media?.type || "none",
+            mediaUrl: q.mediaUrl || q.media?.url || "",
           };
         });
 
@@ -303,127 +298,94 @@ const RapidFireRound = ({ onFinish }) => {
   //     showToast("Error updating score!");
   //   }
   // };
-  // const handleScoring = async (isCorrect, isPassed = false) => {
-  //   if (!activeTeam?.id || !activeRound?.rules) return;
-  //   const rules = activeRound.rules;
+  const handleScoring = async (isCorrect, isPassed = false) => {
+    if (!activeTeam?.id || !activeRound?.rules) return;
+    const rules = activeRound.rules;
 
-  //   try {
-  //     // =======================
-  //     // ⏩ PASS HANDLING
-  //     // =======================
-  //     if (isPassed) {
-  //       if (rules.passCondition === "noPass" || !rules.enablePass) {
-  //         showToast("⛔ Passing is disabled in this round!");
-  //         return;
-  //       }
-
-  //       // if (rules.passCondition === "wrongIfPassed") {
-  //       //   // deduct pass points (passedPoints)
-  //       //   const passPts = Number(rules.passedPoints) || 0;
-
-  //       //   if (passPts > 0) {
-  //       //     await axios.patch(
-  //       //       `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
-  //       //       { points: passPts },
-  //       //       { withCredentials: true }
-  //       //     );
-  //       //     const msg = `⏩ Passed (wrongIfPassed). -${passPts} points from ${activeTeam.name}`;
-  //       //     setScoreMessage((prev) => [...prev, msg]);
-  //       //     showToast(msg);
-  //       //   } else {
-  //       //     showToast(`⏩ Question passed. No points deducted.`);
-  //       //   }
-  //       return; // stop further logic
-  //     }
-
-  //     // =======================
-  //     // 🟢 CORRECT ANSWER
-  //     // =======================
-  //     if (isCorrect) {
-  //       const points = !passIt
-  //         ? Number(rules.points) || 0
-  //         : Number(rules.passedPoints) || 0;
-
-  //       await axios.patch(
-  //         `http://localhost:4000/api/team/teams/${activeTeam.id}/add`,
-  //         { points },
-  //         { withCredentials: true }
-  //       );
-
-  //       const msg = `✅ Correct! +${points} points for ${activeTeam.name}`;
-  //       setScoreMessage((prev) => [...prev, msg]);
-  //       showToast(msg);
-  //       return;
-  //     }
-
-  //     // =======================
-  //     // 🔴 WRONG ANSWER
-  //     // =======================
-  //     if (!isCorrect) {
-  //       if (
-  //         (rules.passCondition === "noPass" &&
-  //           rules.enableNegative &&
-  //           rules.negativePoints > 0) ||
-  //         (rules.passCondition === "wrongIfPassed" &&
-  //           rules.enableNegative &&
-  //           rules.negativePoints > 0)
-  //       ) {
-  //         const penalty = Number(rules.negativePoints);
-  //         await axios.patch(
-  //           `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
-  //           { points: penalty },
-  //           { withCredentials: true }
-  //         );
-
-  //         const msg = `❌ Wrong! -${penalty} points for ${activeTeam.name}`;
-  //         setScoreMessage((prev) => [...prev, msg]);
-  //         showToast(msg);
-  //       } else {
-  //         const msg = `❌ Wrong answer! No points deducted for ${activeTeam.name}`;
-  //         setScoreMessage((prev) => [...prev, msg]);
-  //         showToast(msg);
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.error("⚠️ Scoring update failed:", err);
-  //     showToast("Error updating score!");
-  //   }
-  // };
-
-  const submitAnswerToBackend = async ({
-    teamId,
-    questionId,
-    givenAnswer = null,
-    isPassed = false,
-  }) => {
-    if (!teamId || !questionId) return null;
-
-    const payload = {
-      quizId: quizId,
-      roundId,
-      teamId,
-      questionId,
-      givenAnswer,
-      isPassed,
-    };
-
-    console.log("Payload", payload);
     try {
-      const res = await axios.post(
-        "http://localhost:4000/api/history/submit-ans",
-        payload,
-        { withCredentials: true }
-      );
+      // =======================
+      // ⏩ PASS HANDLING
+      // =======================
+      if (isPassed) {
+        if (rules.passCondition === "noPass" || !rules.enablePass) {
+          showToast("⛔ Passing is disabled in this round!");
+          return;
+        }
 
-      return res.data; // contains pointsEarned, isCorrect, teamPoints
+        // if (rules.passCondition === "wrongIfPassed") {
+        //   // deduct pass points (passedPoints)
+        //   const passPts = Number(rules.passedPoints) || 0;
+
+        //   if (passPts > 0) {
+        //     await axios.patch(
+        //       `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
+        //       { points: passPts },
+        //       { withCredentials: true }
+        //     );
+        //     const msg = `⏩ Passed (wrongIfPassed). -${passPts} points from ${activeTeam.name}`;
+        //     setScoreMessage((prev) => [...prev, msg]);
+        //     showToast(msg);
+        //   } else {
+        //     showToast(`⏩ Question passed. No points deducted.`);
+        //   }
+        return; // stop further logic
+      }
+
+      // =======================
+      // 🟢 CORRECT ANSWER
+      // =======================
+      if (isCorrect) {
+        const points = !passIt
+          ? Number(rules.points) || 0
+          : Number(rules.passedPoints) || 0;
+
+        await axios.patch(
+          `http://localhost:4000/api/team/teams/${activeTeam.id}/add`,
+          { points },
+          { withCredentials: true }
+        );
+
+        const msg = `✅ Correct! +${points} points for ${activeTeam.name}`;
+        setScoreMessage((prev) => [...prev, msg]);
+        showToast(msg);
+        return;
+      }
+
+      // =======================
+      // 🔴 WRONG ANSWER
+      // =======================
+      if (!isCorrect) {
+        if (
+          (rules.passCondition === "noPass" &&
+            rules.enableNegative &&
+            rules.negativePoints > 0) ||
+          (rules.passCondition === "wrongIfPassed" &&
+            rules.enableNegative &&
+            rules.negativePoints > 0)
+        ) {
+          const penalty = Number(rules.negativePoints);
+          await axios.patch(
+            `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
+            { points: penalty },
+            { withCredentials: true }
+          );
+
+          const msg = `❌ Wrong! -${penalty} points for ${activeTeam.name}`;
+          setScoreMessage((prev) => [...prev, msg]);
+          showToast(msg);
+        } else {
+          const msg = `❌ Wrong answer! No points deducted for ${activeTeam.name}`;
+          setScoreMessage((prev) => [...prev, msg]);
+          showToast(msg);
+        }
+      }
     } catch (err) {
-      console.error("Submission Error:", err);
-      showToast("Failed to submit answer!");
-      return null;
+      console.error("⚠️ Scoring update failed:", err);
+      showToast("Error updating score!");
     }
   };
 
-  // // ---------------- Handle Answer Submission ----------------
+  // ---------------- Handle Answer Submission ----------------
   const handleAnswer = async (submitted = false) => {
     if (!currentQuestion || !activeTeam?.id) return;
 
@@ -455,38 +417,6 @@ const RapidFireRound = ({ onFinish }) => {
       answerId = wrongOption ? wrongOption.originalId : -1;
     }
 
-    // Use originalId for submission
-    const givenAnswer = answerId;
-    if (!givenAnswer) {
-      console.warn("Option has no originalId, cannot submit", selectedOption);
-      return;
-    }
-
-    try {
-      const result = await submitAnswerToBackend({
-        teamId: activeTeam.id,
-        questionId: currentQuestion.id,
-        givenAnswer,
-        isPassed: false,
-      });
-
-      if (result) {
-        const { pointsEarned, isCorrect, teamPoints } = result;
-
-        const msg = isCorrect
-          ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
-          : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
-              activeTeam.name
-            }`;
-
-        setScoreMessage((prev) => [...prev, msg]);
-        showToast(msg);
-      }
-    } catch (err) {
-      console.error("Submission Error:", err?.response?.data || err);
-      showToast("Failed to submit answer!");
-    }
-
     // Local tracking for UI
     setAnsweredQuestions((prev) => [
       ...prev,
@@ -499,7 +429,7 @@ const RapidFireRound = ({ onFinish }) => {
       },
     ]);
 
-    // await handleScoring(isCorrect, false);
+    await handleScoring(isCorrect, false);
 
     if (isLastQuestion) {
       setFinishQus(true);
@@ -511,11 +441,6 @@ const RapidFireRound = ({ onFinish }) => {
     }
 
     if (submitted) resetAnswer();
-
-    console.log("Active Team:", activeTeam);
-    console.log("Active Index:", activeIndex);
-    console.log("Current Question:", currentQuestion);
-    console.log("Selected Option:", answerId);
   };
 
   // ---------------- Handle Passing ----------------
@@ -529,7 +454,6 @@ const RapidFireRound = ({ onFinish }) => {
       return;
     }
 
-    // ⚠️ Check pass limit
     if (
       rules.enablePass &&
       rules.passLimit &&
@@ -542,13 +466,13 @@ const RapidFireRound = ({ onFinish }) => {
 
     // ✅ wrongIfPassed condition
     if (rules.passCondition === "wrongIfPassed") {
-      // Double-check pass limit again for safety
+      // check pass limit
       if (rules.passLimit && activeTeam.passesUsed >= rules.passLimit) {
         showToast(`⚠️ Team ${activeTeam.name} has reached the pass limit!`);
         return;
       }
 
-      // Add locally for UI tracking
+      // record pass
       setAnsweredQuestions((prev) => [
         ...prev,
         {
@@ -563,18 +487,31 @@ const RapidFireRound = ({ onFinish }) => {
         },
       ]);
 
-      const passResult = await submitAnswerToBackend({
-        teamId: activeTeam.id,
-        questionId: currentQuestion.id,
-        givenAnswer: null,
-        isPassed: true,
-      });
+      // -------------------------------
+      // Deduct pass points if wrongIfPassed
+      // -------------------------------
 
-      if (passResult) {
-        showToast(`⏩ Question passed!`);
+      const penalty = Number(activeRound?.rules?.negativePoints);
+      if (penalty > 0) {
+        try {
+          await axios.patch(
+            `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
+            { points: penalty },
+            { withCredentials: true }
+          );
+          const msg = `⏩ Passed (wrongIfPassed). -${penalty} points from ${activeTeam.name}`;
+          setScoreMessage((prev) => [...prev, msg]);
+          showToast(msg);
+        } catch (err) {
+          console.error("⚠️ Failed to deduct pass points:", err);
+          showToast("Error updating score!");
+        }
       }
 
-      // increment passesUsed locally
+      // // score handling (deduct pass points)
+      // await handleScoring(false, true);
+
+      // increment passesUsed
       setTeams((prevTeams) =>
         prevTeams.map((team) =>
           team.id === activeTeam.id
@@ -582,20 +519,22 @@ const RapidFireRound = ({ onFinish }) => {
             : team
         )
       );
-    }
 
-    // move to next question
-    if (isLastQuestion) {
-      setFinishQus(true);
-      pauseTimer();
-    } else {
-      nextQuestion();
-      setPassCount((prev) => prev + 1);
-      setAnswerInput("");
+      // move to next
+      if (isLastQuestion) {
+        setFinishQus(true);
+        pauseTimer();
+      } else {
+        nextQuestion();
+        setPassCount((prev) => prev + 1);
+        setAnswerInput("");
+      }
     }
 
     if (submitted) resetAnswer();
   };
+
+  console.log("current question:", currentQuestion);
 
   // ---------------- Handle Timer End ----------------
   useEffect(() => {
@@ -637,13 +576,8 @@ const RapidFireRound = ({ onFinish }) => {
   // ---------------- Keyboard Shortcuts ----------------
   // Ctrl - Pass to Next Question
   useCtrlKeyPass(() => {
-    if (
-      !finishQus &&
-      !finalFinished &&
-      roundStarted &&
-      activeRound?.rules?.enablePass
-    ) {
-      handleAnswer();
+    if (!finishQus && !finalFinished && roundStarted) {
+      passQuestion();
     }
   }, [currentQuestion, finishQus, finalFinished, roundStarted]);
 

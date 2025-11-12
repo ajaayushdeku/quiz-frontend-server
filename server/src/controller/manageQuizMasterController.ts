@@ -8,7 +8,7 @@ interface AuthRequest extends Request {
   };
 }
 
-// 🟢 Get all quiz masters created by this admin
+// Get all quiz masters created by this admin
 export const getQuizMasters = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user || req.user.role !== "admin") {
@@ -28,7 +28,7 @@ export const getQuizMasters = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// 🔴 Delete a quiz master created by this admin
+// Delete a quiz master created by this admin
 export const deleteQuizMaster = async (req: AuthRequest, res: Response) => {
   try {
     if (!req.user || req.user.role !== "admin") {

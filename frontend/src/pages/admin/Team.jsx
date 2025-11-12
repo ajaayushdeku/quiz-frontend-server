@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axiosInstance from "../../utils/axiosInstance";
+import { BsClockHistory } from "react-icons/bs";
+import { MdGroup } from "react-icons/md";
 
 export default function Team() {
   const [teamName, setTeamName] = useState("");
@@ -63,11 +65,14 @@ export default function Team() {
   };
 
   return (
-    <div className="team-container">
-      <h2 className="team-heading">Team Manager</h2>
+    <div className="dashboard-container">
+      <div className="dashboard-header">
+        <MdGroup className="header-icon" />
+        <h4>Team Manager</h4>
+      </div>
 
       {/* Input + Add Button */}
-      <div className="team-form">
+      {/* <div className="team-form">
         <input
           type="text"
           value={teamName}
@@ -78,7 +83,7 @@ export default function Team() {
         <button onClick={handleAdd} className="team-add-btn">
           Add
         </button>
-      </div>
+      </div> */}
 
       {/* Team List */}
       <div className="team-list">

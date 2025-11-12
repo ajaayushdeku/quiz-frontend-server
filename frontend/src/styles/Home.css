@@ -1,117 +1,126 @@
-* {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-
-  box-sizing: border-box;
-}
-
-/* ===================== */
-/* General Wrappers */
-/* ===================== */
+/* ==========================
+   Global Wrapper
+========================== */
 .home-wrapper {
   width: 100%;
   height: 100vh;
+  background: linear-gradient(135deg, #232323, #404142, #3c3b3b);
+  color: #fff;
   display: flex;
-  align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #0f0f0f, #1a1a1a);
-  color: white;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  overflow: hidden;
 }
 
-/* ===================== */
-/* Splash Screen */
-/* ===================== */
+/* ==========================
+   Main Container
+========================== */
+.main-container {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.8s ease-in-out;
+}
 
+/* ==========================
+   Splash Screen
+========================== */
 .splash-content {
-  animation: fadeIn 1.5s ease-in-out;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.2rem;
+  animation: fadeInUp 1.5s ease-in-out;
 }
 
 .splash-text {
-  font-size: 2.2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
-  letter-spacing: 1px;
-  color: #e0e0e0;
+  font-size: 5.2rem;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+  color: #c9c9c9;
+  text-shadow: 0 0 15px rgba(121, 123, 123, 0.4);
 }
 
 .splash-logo {
-  width: 220px;
-  animation: zoomInOut 3s ease-in-out infinite;
+  width: 150px;
+  height: auto;
+  animation: spinLogo 10s linear infinite;
 }
 
-/* ===================== */
-/* Home Content */
-/* ===================== */
-.main-container {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  text-align: center;
-}
-
+/* ==========================
+   Main Home Section
+========================== */
 .home-content {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 2.5rem;
-  animation: fadeInUp 1.2s ease;
+  justify-content: center;
+  gap: 1.2rem;
+  animation: fadeInUp 1s ease-in-out;
 }
 
 .home-logo {
-  width: 200px;
+  width: 120px;
   height: auto;
+  filter: drop-shadow(0 0 15px rgba(121, 123, 123, 0.4));
 }
 
 .home-title {
-  font-size: 3.5rem;
+  font-size: 2.4rem;
   font-weight: 800;
-  letter-spacing: 2px;
-  color: #f5f5f5;
-  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.6);
+  text-transform: uppercase;
+  color: #ffffff;
+  text-shadow: 0 0 15px rgba(255, 255, 255, 0.225);
+  letter-spacing: 1.2px;
+  margin-top: 1rem;
 }
 
-/* ===================== */
-/* Start Button */
-/* ===================== */
-.nav-link {
-  text-decoration: none;
-}
-
+/* ==========================
+   Start Button
+========================== */
 .start-btn {
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  gap: 0.7rem;
-  font-size: 1.3rem;
-  font-weight: 800;
-  padding: 0.5rem 1.5rem;
-  border: 2px solid #fff;
+  gap: 1.3rem;
+  /* background: linear-gradient(90deg, #00c3ff, #2887a7); */
+  color: #000000;
+  font-size: 1.4rem;
+  font-weight: 700;
+  padding: 0.6rem 1.8rem;
+  border: 2px solid white;
   border-radius: 50px;
-  background-color: transparent;
-  color: white;
+  text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  animation: zoomInOut 3s ease-in-out infinite;
+  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.225);
 }
 
 .start-btn:hover {
-  background-color: white;
-  color: #0f0f0f;
+  /* background: linear-gradient(90deg, #00a6ff, #1f6d8a); */
   transform: scale(1.05);
+  background-color: transparent;
+  border: 2px solid white;
+  color: #ffffff;
+  /* box-shadow: 0 8px 25px rgba(0, 195, 255, 0.4); */
 }
 
-/* ===================== */
-/* Animations */
-/* ===================== */
-@keyframes zoomInOut {
-  0%,
-  100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.08);
-  }
+/* ==========================
+   Loading State
+========================== */
+.loading-screen {
+  text-align: center;
+  color: #ccc;
+  font-size: 1.2rem;
+  animation: fadeIn 1s ease-in-out;
 }
 
+/* ==========================
+   Animations
+========================== */
 @keyframes fadeIn {
   from {
     opacity: 0;
@@ -124,10 +133,39 @@
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(40px);
   }
   to {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+@keyframes spinLogo {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* ==========================
+   Responsive Design
+========================== */
+@media (max-width: 768px) {
+  .splash-text,
+  .home-title {
+    font-size: 1.8rem;
+  }
+
+  .start-btn {
+    font-size: 1rem;
+    padding: 0.8rem 1.6rem;
+  }
+
+  .splash-logo,
+  .home-logo {
+    width: 100px;
   }
 }

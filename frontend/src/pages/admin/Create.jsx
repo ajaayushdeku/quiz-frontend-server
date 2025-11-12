@@ -1,6 +1,15 @@
 import { useState } from "react";
 import axios from "axios";
 import toast from "react-hot-toast";
+import { MdCreate } from "react-icons/md";
+import {
+  BsPersonBadgeFill,
+  BsPersonFill,
+  BsPersonFillAdd,
+  BsPersonFillDash,
+  BsPersonFillGear,
+  BsPersonFillX,
+} from "react-icons/bs";
 
 export default function AdminCreateUser() {
   const [formData, setFormData] = useState({
@@ -10,6 +19,8 @@ export default function AdminCreateUser() {
     role: "user",
   });
 
+  const [loading, setLoading] = useState(false);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -17,19 +28,17 @@ export default function AdminCreateUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setLoading(true);
 
     try {
-      const token = localStorage.getItem("token"); // admin token stored on login
+      const token = localStorage.getItem("token"); // Admin token
 
       const res = await axios.post(
         "http://localhost:4000/api/auth/admin/register",
         formData,
         {
-          withCredentials: true, // ✅ important
-
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` },
         }
       );
 
@@ -37,67 +46,76 @@ export default function AdminCreateUser() {
       setFormData({ name: "", email: "", password: "", role: "user" });
     } catch (err) {
       console.error(err);
-      alert(err.response?.data?.message || "Failed to create user");
+      toast.error(err.response?.data?.message || "Failed to create user");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <section className="create-quiz-round">
-      <h2 className="form-heading">Create Quiz-Master</h2>
+    <section className="dashboard-container">
+      <div className="dashboard-header">
+        <BsPersonFill className="header-icon" />
+        <h4 className="form-heading">Create Quiz-Master</h4>
+      </div>
 
-      <form onSubmit={handleSubmit} className="quiz-form">
-        <div className="round-details ">
-          {/* Full Name */}
-          <label className="quiz-label">
-            Full Name:
-            <input
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              placeholder="Full Name"
-              className="quiz-input"
-              required
-            />
-          </label>
+      <div>
+        {" "}
+        <form onSubmit={handleSubmit} className="quiz-form">
+          <div>
+            {/* Full Name */}
+            <label className="quiz-label">
+              Full Name:
+              <input
+                type="text"
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Enter full name"
+                className="quiz-input"
+                required
+              />
+            </label>
 
-          {/* Email */}
-          <label className="quiz-label">
-            Email Address:
-            <input
-              type="email"
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="Email Address"
-              className="quiz-input"
-              required
-            />
-          </label>
+            {/* Email */}
+            <label className="quiz-label">
+              Email Address:
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter email address"
+                className="quiz-input"
+                required
+              />
+            </label>
 
-          {/* Password */}
-          <label className="quiz-label">
-            Password:
-            <input
-              type="password"
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Password"
-              className="quiz-input"
-              required
-            />
-          </label>
-        </div>
+            {/* Password */}
+            <label className="quiz-label">
+              Password:
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter password"
+                className="quiz-input"
+                required
+              />
+            </label>
+          </div>
 
-        <button
-          type="submit"
-          className="primary-btn add-question-btn"
-          style={{ marginTop: "2rem" }}
-        >
-          Create User
-        </button>
-      </form>
+          <button
+            type="submit"
+            className="primary-btn add-question-btn"
+            disabled={loading}
+            style={{ marginTop: "2rem" }}
+          >
+            {loading ? "Creating..." : "Create User"}
+          </button>
+        </form>
+      </div>
     </section>
   );
 }

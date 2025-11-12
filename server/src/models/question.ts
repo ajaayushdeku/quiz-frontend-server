@@ -1,14 +1,15 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 
 interface IOption {
+  _id: Types.ObjectId;
   text: string;
 }
 
 export interface IQuestion extends Document {
   text: string;
-  options: IOption[]; // ✅ FIXED: subdocuments, not string[]
-  correctAnswer: string; // stores _id of the correct option
-
+  options?: IOption[]; // optional for MCQ
+  shortAnswer?: IOption; // NEW: short answer as object with _id
+  correctAnswer: string; // store _id of correct option or shortAnswer
   category:
     | "Physics"
     | "Maths"
@@ -23,7 +24,6 @@ export interface IQuestion extends Document {
     | "Sports"
     | "General Knowledge";
   roundId?: Types.ObjectId;
-  // quizId?: Types.ObjectId;
   media?: {
     type: "image" | "video" | "file" | null;
     url: string | null;
@@ -34,15 +34,16 @@ export interface IQuestion extends Document {
 }
 
 const OptionSchema = new Schema<IOption>({
+  _id: { type: Schema.Types.ObjectId, required: true, auto: true },
   text: { type: String, required: true },
 });
 
 const questionSchema = new Schema<IQuestion>(
   {
     text: { type: String, required: true },
-    options: { type: [OptionSchema], required: true }, // ✅ FIXED
-    correctAnswer: { type: String, required: true }, // stores option._id as string
-    //points: { type: Number, default: 0 },
+    options: { type: [OptionSchema], default: [] },
+    shortAnswer: { type: OptionSchema }, // store short answer like an option
+    correctAnswer: { type: String, required: true }, // _id of option or shortAnswer
     category: {
       type: String,
       enum: [
@@ -62,7 +63,6 @@ const questionSchema = new Schema<IQuestion>(
       required: true,
     },
     roundId: { type: Schema.Types.ObjectId, ref: "Round" },
-    // quizId: { type: Schema.Types.ObjectId, ref: "Quiz" },
     media: {
       type: {
         type: String,
@@ -85,13 +85,20 @@ export default mongoose.model<IQuestion>("Question", questionSchema);
 //   options: string[];
 //   correctAnswer: string;
 //   points: number;
-//   category:
-//     | "Physics"
-//     | "Maths"
-//     | "Chemistry"
-//     | "Biology"
-//     | "Zoology"
-//     | "Botany";
+
+// category:
+//   | "Physics"
+//   | "Maths"
+//   | "Cosmics"
+//   | "Chemistry"
+//   | "Biology"
+//   | "Zoology"
+//   | "Botany"
+//   | "English"
+//   | "History"
+//   | "Geography"
+//   | "Sports"
+//   | "General Knowledge";
 //   roundId?: Types.ObjectId;
 //   quizId?: Types.ObjectId; // ✅ prevent reuse across rounds of same quiz
 //   media?: {

@@ -1,0 +1,288 @@
+// import React, { useEffect, useState } from "react";
+// import "../../styles/Quiz.css";
+// import "../../styles/ButtonQuiz.css";
+// import "../../styles/OptionQuiz.css";
+// import { FaArrowRight } from "react-icons/fa";
+// import { BiShow } from "react-icons/bi";
+// import Button from "../common/Button";
+// import TeamDisplay from "../quiz_components/TeamDisplay";
+// import QuestionCard from "../quiz_components/QuestionCard";
+// import TeamAnswerBoxes from "../quiz_components/TeamAnswerBoxes";
+// import FinishDisplay from "../common/FinishDisplay";
+// import axios from "axios";
+// import { useParams } from "react-router-dom";
+// import useShiftToShow from "../../hooks/useShiftToShow";
+
+// const COLORS = [
+//   "#8d1734ff",
+//   "#0ab9d4ff",
+//   "#32be76ff",
+//   "#e5d51eff",
+//   "#ff9800ff",
+//   "#9c27b0ff",
+//   "#03a9f4ff",
+//   "#ffc107ff",
+// ];
+
+// const EstimationRound = ({ onFinish }) => {
+//   const { quizId, roundId } = useParams();
+
+//   const [teams, setTeams] = useState([]);
+//   const [questions, setQuestions] = useState([]);
+//   const [questionDisplay, setQuestionDisplay] = useState(false);
+//   const [quizCompleted, setQuizCompleted] = useState(false);
+
+//   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+//   const [showQuestion, setShowQuestion] = useState(false);
+//   const [teamAnswers, setTeamAnswers] = useState({});
+//   const [submitted, setSubmitted] = useState(false);
+//   const [result, setResult] = useState(null);
+
+//   const TEAM_COLORS = Object.fromEntries(
+//     teams.map((team, i) => [team.name, COLORS[i % COLORS.length]])
+//   );
+
+//   // 🧩 Fetch Quiz and Questions
+//   useEffect(() => {
+//     const fetchData = async () => {
+//       if (!quizId || !roundId) return;
+//       try {
+//         const quizRes = await axios.get(
+//           "http://localhost:4000/api/quiz/get-quiz",
+//           {
+//             withCredentials: true,
+//           }
+//         );
+//         const allQuizzes = quizRes.data.quizzes || [];
+//         const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+//         if (!currentQuiz) return;
+
+//         const formattedTeams = currentQuiz.teams.map((t) => ({
+//           id: t._id,
+//           name: t.name,
+//         }));
+//         setTeams(formattedTeams);
+
+//         const round = currentQuiz.rounds.find((r) => r._id === roundId);
+//         if (!round) return;
+
+//         const questionRes = await axios.get(
+//           "http://localhost:4000/api/question/get-questions",
+//           {
+//             withCredentials: true,
+//           }
+//         );
+//         const allQuestions = questionRes.data.data || [];
+//         const filteredQuestions = allQuestions.filter((q) =>
+//           round.questions.includes(q._id)
+//         );
+
+//         const estimationQuestions = filteredQuestions.filter((q) => {
+//           const ans = q.correctAnswer || q.shortAnswer?.text;
+//           return !isNaN(parseFloat(ans));
+//         });
+
+//         setQuestions(estimationQuestions);
+
+//         const answersInit = {};
+//         formattedTeams.forEach((t) => (answersInit[t.name] = ""));
+//         setTeamAnswers(answersInit);
+//       } catch (err) {
+//         console.error("❌ Failed to fetch data:", err);
+//       }
+//     };
+//     fetchData();
+//   }, [quizId, roundId]);
+
+//   const currentQuestion = questions[currentQuestionIndex];
+
+//   // 🧮 Handle input change
+//   const handleAnswerChange = (teamName, value) => {
+//     setTeamAnswers((prev) => ({ ...prev, [teamName]: value }));
+//   };
+
+//   // 📨 Submit all answers
+//   const handleSubmit = async () => {
+//     if (!currentQuestion) return;
+
+//     for (const t of teams) {
+//       const ans = teamAnswers[t.name];
+//       if (!ans || isNaN(Number(ans))) {
+//         alert(`Team ${t.name} must enter a valid number!`);
+//         return;
+//       }
+//     }
+
+//     const answersPayload = teams.map((t) => ({
+//       teamId: t.id,
+//       givenAnswer: Number(teamAnswers[t.name]),
+//     }));
+
+//     const payload = {
+//       quizId,
+//       roundId,
+//       questionId: currentQuestion._id,
+//       answers: answersPayload,
+//     };
+
+//     try {
+//       const response = await axios.post(
+//         "http://localhost:4000/api/history/submit-ans",
+//         payload,
+//         { withCredentials: true }
+//       );
+
+//       const { correctAnswer, winners, message } = response.data;
+//       setResult({ correctAnswer, winners, message });
+//       setSubmitted(true);
+//     } catch (err) {
+//       console.error("❌ Submit error:", err.response?.data || err.message);
+//       alert("Failed to submit answers! Check console for details.");
+//     }
+//   };
+
+//   console.log("Results:", result);
+
+//   const nextQuestion = () => {
+//     setCurrentQuestionIndex((prev) => prev + 1);
+//     setShowQuestion(false);
+//     setSubmitted(false);
+//     setTeamAnswers(Object.fromEntries(teams.map((t) => [t.name, ""])));
+//     setResult(null);
+//   };
+
+//   //---------------- SHIFT key to show the question ----------------
+//   useShiftToShow(() => {
+//     if (!questionDisplay) {
+//       setQuestionDisplay(true);
+//     }
+//   }, [questionDisplay]);
+
+//   //---------------- When all question finishes, hide components ----------------
+//   useEffect(() => {
+//     const details = document.getElementsByClassName("detail-info");
+//     Array.from(details).forEach(
+//       (el) => (el.style.display = quizCompleted ? "none" : "block")
+//     );
+//   }, [quizCompleted]);
+
+//   return (
+//     <section className="quiz-container">
+//       {/* {scoreMessage && (
+//         <div className="score-message-list detail-info">
+//           {scoreMessage.map((msg, i) => (
+//             <div key={i} className="score-message">
+//               {msg}
+//             </div>
+//           ))}
+//         </div>
+//       )} */}
+
+//       <TeamDisplay
+//         teams={teams}
+//         TEAM_COLORS={TEAM_COLORS}
+//         toastMessage="Press 'Submit' to submit your answer"
+//         estimationEnable={true}
+//         timeRemaining={0}
+//       />
+
+//       {!currentQuestion ? (
+//         <p className="text-gray-400 mt-4">Loading questions...</p>
+//       ) : (
+//          !showQuestion && !quizCompleted ? (!questionDisplay ? ( <div className="centered-control">
+//             <Button
+//               className="start-question-btn"
+//               onClick={() => setShowQuestion(true)}
+//             >
+//               Show Question <BiShow className="icon" />
+//             </Button>
+//           </div>):()):()
+//       )}
+
+//       {!currentQuestion ? (
+//         <p className="text-gray-400 mt-4">Loading questions...</p>
+//       ) :  !quizCompleted ? (
+//         !showQuestion && (
+//           <div className="centered-control">
+//             <Button
+//               className="start-question-btn"
+//               onClick={() => setShowQuestion(true)}
+//             >
+//               Show Question <BiShow className="icon" />
+//             </Button>
+//           </div>
+//         )
+//       ) : submitted ? (
+//         <div className="detail-info result-container">
+//           {/* <h3 className="result-title">Results:</h3> */}
+
+//           {result?.correctAnswer !== undefined && (
+//             <div className="correct-answer-display">
+//               <p>
+//                 🎯 Correct Answer:{" "}
+//                 <strong style={{ color: "#c9c9c9ff" }}>
+//                   {result.correctAnswer}
+//                 </strong>
+//               </p>
+//             </div>
+//           )}
+
+//           <Button className="next-question-btn" onClick={nextQuestion}>
+//             <h3>NEXT QUESTION</h3>
+//             <FaArrowRight />
+//           </Button>
+
+//           {result?.winners?.length ? (
+//             <div className="winner-list">
+//               <h4>🏆 Closest Team(s):</h4>
+//               {result.winners.map((w) => {
+//                 const teamName =
+//                   teams.find((t) => t.id === w.teamId)?.name || "Unknown";
+//                 return (
+//                   <p key={w.teamId} className="winner-item">
+//                     <strong>{teamName.toUpperCase()}</strong>
+//                     <br /> Answer: {w.givenAnswer},<br /> Diff: {w.difference},{" "}
+//                     <br />
+//                     Points: {w.pointsAwarded}
+//                   </p>
+//                 );
+//               })}
+//             </div>
+//           ) : (
+//             <p className="waiting-text">Waiting for remaining teams...</p>
+//           )}
+//         </div>
+//       ) : (
+//         <>
+//           <QuestionCard
+//             displayedText={`Q${currentQuestionIndex + 1}. ${
+//               currentQuestion.text
+//             }`}
+//             mediaType={currentQuestion.mediaType}
+//             mediaUrl={currentQuestion.mediaUrl}
+//           />
+
+//           <TeamAnswerBoxes
+//             teams={teams}
+//             teamColors={TEAM_COLORS}
+//             teamAnswers={teamAnswers}
+//             handleAnswerChange={handleAnswerChange}
+//             handleSubmit={handleSubmit}
+//             disabled={submitted}
+//           />
+//         </>
+//       )}
+
+//       {currentQuestionIndex >= questions.length && questions.length > 0 && (
+//         <FinishDisplay
+//           onFinish={onFinish}
+//           message="Estimation Round Finished!"
+//         />
+//       )}
+
+//       <div id="toast-container"></div>
+//     </section>
+//   );
+// };
+
+// export default EstimationRound;

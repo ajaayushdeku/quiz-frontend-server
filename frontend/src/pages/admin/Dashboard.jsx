@@ -1,53 +1,58 @@
 import React from "react";
 import { useNavigate, Outlet } from "react-router-dom";
-import { Users, HelpCircle } from "lucide-react";
+import { Users, HelpCircle, Briefcase, LayoutDashboard } from "lucide-react";
+import { BiCollection } from "react-icons/bi";
 
 export default function Dashboard() {
   const navigate = useNavigate();
 
+  const cards = [
+    {
+      icon: <Users className="card-icon" />,
+      title: "Manage Quiz Masters",
+      description: "Add or remove quiz masters and manage permissions.",
+      path: "manage-quizmasters",
+    },
+    {
+      icon: <BiCollection className="card-icon" />,
+      title: "Manage Quizzes",
+      description: "View your quizzes in the quiz database.",
+      path: "manage-quizzes",
+    },
+    {
+      icon: <HelpCircle className="card-icon" />,
+      title: "Manage Questions",
+      description: "View, add, and edit questions in the quiz database.",
+      path: "manage-questions",
+    },
+  ];
+
   return (
-    <div className="create-quiz-round">
-      <h2 className="form-heading">Admin Dashboard</h2>
+    <div className="dashboard-container">
+      {/* Header */}
+      <div className="dashboard-header">
+        <LayoutDashboard className="dashboard-header-icon" />
+        <h4>Admin Dashboard</h4>
+      </div>
 
-      <div className="main-content">
-        <div className="card-grid">
+      {/* Card Grid */}
+      <div className="card-grid">
+        {cards.map((card) => (
           <div
-            className="option-card"
-            onClick={() => navigate("manage-quizmasters")}
+            key={card.title}
+            className="dashboard-card"
+            onClick={() => navigate(card.path)}
           >
-            <Users className="card-icon" />
-            <h2 className="card-title">Manage Quiz Masters</h2>
-            <p className="card-description">
-              Add or remove quiz masters and manage permissions.
-            </p>
+            <div className="card-icon-wrapper">{card.icon}</div>
+            <h3 className="card-title">{card.title}</h3>
+            <p className="card-description">{card.description}</p>
           </div>
+        ))}
+      </div>
 
-          <div
-            className="option-card"
-            onClick={() => navigate("manage-questions")}
-          >
-            <HelpCircle className="card-icon" />
-            <h2 className="card-title">Manage Questions</h2>
-            <p className="card-description">
-              View, add, and edit questions in the quiz database.
-            </p>
-          </div>
-
-          <div
-            className="option-card"
-            onClick={() => navigate("manage-quizzes")}
-          >
-            <HelpCircle className="card-icon" />
-            <h2 className="card-title">Manage Quizzes</h2>
-            <p className="card-description">
-              View your quizzes in the quiz database.
-            </p>
-          </div>
-        </div>
-
-        <div className="section-content">
-          <Outlet />
-        </div>
+      {/* Outlet for nested routes */}
+      <div className="dashboard-outlet">
+        <Outlet />
       </div>
     </div>
   );

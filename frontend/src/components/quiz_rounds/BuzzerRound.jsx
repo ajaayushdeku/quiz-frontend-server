@@ -25,7 +25,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 
 const { settings } = rulesConfig.buzzer_round;
-const TIMER = settings.timerPerTeam;
+const TIMER = settings.timerPerTeam || 10;
 
 const COLORS = [
   "#8d1734ff",
@@ -40,114 +40,102 @@ const COLORS = [
 
 const BuzzerRound = ({ onFinish }) => {
   const { showToast } = useUIHelpers();
-
   const { quizId, roundId } = useParams();
 
   const [quesFetched, setQuesFetched] = useState([]);
-
   const [teams, setTeams] = useState([]);
-
   const [teamAnswer, setTeamAnswer] = useState("");
   const [questionAnswered, setQuestionAnswered] = useState(false);
   const [buzzerPressed, setBuzzerPressed] = useState(null);
   const [teamQueue, setTeamQueue] = useState([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
-  const [questionDisplay, setQuestionDisplay] = useState(false); // new state
-
+  const [questionDisplay, setQuestionDisplay] = useState(false);
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
   const [correctAnswerValue, setCorrectAnswerValue] = useState("");
-
-  const [roundPoints, setRoundPoints] = useState([]);
+  const [roundPoints, setRoundPoints] = useState(settings.defaultPoints || 10);
   const [roundTime, setRoundTime] = useState(TIMER);
   const [reduceBool, setReduceBool] = useState(false);
-
   const [scoreMessage, setScoreMessage] = useState([]);
+  const [activeTeam, setActiveTeam] = useState(null);
+  const [activeRound, setActiveRound] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [results, setResults] = useState(null);
 
-  // Fetch only the teams on the basis of the current Quiz
+  const normalize = (str) => str?.trim().toLowerCase() || "";
+
+  // -------------------- Fetch Quiz & Questions --------------------
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        console.log(
-          "🔍 Fetching quiz data for quizId:",
-          quizId,
-          "roundId:",
-          roundId
-        );
-
         const quizRes = await axios.get(
           "http://localhost:4000/api/quiz/get-quiz",
           { withCredentials: true }
         );
+        const allQuizzes = quizRes.data.quizzes || [];
+        const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+        if (!currentQuiz) return;
 
-        const allQuizzes = quizRes.data.quiz || [];
-        const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds.some((r) => r._id === roundId)
+        // Safety check for teams
+        setTeams(
+          (currentQuiz.teams || [])
+            .filter((t) => t && t._id)
+            .map((t, i) => ({
+              id: t._id,
+              name: t.name || `Team ${i + 1}`,
+              points: t.points || 0,
+            }))
         );
 
-        if (!currentQuiz) return console.warn("⚠️ Quiz not found");
-
-        // ----------- Teams -----------
-        const teamIds = currentQuiz.teams || [];
-        const formattedTeams = teamIds.map((team, index) => ({
-          id: team._id,
-          name: team.name || `Team ${index + 1}`,
-          points: team.points || 0,
-        }));
-        console.log("🧩 Formatted teams:", formattedTeams);
-        setTeams(formattedTeams);
-
-        // ----------- Round -----------
         const round = currentQuiz.rounds.find((r) => r._id === roundId);
-        if (!round) return console.warn("⚠️ Round not found:", roundId);
+        if (!round) return;
 
-        setRoundPoints(round.points || 10);
-        setRoundTime(round.timeLimitValue || TEAM_TIME_LIMIT);
+        setActiveRound(round);
+        setRoundPoints(round?.rules?.points || 10);
+        setRoundTime(round?.rules?.timeLimitValue || TIMER);
         if (round?.rules?.enableNegative) setReduceBool(true);
 
-        // ----------- Questions -----------
         const questionRes = await axios.get(
           "http://localhost:4000/api/question/get-questions",
           { withCredentials: true }
         );
-
         const allQuestions = questionRes.data.data || [];
         const filteredQuestions = allQuestions.filter((q) =>
           round.questions.includes(q._id)
         );
 
         const formattedQuestions = filteredQuestions.map((q) => {
-          const optionsArray =
-            typeof q.options[0] === "string"
-              ? JSON.parse(q.options[0])
-              : q.options;
-
-          const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx),
-            text: typeof opt === "string" ? opt : opt.text || "",
+          // q.options is now an array of objects { _id, text }
+          const mappedOptions = (q.options || []).map((opt, idx) => ({
+            id: String.fromCharCode(97 + idx), // 'a', 'b', 'c'...
+            text: opt.text || "",
             originalId: opt._id || null,
           }));
 
+          // Find correct option
           const correctIndex = mappedOptions.findIndex(
             (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
           );
+
+          // If correctOption not in options, maybe shortAnswer
+          const correctOptionId =
+            correctIndex >= 0
+              ? mappedOptions[correctIndex].id
+              : mappedOptions[0]?.id || null;
 
           return {
             id: q._id,
             question: q.text,
             options: mappedOptions,
-            correctOptionId:
-              correctIndex >= 0
-                ? mappedOptions[correctIndex].id
-                : mappedOptions[0].id,
-            mediaType: q.mediaType || q.media?.type || "none",
-            mediaUrl: q.mediaUrl || q.media?.url || "",
+            correctOptionId,
+            mediaType: q.media?.type || "none",
+            mediaUrl: q.media?.url || "",
+            shortAnswer: q.shortAnswer || null,
           };
         });
 
-        console.log("🧩 Formatted questions:", formattedQuestions);
         setQuesFetched(formattedQuestions);
-      } catch (error) {
-        console.error("❌ Fetch Error:", error);
+      } catch (err) {
+        console.error("❌ Fetch Error:", err);
         showToast("Failed to fetch quiz data!");
       }
     };
@@ -155,17 +143,9 @@ const BuzzerRound = ({ onFinish }) => {
     if (quizId && roundId) fetchQuizData();
   }, [quizId, roundId]);
 
-  // Team colors assignment
-  const generateTeamColors = (teams) => {
-    const teamColors = {};
-    teams.forEach((team, index) => {
-      const color = COLORS[index % COLORS.length]; // cycle colors if more teams than colors
-      teamColors[team.name || `Team${index + 1}`] = color;
-    });
-    return teamColors;
-  };
-
-  const TEAM_COLORS = generateTeamColors(teams);
+  const TEAM_COLORS = Object.fromEntries(
+    teams.map((t, i) => [t.name, COLORS[i % COLORS.length]])
+  );
 
   const {
     questions,
@@ -175,65 +155,64 @@ const BuzzerRound = ({ onFinish }) => {
     isLastQuestion,
   } = useQuestionManager(quesFetched);
 
-  const { timeRemaining, isRunning, startTimer, pauseTimer, resetTimer } =
-    useTimer(TIMER, false);
+  const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
+    roundTime,
+    false
+  );
 
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 50);
 
-  const [activeTeam, setActiveTeam] = useState();
-
+  // -------------------- Buzzer Logic --------------------
   const handleBuzzer = (teamName) => {
-    // Ignore if team already in queue
-    if (teamQueue.find((t) => t.name === teamName)) return;
+    if (
+      teamQueue.find((t) => t.name === teamName) ||
+      activeTeam?.name === teamName
+    )
+      return;
 
     const teamObj = teams.find((t) => t.name === teamName);
     if (!teamObj) return;
 
-    setTeamQueue((prevQueue) => {
-      const newQueue = [...prevQueue, teamObj]; // store full object
-      if (!activeTeam) {
-        setActiveTeam(teamObj); // set current active team
-        setBuzzerPressed(teamObj.name);
-        resetTimer(roundTime);
-        startTimer();
-      }
-      return newQueue;
-    });
+    // If no active team, make this team the first one to answer
+    if (!activeTeam) {
+      setActiveTeam(teamObj);
+      setBuzzerPressed(teamObj.name);
+      resetTimer(roundTime);
+      startTimer();
+    } else {
+      // Only queue up next teams
+      setTeamQueue((prev) => [...prev, teamObj]);
+    }
 
     showToast(`Team ${teamObj.name} pressed the buzzer!`);
   };
 
   const moveToNextTeamOrQuestion = () => {
-    if (teamQueue.length > 0) {
-      const [current, ...rest] = teamQueue;
-
-      if (rest.length > 0) {
-        // Move to next team in the queue
-        const nextTeam = rest[0];
-        setActiveTeam(nextTeam); // update active team object
-        setBuzzerPressed(nextTeam.name);
-        setTeamQueue(rest);
-        resetTimer(roundTime);
-        startTimer();
-        setTeamAnswer("");
-        showToast(`Team ${nextTeam.name} now answers!`);
-      } else {
-        // Last team answered, show correct answer
-        const correctOption = currentQuestion.options.find(
-          (opt) => opt.id === currentQuestion.correctOptionId
-        );
-
-        setCorrectAnswerValue(correctOption?.text || "");
-        setShowCorrectAnswer(true);
-        setActiveTeam(null);
-        setBuzzerPressed(null);
-        setTeamQueue([]);
-        setTeamAnswer("");
-        pauseTimer();
-
-        if (isLastQuestion) setQuizCompleted(true);
-      }
+    if (teamQueue.length === 0) {
+      // No more teams, show correct answer
+      const correctOption = currentQuestion.options.find(
+        (opt) => opt.id === currentQuestion.correctOptionId
+      );
+      setCorrectAnswerValue(correctOption?.text || "");
+      setShowCorrectAnswer(true);
+      setActiveTeam(null);
+      setBuzzerPressed(null);
+      pauseTimer();
+      setTeamQueue([]);
+      setTeamAnswer("");
+      if (isLastQuestion) setQuizCompleted(true);
+      return;
     }
+
+    // Move to next team in queue
+    const [current, ...rest] = teamQueue;
+    setActiveTeam(current);
+    setBuzzerPressed(current.name);
+    setTeamQueue(rest);
+    resetTimer(roundTime);
+    startTimer();
+    setTeamAnswer("");
+    showToast(`Team ${current.name} now answers!`);
   };
 
   useEffect(() => {
@@ -241,72 +220,143 @@ const BuzzerRound = ({ onFinish }) => {
       showToast(`⏰ Time's up! Team ${buzzerPressed} missed their turn.`);
       moveToNextTeamOrQuestion();
     }
-  }, [timeRemaining, buzzerPressed]);
+  });
 
-  const handleSubmit = async () => {
-    if (!buzzerPressed || !currentQuestion) return;
-
-    const teamObj = teams.find((t) => t.name === buzzerPressed);
-    if (!teamObj) return;
-
-    const correctOption = currentQuestion.options.find(
-      (opt) => opt.id === currentQuestion.correctOptionId
-    );
-    const correctValue = correctOption?.text || "";
-
-    const isCorrect =
-      teamAnswer.trim().toLowerCase() === correctValue.toLowerCase();
-
-    const endpoint = isCorrect
-      ? `http://localhost:4000/api/team/teams/${teamObj.id}/add`
-      : reduceBool
-      ? `http://localhost:4000/api/team/teams/${teamObj.id}/reduce`
-      : null;
-
-    if (endpoint) {
-      try {
-        await axios.patch(
-          endpoint,
-          { points: Number(currentQuestion.points) || 10 },
-          { withCredentials: true }
-        );
-
-        const msg = `${isCorrect ? "✅ Added" : "❌ Reduced"} ${
-          currentQuestion.points || 10
-        } points for ${teamObj.name}!`;
-
-        setScoreMessage((prev) => [...prev, msg]);
-      } catch (err) {
-        console.error(`⚠️ Failed to update score for ${teamObj.name}:`, err);
-        showToast(`⚠️ Failed to update score for ${teamObj.name}`);
-      }
-    }
-
-    if (isCorrect) {
-      // Correct answer, show answer and reset queue
-      setCorrectAnswerValue(correctValue);
-      setShowCorrectAnswer(true);
-      setTeamAnswer("");
-      setTeamQueue([]);
-      setBuzzerPressed(null);
-      pauseTimer();
-      setQuestionAnswered(true);
-
-      if (isLastQuestion) setQuizCompleted(true);
-    } else {
-      // Wrong answer, move to next team
-      moveToNextTeamOrQuestion();
-      setTeamAnswer("");
+  // -------------------- Submit Answer --------------------
+  const submitAnswerToBackend = async ({
+    teamId,
+    questionId,
+    givenAnswer = null,
+    isPassed = false,
+  }) => {
+    if (!teamId || !questionId) return null;
+    const payload = {
+      quizId,
+      roundId,
+      teamId,
+      questionId,
+      givenAnswer,
+      isPassed,
+    };
+    try {
+      const res = await axios.post(
+        "http://localhost:4000/api/history/submit-ans",
+        payload,
+        { withCredentials: true }
+      );
+      return res.data;
+    } catch (err) {
+      console.error("Submission Error:", err);
+      showToast("Failed to submit answer!");
+      return null;
     }
   };
 
-  const handleAnswerChange = (e) => setTeamAnswer(e.target.value);
+  // -------------------- Handle Submit --------------------
+  const handleSubmit = async () => {
+    if (!activeTeam || !currentQuestion || isSubmitting) return;
+    setIsSubmitting(true);
 
-  // SHIFT key to show question
-  useShiftToShow(() => {
-    if (!questionDisplay) {
-      setQuestionDisplay(true);
+    const normalize = (str) => str?.trim().toLowerCase() || "";
+    let answerId = -1; // default for wrong answer
+
+    // Check MCQ options
+    const matchedOption = currentQuestion.options.find(
+      (opt) => normalize(opt.text) === normalize(teamAnswer)
+    );
+    if (matchedOption) answerId = matchedOption.originalId;
+
+    // Check short answer
+    if (currentQuestion.shortAnswer) {
+      if (
+        normalize(teamAnswer) === normalize(currentQuestion.shortAnswer.text)
+      ) {
+        answerId = currentQuestion.shortAnswer._id;
+      }
     }
+
+    // If input is invalid (doesn’t match any option or short answer)
+    // const isInputValid =
+    //   matchedOption || (currentQuestion.shortAnswer && answerId !== -1);
+    // if (!isInputValid) {
+    //   showToast("Invalid answer! Please enter a valid option.");
+    //   setIsSubmitting(false);
+    //   return;
+    // }
+
+    // If wrong answer, send -1 to backend
+    const isCorrect =
+      answerId === currentQuestion.correctOptionId ||
+      (currentQuestion.shortAnswer &&
+        answerId === currentQuestion.shortAnswer._id);
+
+    const submitAnswerId = isCorrect ? answerId : -1;
+
+    try {
+      const result = await submitAnswerToBackend({
+        teamId: activeTeam.id,
+        questionId: currentQuestion.id,
+        givenAnswer: submitAnswerId,
+        isPassed: false,
+      });
+
+      if (!result) return;
+
+      const { pointsEarned, teamPoints, correctAnswer } = result;
+
+      const msg = isCorrect
+        ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
+        : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
+            activeTeam.name
+          }`;
+
+      setResults({ pointsEarned, teamPoints, correctAnswer });
+      setScoreMessage((prev) => [...prev, msg]);
+      showToast(msg);
+
+      if (isCorrect) {
+        // Correct answer → show and reset
+        setCorrectAnswerValue(
+          correctAnswer || currentQuestion.shortAnswer?.text || ""
+        );
+        setShowCorrectAnswer(true);
+        setTeamAnswer("");
+        setTeamQueue([]);
+        setBuzzerPressed(null);
+        pauseTimer();
+        setQuestionAnswered(true);
+
+        if (isLastQuestion) setQuizCompleted(true);
+      } else {
+        // Wrong answer → apply negative points if enabled
+        if (activeRound?.rules?.enableNegative) {
+          const teamIndex = teams.findIndex((t) => t.id === activeTeam.id);
+          if (teamIndex >= 0) {
+            const updatedTeams = [...teams];
+            updatedTeams[teamIndex].points =
+              (updatedTeams[teamIndex].points || 0) + pointsEarned;
+            setTeams(updatedTeams);
+          }
+        }
+        // Move to next team
+        moveToNextTeamOrQuestion();
+        setTeamAnswer("");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Failed to submit answer!");
+    } finally {
+      setIsSubmitting(false);
+    }
+    if (isCorrect) {
+      setShowCorrectAnswer(true);
+      console.log("Show Correct Asnwer:", showCorrectAnswer);
+    }
+  };
+
+  // -------------------- SHIFT Key --------------------
+  useShiftToShow(() => {
+    if (!questionDisplay) setQuestionDisplay(true);
   }, [questionDisplay]);
 
   // Hide components when quiz round completes
@@ -319,7 +369,7 @@ const BuzzerRound = ({ onFinish }) => {
 
   return (
     <div className="quiz-container">
-      {scoreMessage && (
+      {scoreMessage.length > 0 && (
         <div className="score-message-list detail-info">
           {scoreMessage.map((msg, i) => (
             <div key={i} className="score-message">
@@ -330,6 +380,7 @@ const BuzzerRound = ({ onFinish }) => {
       )}
 
       <TeamDisplay
+        teams={teams}
         TEAM_COLORS={TEAM_COLORS}
         toastMessage="Press 'Buzzer' to Answer the Question"
         timeRemaining={timeRemaining}
@@ -342,18 +393,21 @@ const BuzzerRound = ({ onFinish }) => {
 
       {!quizCompleted ? (
         !questionDisplay ? (
-          <div className="centered-control">
-            <Button
-              className="start-question-btn"
-              onClick={() => {
-                setQuestionDisplay(true);
-              }}
-            >
-              Show Question
-              <BiShow className="icon" />
-            </Button>
-          </div>
-        ) : currentQuestion && questionDisplay ? (
+          !currentQuestion ? (
+            <div className="centered-control">
+              <p className="form-heading">Loading questions...</p>
+            </div>
+          ) : (
+            <div className="centered-control">
+              <Button
+                className="start-question-btn"
+                onClick={() => setQuestionDisplay(true)}
+              >
+                Show Question <BiShow className="icon" />
+              </Button>
+            </div>
+          )
+        ) : currentQuestion ? (
           <>
             <QuestionCard
               displayedText={`Q${currentQuestionIndex + 1}. ${displayedText}`}
@@ -362,16 +416,13 @@ const BuzzerRound = ({ onFinish }) => {
               mediaUrl={currentQuestion.mediaUrl}
             />
 
-            {/* Conditional UI */}
-            {showCorrectAnswer ? (
+            {showCorrectAnswer || results ? (
               <>
                 <div className="correct-answer-display">
-                  <p>
-                    ✅ Correct Answer:{" "}
-                    <strong style={{ color: "#32be76ff" }}>
-                      {correctAnswerValue}
-                    </strong>
-                  </p>
+                  ✅ Correct Answer:{" "}
+                  <strong style={{ color: "#32be76ff" }}>
+                    {correctAnswerValue}
+                  </strong>
                 </div>
                 <Button
                   className="next-question-btn"
@@ -379,34 +430,28 @@ const BuzzerRound = ({ onFinish }) => {
                     if (!isLastQuestion) {
                       nextQuestion();
                       setQuestionAnswered(false);
-                      setActiveTeam(null);
-                      setTeamAnswer("");
-                      setTeamQueue([]);
                       setQuestionDisplay(false);
                       setShowCorrectAnswer(false);
                       setCorrectAnswerValue("");
+                      setTeamAnswer("");
                       resetTimer(roundTime);
                       setScoreMessage([]);
-                    } else {
-                      setQuizCompleted(true);
-                    }
+                    } else setQuizCompleted(true);
                   }}
                 >
-                  <h3> NEXT QUESTION</h3>
-                  <FaArrowRight />
+                  <h3>NEXT QUESTION</h3> <FaArrowRight />
                 </Button>
               </>
             ) : (
               buzzerPressed &&
               !questionAnswered && (
-                <>
-                  <AnswerTextBox
-                    value={teamAnswer}
-                    onChange={handleAnswerChange}
-                    onSubmit={handleSubmit}
-                    placeholder="Enter your answer"
-                  />
-                </>
+                <AnswerTextBox
+                  value={teamAnswer}
+                  onChange={(e) => setTeamAnswer(e.target.value)}
+                  onSubmit={handleSubmit}
+                  placeholder="Enter your answer"
+                  disabled={isSubmitting}
+                />
               )
             )}
 
@@ -417,7 +462,7 @@ const BuzzerRound = ({ onFinish }) => {
               buzzerPressed={buzzerPressed}
               teamQueue={teamQueue}
               handleBuzzer={handleBuzzer}
-              disabled={showCorrectAnswer}
+              disabled={showCorrectAnswer || isSubmitting}
             />
           </>
         ) : (

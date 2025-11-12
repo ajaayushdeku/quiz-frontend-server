@@ -21,7 +21,7 @@ export default function ManageQuizzes() {
           withCredentials: true,
         });
 
-        const data = res.data.quiz || [];
+        const data = res.data.quizzes || [];
 
         // ✅ Format quiz data for table
         const formatted = data.map((quiz) => ({

@@ -1,14 +1,30 @@
 import React, { useState } from "react";
 import { NavLink, Outlet } from "react-router-dom";
+import {
+  MdDashboard,
+  MdQuestionAnswer,
+  MdGroup,
+  MdHistory,
+  MdPlayCircleOutline,
+  MdMenu,
+  MdQuiz,
+} from "react-icons/md";
+import "../../styles/Dashboard.css"; // Make sure to create this CSS
+import { BsPersonFill } from "react-icons/bs";
 
 export default function AdminLayout() {
   const menuItems = [
-    { name: "Dashboard", path: "/admin/dashboard" },
-    { name: "Teams", path: "/admin/teams" },
-    { name: "Questions", path: "/admin/questions" },
-    { name: "Create-Quiz", path: "/admin/rounds" },
-    { name: "Create Quiz-Master", path: "/admin/create" },
-    { name: "Start Quiz", path: "/quizselect" },
+    { name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard /> },
+    { name: "Questions", path: "/admin/questions", icon: <MdQuestionAnswer /> },
+    { name: "Create-Quiz", path: "/admin/rounds", icon: <MdQuiz /> },
+    {
+      name: "Create Quiz-Master",
+      path: "/admin/create",
+      icon: <BsPersonFill />,
+    },
+    { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
+    { name: "History", path: "/admin/history", icon: <MdHistory /> },
+    { name: "Start Quiz", path: "/quizselect", icon: <MdPlayCircleOutline /> },
   ];
 
   const [collapsed, setCollapsed] = useState(false);
@@ -21,23 +37,31 @@ export default function AdminLayout() {
         {/* Sidebar */}
         <div className={`side-menu ${collapsed ? "collapsed" : ""}`}>
           <div className="side-menu-header">
-            <h2 className="heading">Admin</h2>
-            <div className="hamburger" onClick={() => setCollapsed(!collapsed)}>
-              &#9776;
-            </div>
+            {collapsed ? (
+              <div className="hamburger" onClick={toggleSidebar}>
+                <MdMenu size={24} />
+              </div>
+            ) : (
+              <h2 className="heading" onClick={toggleSidebar}>
+                Admin
+              </h2>
+            )}
           </div>
 
-          {menuItems.map((item) => (
-            <NavLink
-              key={item.name}
-              to={item.path}
-              className={({ isActive }) =>
-                `menu-link ${isActive ? "active" : ""}`
-              }
-            >
-              <span className="link-text">{item.name.toUpperCase()}</span>
-            </NavLink>
-          ))}
+          <nav className="menu-items">
+            {menuItems.map((item) => (
+              <NavLink
+                key={item.name}
+                to={item.path}
+                className={({ isActive }) =>
+                  `menu-link ${isActive ? "active" : ""}`
+                }
+              >
+                <span className="link-icon">{item.icon}</span>
+                {!collapsed && <span className="link-text">{item.name}</span>}
+              </NavLink>
+            ))}
+          </nav>
         </div>
 
         {/* Main Content */}

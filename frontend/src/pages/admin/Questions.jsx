@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from "uuid";
 import toast, { Toaster } from "react-hot-toast";
 import "../../styles/Dashboard.css";
 import "../../styles/Quiz.css";
+import { BsQuestionOctagonFill } from "react-icons/bs";
 
 export default function QuestionForm() {
   const [formData, setFormData] = useState({
@@ -16,6 +17,7 @@ export default function QuestionForm() {
       { id: uuidv4(), text: "" },
     ],
     correctAnswer: "",
+    shortAnswer: "",
     category: "",
   });
 
@@ -23,11 +25,13 @@ export default function QuestionForm() {
   const [preview, setPreview] = useState(null);
   const API_URL = "http://localhost:4000/api";
 
+  // Input change
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
+  // Type change (MCQ / Short)
   const handleTypeChange = (e) => {
     const type = e.target.value;
     setFormData((prev) => ({
@@ -41,17 +45,20 @@ export default function QuestionForm() {
               { id: uuidv4(), text: "" },
               { id: uuidv4(), text: "" },
             ]
-          : [{ id: uuidv4(), text: "" }],
+          : [],
       correctAnswer: "",
+      shortAnswer: "",
     }));
   };
 
+  // Option text change
   const handleOptionChange = (index, value) => {
     const newOptions = [...formData.options];
     newOptions[index].text = value;
     setFormData((prev) => ({ ...prev, options: newOptions }));
   };
 
+  // File upload
   const handleFileChange = (e) => {
     const selectedFile = e.target.files[0];
     if (!selectedFile) return;
@@ -64,6 +71,7 @@ export default function QuestionForm() {
     setPreview(null);
   };
 
+  // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -72,18 +80,20 @@ export default function QuestionForm() {
       payload.append("text", formData.text);
       payload.append("category", formData.category);
 
-      payload.append(
-        "options",
-        JSON.stringify(formData.options.map((opt) => ({ text: opt.text })))
-      );
+      if (formData.type === "multiple-choice") {
+        payload.append(
+          "options",
+          JSON.stringify(formData.options.map((opt) => ({ text: opt.text })))
+        );
 
-      const correctAnswerValue =
-        formData.type === "multiple-choice"
-          ? formData.options.find((o) => o.id === formData.correctAnswer)
-              ?.text || ""
-          : formData.options[0].text;
+        const correctAnswerValue =
+          formData.options.find((o) => o.id === formData.correctAnswer)?.text ||
+          "";
+        payload.append("correctAnswer", correctAnswerValue);
+      } else {
+        payload.append("shortAnswer", formData.shortAnswer);
+      }
 
-      payload.append("correctAnswer", correctAnswerValue);
       if (file) payload.append("media", file);
 
       await axios.post(`${API_URL}/question/create-question`, payload, {
@@ -93,6 +103,7 @@ export default function QuestionForm() {
 
       toast.success("✅ Question added successfully!");
 
+      // Reset form
       setFormData({
         text: "",
         type: "multiple-choice",
@@ -103,6 +114,7 @@ export default function QuestionForm() {
           { id: uuidv4(), text: "" },
         ],
         correctAnswer: "",
+        shortAnswer: "",
         category: "",
       });
       setFile(null);
@@ -131,56 +143,63 @@ export default function QuestionForm() {
   ];
 
   return (
-    <section className="create-quiz-round">
-      <h2 className="form-heading">Add Question</h2>
+    <section className="dashboard-container">
+      <Toaster position="top-right" />
+      <div className="dashboard-header">
+        <BsQuestionOctagonFill className="header-icon" />
+        <h4 className="form-heading">Add Question</h4>
+      </div>
 
-      <div>
-        <form onSubmit={handleSubmit} className="quiz-form">
-          {/* Question Text */}
-          <label className="quiz-label">
-            Question:
-            <textarea
-              name="text"
-              value={formData.text}
-              onChange={handleChange}
-              placeholder="Question text"
-              className="quiz-input textarea"
-              required
-            />
-          </label>
+      <form onSubmit={handleSubmit} className="quiz-form">
+        {/* Question Text */}
+        <label className="quiz-label">
+          Question:
+          <textarea
+            name="text"
+            value={formData.text}
+            onChange={handleChange}
+            placeholder="Enter question text"
+            className="quiz-input textarea"
+            required
+          />
+        </label>
 
-          {/* Type */}
-          <label className="quiz-label">
-            Type:
-            <select
-              value={formData.type}
-              onChange={handleTypeChange}
-              className="quiz-input select"
-            >
-              <option value="multiple-choice">Multiple Choice</option>
-              <option value="short-answer">Short Answer</option>
-            </select>
-          </label>
+        {/* Question Type */}
+        <label className="quiz-label">
+          Type:
+          <select
+            value={formData.type}
+            onChange={handleTypeChange}
+            className="quiz-input select"
+          >
+            <option value="multiple-choice">Multiple Choice</option>
+            <option value="short-answer">Short / Estimation</option>
+          </select>
+        </label>
 
-          {/* Options */}
-          {formData.options.map((opt, idx) => (
-            <label key={opt.id} className="quiz-label">
-              Option {idx + 1}:
-              <input
-                type="text"
-                value={opt.text}
-                onChange={(e) => handleOptionChange(idx, e.target.value)}
-                placeholder={`Option ${idx + 1}`}
-                className="quiz-input"
-                required
-              />
-            </label>
-          ))}
+        {/* Options for MCQ */}
+        {formData.type === "multiple-choice" && (
+          <>
+            <label className="quiz-label">Options:</label>
+            <div className="multi-option-container">
+              {formData.options.map((opt, idx) => (
+                <label key={opt.id} className="quiz-label-d">
+                  Option {idx + 1}:
+                  <input
+                    type="text"
+                    value={opt.text}
+                    onChange={(e) => handleOptionChange(idx, e.target.value)}
+                    placeholder={`Option ${idx + 1}`}
+                    className="quiz-input-d"
+                    required
+                  />
+                </label>
+              ))}
+            </div>
 
-          {/* Correct Answer */}
-          <label className="quiz-label">
-            Correct Answer:
-            {formData.type === "multiple-choice" ? (
+            {/* Correct Answer Dropdown */}
+            <label className="quiz-label">
+              Correct Answer:
               <select
                 value={formData.correctAnswer}
                 onChange={(e) =>
@@ -199,83 +218,77 @@ export default function QuestionForm() {
                   </option>
                 ))}
               </select>
-            ) : (
-              <input
-                type="text"
-                value={formData.options[0].text}
-                onChange={(e) => handleOptionChange(0, e.target.value)}
-                className="quiz-input"
-                required
-              />
-            )}
-          </label>
+            </label>
+          </>
+        )}
 
-          {/* Points */}
-          {/* <label className="quiz-label">
-            Points:
+        {/* Short Answer */}
+        {formData.type === "short-answer" && (
+          <label className="quiz-label">
+            Expected Answer:
             <input
-              type="number"
-              name="points"
-              value={formData.points}
+              type="text"
+              name="shortAnswer"
+              value={formData.shortAnswer}
               onChange={handleChange}
-              placeholder="Points"
+              placeholder="Enter expected short answer"
               className="quiz-input"
               required
             />
-          </label> */}
+          </label>
+        )}
 
-          {/* Category */}
-          <label className="quiz-label">
-            Category:
-            <select
-              name="category"
-              value={formData.category}
-              onChange={handleChange}
-              className="quiz-input select"
-              required
+        {/* Category */}
+        <label className="quiz-label">
+          Category:
+          <select
+            name="category"
+            value={formData.category}
+            onChange={handleChange}
+            className="quiz-input select"
+            required
+          >
+            <option value="">Select Category</option>
+            {categories.map((cat) => (
+              <option key={cat} value={cat}>
+                {cat}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {/* File Upload */}
+        <label className="quiz-label">
+          Media Upload:
+          <input
+            type="file"
+            onChange={handleFileChange}
+            accept="image/*,video/*"
+            className="quiz-input file-input"
+          />
+        </label>
+
+        {preview && (
+          <div className="media-preview">
+            {file?.type.startsWith("image") ? (
+              <img src={preview} alt="Preview" className="preview-image" />
+            ) : (
+              <video src={preview} controls className="preview-video" />
+            )}
+            <button
+              type="button"
+              onClick={handleFileRemove}
+              className="remove-btn"
             >
-              <option value="">Select Category</option>
-              {categories.map((cat) => (
-                <option key={cat} value={cat}>
-                  {cat}
-                </option>
-              ))}
-            </select>
-          </label>
+              ×
+            </button>
+          </div>
+        )}
 
-          {/* File Upload */}
-          <label className="quiz-label">
-            Media Upload:
-            <input
-              type="file"
-              onChange={handleFileChange}
-              accept="image/*,video/*"
-              className="quiz-input file-input"
-            />
-          </label>
-
-          {preview && (
-            <div className="media-preview">
-              {file?.type.startsWith("image") ? (
-                <img src={preview} alt="Preview" className="preview-image" />
-              ) : (
-                <video src={preview} controls className="preview-video" />
-              )}
-              <button
-                type="button"
-                onClick={handleFileRemove}
-                className="remove-btn"
-              >
-                ×
-              </button>
-            </div>
-          )}
-
-          <button type="submit" className="primary-btn add-question-btn">
-            Add Question
-          </button>
-        </form>
-      </div>
+        <button type="submit" className="primary-btn add-question-btn">
+          Add Question
+        </button>
+      </form>
     </section>
   );
 }

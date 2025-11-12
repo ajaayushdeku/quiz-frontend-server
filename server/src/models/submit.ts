@@ -1,19 +1,19 @@
-import mongoose, { Schema, Document, Model } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
-// ✅ Define the interface
 export interface ISubmit extends Document {
   quizId: mongoose.Types.ObjectId;
   roundId: mongoose.Types.ObjectId;
   roundNumber: number;
   teamId: mongoose.Types.ObjectId;
   questionId: mongoose.Types.ObjectId;
-  isCorrect: boolean;
+  givenAnswer: string | number;
   pointsEarned: number;
+  isCorrect: boolean;
   createdAt: Date;
+  updatedAt: Date;
 }
 
-// ✅ Define the schema
-const SubmitSchema = new Schema<ISubmit>(
+const submitSchema = new Schema<ISubmit>(
   {
     quizId: { type: Schema.Types.ObjectId, ref: "Quiz", required: true },
     roundId: { type: Schema.Types.ObjectId, ref: "Round", required: true },
@@ -24,15 +24,11 @@ const SubmitSchema = new Schema<ISubmit>(
       ref: "Question",
       required: true,
     },
-    isCorrect: { type: Boolean, required: true },
-    pointsEarned: { type: Number, required: true },
+    givenAnswer: { type: Schema.Types.Mixed, required: true },
+    pointsEarned: { type: Number, default: 0 },
+    isCorrect: { type: Boolean, default: false },
   },
   { timestamps: true }
 );
 
-// ✅ Properly export the model with type
-const Submit: Model<ISubmit> =
-  (mongoose.models.Submit as Model<ISubmit>) ||
-  mongoose.model<ISubmit>("Submit", SubmitSchema);
-
-export default Submit;
+export default mongoose.model<ISubmit>("Submit", submitSchema);

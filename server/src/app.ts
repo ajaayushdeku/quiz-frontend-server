@@ -10,6 +10,7 @@ import quizRoutes from "./routes/quiz";
 //import QuizHistory from "./routes/quizHistory";
 import history from "./routes/history";
 import quizMasterRoutes from "./routes/manageQuizMaster";
+import mongoose from "mongoose";
 import dotenv from "dotenv";
 import path from "path";
 import cookieParser from "cookie-parser";
@@ -17,6 +18,8 @@ import events from "events";
 events.EventEmitter.defaultMaxListeners = 20; // or higher
 
 const app = express();
+// Disable strict populate globally
+mongoose.set("strictPopulate", false);
 
 app.use(express.json());
 //app.use(bodyParser.json());

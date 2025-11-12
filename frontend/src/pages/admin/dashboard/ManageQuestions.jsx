@@ -10,7 +10,7 @@ export default function ManageQuestions() {
     text: "",
     category: "",
     options: [],
-    correctOptionId: "",
+    correctAnswerId: "",
     correctAnswerText: "",
   });
 
@@ -25,79 +25,51 @@ export default function ManageQuestions() {
 
   // Fetch all questions on mount
   useEffect(() => {
-    const fetchQuestions = async () => {
-      try {
-        const res = await axios.get(
-          "http://localhost:4000/api/question/get-questions",
-          { withCredentials: true }
-        );
-
-        const data = res.data.data || [];
-
-        const formatted = data.map((q) => {
-          let optionsArray = q.options || [];
-          if (typeof optionsArray[0] === "string") {
-            try {
-              optionsArray = JSON.parse(optionsArray[0]);
-            } catch {}
-          }
-
-          const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx), // 'a', 'b', 'c'…
-            text: typeof opt === "string" ? opt : opt.text || "",
-            originalId: opt._id || null,
-          }));
-
-          const correctIndex = mappedOptions.findIndex(
-            (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
-          );
-
-          return {
-            _id: q._id,
-            category: q.category || "General",
-            question: q.text || "No question provided",
-            options: mappedOptions,
-            correctOptionId:
-              correctIndex >= 0
-                ? mappedOptions[correctIndex].id
-                : mappedOptions[0]?.id,
-          };
-        });
-
-        setQuestions(formatted);
-      } catch (error) {
-        console.error("Fetch Error:", error);
-        toast.error("Failed to fetch questions!");
-      }
-    };
-
     fetchQuestions();
   }, []);
 
-  // Start editing a question
+  const fetchQuestions = async () => {
+    try {
+      const res = await axios.get(
+        "http://localhost:4000/api/question/get-questions",
+        { withCredentials: true }
+      );
+      setQuestions(res.data.data || []);
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to fetch questions");
+    }
+  };
+
+  //  Start editing a question
   const handleEdit = (q) => {
     setEditingId(q._id);
-    const correctOption = q.options.find((opt) => opt.id === q.correctOptionId);
+
+    // Find the correct option text by matching _id
+    const correctOption = q.options?.find(
+      (opt) => opt?._id?.toString() === q.correctAnswer?.toString()
+    );
 
     setEditedQuestion({
-      text: q.question,
+      text: q.text,
       category: q.category,
-      options: q.options.map((opt) => ({ ...opt })), // clone options
-      correctOptionId: q.correctOptionId,
+      options: q.options ? q.options.map((opt) => ({ ...opt })) : [],
+      correctAnswerId: q.correctAnswer,
       correctAnswerText: correctOption?.text || "",
     });
   };
 
-  // Update an option text while editing
+  //  Update an option text while editing
   const handleOptionChange = (index, value) => {
     const newOptions = [...editedQuestion.options];
     newOptions[index] = { ...newOptions[index], text: value };
     setEditedQuestion((prev) => ({ ...prev, options: newOptions }));
   };
 
-  // Save edited question
+  //  Save edited question to backend
   const handleSave = async (id) => {
     try {
+      // Try to find selected correct option
       const selectedOption = editedQuestion.options.find(
         (opt) =>
           opt.text.trim().toLowerCase() ===
@@ -109,7 +81,7 @@ export default function ManageQuestions() {
         category: editedQuestion.category,
         options: editedQuestion.options,
         correctAnswer:
-          selectedOption?.originalId || editedQuestion.correctOptionId,
+          selectedOption?._id?.toString() || editedQuestion.correctAnswerId,
       };
 
       await axios.put(
@@ -120,28 +92,14 @@ export default function ManageQuestions() {
 
       toast.success("✅ Question updated successfully");
       setEditingId(null);
-      // Refresh questions
-      setQuestions((prev) =>
-        prev.map((q) =>
-          q._id === id
-            ? {
-                ...q,
-                question: editedQuestion.text,
-                category: editedQuestion.category,
-                options: editedQuestion.options,
-                correctOptionId:
-                  selectedOption?.id || editedQuestion.correctOptionId,
-              }
-            : q
-        )
-      );
+      fetchQuestions();
     } catch (err) {
       console.error(err);
       toast.error("Failed to update question");
     }
   };
 
-  // Delete question
+  //  Delete question
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this question?")) return;
     try {
@@ -149,7 +107,7 @@ export default function ManageQuestions() {
         withCredentials: true,
       });
       toast.success("🗑️ Question deleted");
-      setQuestions((prev) => prev.filter((q) => q._id !== id));
+      fetchQuestions();
     } catch (err) {
       console.error(err);
       toast.error("Failed to delete question");
@@ -195,7 +153,7 @@ export default function ManageQuestions() {
                           className="form-input"
                         />
                       ) : (
-                        q.question
+                        q.text
                       )}
                     </td>
 
@@ -223,7 +181,7 @@ export default function ManageQuestions() {
                       {editingId === q._id
                         ? editedQuestion.options.map((opt, idx) => (
                             <input
-                              key={opt.id || idx}
+                              key={opt._id || idx}
                               type="text"
                               value={opt.text}
                               onChange={(e) =>
@@ -234,9 +192,9 @@ export default function ManageQuestions() {
                           ))
                         : q.options.map((opt, i) => (
                             <div
-                              key={opt.id || i}
+                              key={opt._id || i}
                               className={
-                                q.correctOptionId === opt.id ? "text-green" : ""
+                                q.correctAnswer === opt._id ? "text-green" : ""
                               }
                             >
                               {i + 1}. {opt.text}
@@ -259,8 +217,10 @@ export default function ManageQuestions() {
                           className="form-input"
                         />
                       ) : (
-                        q.options.find((opt) => opt.id === q.correctOptionId)
-                          ?.text || "-"
+                        q.options.find(
+                          (opt) =>
+                            opt?._id?.toString() === q.correctAnswer?.toString()
+                        )?.text || "-"
                       )}
                     </td>
 

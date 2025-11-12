@@ -1,0 +1,351 @@
+/* ==========================
+   Page Wrapper
+========================== */
+.results-page {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(
+    135deg,
+    #111111,
+    #1e1e1e,
+    #3a3a3a,
+    #555555,
+    #808080
+  );
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  font-family: "Poppins", sans-serif;
+  color: #e0e0e0;
+  padding: 2rem;
+  overflow-x: hidden;
+  overflow-y: auto;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.results-page::before,
+.results-page::after {
+  content: "";
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(140px);
+  opacity: 0.25;
+  z-index: 0;
+}
+
+.results-page::before {
+  width: 400px;
+  height: 400px;
+  background: radial-gradient(
+    circle at center,
+    rgba(255, 255, 255, 0.5),
+    transparent
+  );
+  top: 20%;
+  left: -10%;
+  animation: float1 12s infinite alternate ease-in-out;
+}
+
+.results-page::after {
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(
+    circle at center,
+    rgba(200, 200, 200, 0.35),
+    transparent
+  );
+  bottom: 10%;
+  right: -15%;
+  animation: float2 15s infinite alternate ease-in-out;
+}
+
+.results-page::-webkit-scrollbar {
+  display: none;
+}
+
+.results-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+  width: 100%;
+  max-width: 800px;
+}
+
+/* ==========================
+   Scoreboard Card
+========================== */
+.scoreboard-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.scoreboard-title {
+  font-size: 3rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: #f0f0f0;
+  text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
+}
+
+.scoreboard-logo {
+  width: 60px;
+  height: auto;
+  filter: grayscale(10%) contrast(1.1);
+}
+
+/* ==========================
+   Team Scores
+========================== */
+.team-scores-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+}
+
+.team-score-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 80%;
+  max-width: 420px;
+  padding: 1rem 2.5rem;
+  background-color: #e1e1e1;
+  color: #111;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  transition: transform 0.25s ease, background-color 0.3s ease,
+    box-shadow 0.3s ease;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.team-score-card:hover {
+  transform: translateY(-3px);
+  background-color: #2f78f5;
+  color: #fff;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.team-title {
+  font-size: 1.8rem;
+  font-weight: 700;
+  color: #222;
+}
+
+.team-points {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: #ffffff;
+}
+
+/* ==========================
+   Reveal Button
+========================== */
+.reveal-scores-btn {
+  background-color: #dcdcdc;
+  color: #222;
+  border: none;
+  padding: 1.5rem 2.5rem;
+  border-radius: 40px;
+  font-size: 1.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.reveal-scores-btn:hover {
+  background-color: #394049;
+  color: #fff;
+  transform: scale(1.05);
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.2);
+}
+
+/* ==========================
+   No Data Text
+========================== */
+.no-team-data {
+  color: #aaa;
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+/* ==========================
+   Loading Text
+========================== */
+.results-loading {
+  color: #ccc;
+  font-size: 1.3rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* ==========================
+   Finish Display Wrapper
+========================== */
+.finish-wrapper {
+  width: 100%;
+  min-height: 100vh;
+  background-color: #2c2c2c;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  font-family: "Poppins", sans-serif;
+}
+
+.finish-display-container,
+.finish-container {
+  background-color: #3a3a3a43;
+  border-radius: 16px;
+  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  text-align: center;
+  padding: 2.5rem 5rem;
+  max-width: 900px;
+  width: 100%;
+
+  color: #e0e0e0;
+  border: 2px dashed #555;
+}
+
+.finish-display-container {
+  margin-top: -8rem;
+}
+.finish-container {
+  margin-top: 1rem;
+}
+/* ==========================
+   Headings & Button
+========================== */
+.finish-message {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #f0f0f0;
+  margin-bottom: 1.5rem;
+}
+
+.next-round-btn {
+  background-color: #c2c2c2;
+  color: #1f1f1f;
+  border: none;
+  border-radius: 40px;
+  padding: 0.9rem 2rem;
+  font-size: 1.3rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-bottom: 2rem;
+}
+
+.next-round-btn:hover {
+  background-color: #394049;
+  color: #ebebeb;
+  transform: scale(1.05);
+}
+
+/* ==========================
+   Scoreboard List
+========================== */
+.scoreboard-subtitle {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #bdbdbd;
+  margin-bottom: 1rem;
+}
+
+.scoreboard-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  align-items: center;
+}
+
+.scoreboard-card {
+  width: 80%;
+  max-width: 420px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background-color: #9f9f9f;
+  border-radius: 10px;
+  font-size: 1rem;
+  font-weight: 500;
+  transition: all 0.25s ease;
+  box-shadow: 0 3px 8px rgba(0, 0, 0, 0.1);
+  color: #f0f0f0;
+}
+
+.scoreboard-card:hover {
+  transform: translateY(-3px);
+  background-color: #606060;
+}
+
+/* ==========================
+   Winner Highlight
+========================== */
+.winner-card {
+  background: linear-gradient(135deg, #ffdf70, #ffbb33);
+  box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+  color: #1a1a1a;
+}
+
+.winner-card .team-points {
+  color: #1a1a1a;
+}
+
+/* ==========================
+   Loading & Empty State
+========================== */
+.finish-loading {
+  color: #ccc;
+  font-size: 1.1rem;
+  text-align: center;
+}
+
+.no-team-data {
+  color: #aaa;
+  font-style: italic;
+  margin-top: 1rem;
+}
+
+/* ==========================
+   Responsive
+========================== */
+@media (max-width: 768px) {
+  .finish-container {
+    padding: 1.5rem;
+  }
+
+  .finish-message {
+    font-size: 1.6rem;
+  }
+
+  .scoreboard-card {
+    width: 90%;
+    font-size: 0.95rem;
+  }
+}
+
+/* Crown hover animation */
+.crown-emoji {
+  animation: floatCrown 0.3s ease-in-out infinite alternate;
+  cursor: default;
+}
+
+@keyframes floatCrown {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(-60px);
+  }
+}

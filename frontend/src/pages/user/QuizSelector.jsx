@@ -19,8 +19,8 @@ const QuizSelector = () => {
           { withCredentials: true } // sends JWT/cookie
         );
 
-        console.log("Fetched quizzes:", res.data.quiz);
-        setQuizzes(res.data.quiz);
+        console.log("Fetched quizzes:", res.data.quizzes);
+        setQuizzes(res.data.quizzes);
       } catch (err) {
         console.error("Error fetching quizzes:", err);
       }

@@ -16,48 +16,59 @@ export const createQuestion = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const adminId = req.user;
+    const adminId = req.user?.id;
     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
 
-    let { text, options, correctAnswer, category } = req.body;
+    let { text, options, correctAnswer, shortAnswer, category } = req.body;
 
-    if (!text || !options || !correctAnswer || !category) {
+    if (!text || !category || (!options && !shortAnswer)) {
       return res.status(400).json({ message: "Missing required fields" });
     }
 
-    // ✅ Handle case where options might be a string (from form-data)
-    if (typeof options === "string") {
-      try {
-        options = JSON.parse(options);
-      } catch {
-        // If not valid JSON, split by commas as fallback
-        options = options.split(",").map((opt: string) => opt.trim());
+    let optionsWithIds: any[] = [];
+    let shortAnswerObj: any = null;
+
+    //  MCQ
+    if (options) {
+      if (typeof options === "string") {
+        try {
+          options = JSON.parse(options);
+        } catch {
+          options = options.split(",").map((opt: string) => opt.trim());
+        }
       }
+
+      optionsWithIds = options.map((opt: any) => ({
+        _id: new mongoose.Types.ObjectId(),
+        text: typeof opt === "object" && opt.text ? opt.text : String(opt),
+      }));
+
+      // Normalize correctAnswer to find matching option
+      const normalizedCorrectAnswer = String(correctAnswer)
+        .trim()
+        .toLowerCase();
+      const correctOption = optionsWithIds.find(
+        (opt) =>
+          String(opt.text).trim().toLowerCase() === normalizedCorrectAnswer
+      );
+      if (!correctOption) {
+        return res
+          .status(400)
+          .json({ message: "Correct answer must match one of the options" });
+      }
+
+      correctAnswer = correctOption._id.toString();
     }
 
-    // ✅ Ensure options is an array
-    if (!Array.isArray(options) || options.length === 0) {
-      return res.status(400).json({ message: "Options must be an array" });
+    //  SHORT / ESTIMATION
+    if (shortAnswer !== undefined) {
+      const textValue = String(shortAnswer);
+      const id = new mongoose.Types.ObjectId();
+      shortAnswerObj = { _id: id, text: textValue };
+      correctAnswer = id.toString();
     }
 
-    // ✅ Convert each option to object with _id
-    const optionsWithIds = options.map((opt: any) => ({
-      _id: new mongoose.Types.ObjectId(),
-      text: typeof opt === "string" ? opt : opt.text,
-    }));
-
-    // ✅ Find correct option
-    const correctOption = optionsWithIds.find(
-      (opt) =>
-        opt.text.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
-    );
-
-    if (!correctOption) {
-      return res
-        .status(400)
-        .json({ message: "Correct answer must match one of the options" });
-    }
-
+    //  MEDIA
     let finalMedia = null;
     if (req.file) {
       const file = req.file as any;
@@ -72,14 +83,15 @@ export const createQuestion = async (
     const question = new Question({
       text,
       options: optionsWithIds,
-      correctAnswer: correctOption._id.toString(),
-
+      shortAnswer: shortAnswerObj,
+      correctAnswer,
       category,
       media: finalMedia,
       adminId,
     });
 
     await question.save();
+
     return res.status(201).json({ success: true, question });
   } catch (err) {
     console.error("Error creating question:", err);
@@ -89,59 +101,6 @@ export const createQuestion = async (
     });
   }
 };
-
-// // Create Quiz with rounds
-// export const createQuiz = async (
-//   req: AuthenticatedRequest,
-//   res: Response
-// ): Promise<Response> => {
-//   try {
-//     const user = req.user;
-//     if (!user) return res.status(401).json({ message: "Unauthorized" });
-
-//     const { title, rounds } = req.body;
-
-//     const quiz = new Quiz({
-//       title,
-//       rounds,
-//       adminId: user.id,
-//     });
-
-//     await quiz.save();
-//     return res.status(201).json(quiz);
-//   } catch (err) {
-//     console.error("Error creating quiz:", err);
-//     return res.status(500).json({
-//       message: "Error creating quiz",
-//       error: err instanceof Error ? err.message : String(err),
-//     });
-//   }
-// };
-
-// // Get all quizzes with populated rounds and questions
-// export const getQuizzes = async (
-//   req: AuthenticatedRequest,
-//   res: Response
-// ): Promise<Response> => {
-//   try {
-//     const quizzes = await Quiz.find().populate({
-//       path: "rounds.questions",
-//       model: "Question",
-//     });
-
-//     if (!quizzes || quizzes.length === 0) {
-//       return res.status(404).json({ message: "No quizzes found" });
-//     }
-
-//     return res.status(200).json(quizzes);
-//   } catch (err) {
-//     console.error("Error fetching quizzes:", err);
-//     return res.status(500).json({
-//       message: "Server error while fetching quizzes",
-//       error: err instanceof Error ? err.message : String(err),
-//     });
-//   }
-// };
 
 export const getQuestions = async (
   req: AuthenticatedRequest,

@@ -1,167 +1,322 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import Question from "../models/question";
-import Team from "../models/team";
-import Round from "../models/createRounds";
-import Submit, { ISubmit } from "../models/submit";
 import Quiz from "../models/createQuiz";
+import Round from "../models/createRounds";
+import Team from "../models/team";
+import Question from "../models/question";
 import QuizHistory from "../models/quizHistory";
+import Submit from "../models/submit";
 
-interface SubmitAnswerRequest extends Request {
+interface SubmitRequest extends Request {
   body: {
     quizId: string;
-    roundNumber: number;
-    teamId: string;
+    roundId: string;
+    // Normal rounds: single answer
+    teamId?: string;
     questionId: string;
-    answerId?: string;
+    givenAnswer?: string | number;
     isPassed?: boolean;
+    // Estimation round: multiple answers
+    answers?: { teamId: string; givenAnswer: number | string }[];
   };
 }
 
-export const submitAnswer = async (req: SubmitAnswerRequest, res: Response) => {
+export const submitAnswer = async (req: SubmitRequest, res: Response) => {
   try {
-    const { quizId, roundNumber, teamId, questionId, answerId, isPassed } =
-      req.body;
+    console.log("=== Submit Answer Request Received ===");
+    console.log("Request Body:", req.body);
 
-    if (!quizId || !roundNumber || !teamId || !questionId)
-      return res.status(400).json({ message: "Missing required fields" });
+    const {
+      quizId,
+      roundId,
+      questionId,
+      teamId,
+      givenAnswer,
+      isPassed = false,
+      answers,
+    } = req.body;
 
-    if (
-      !mongoose.Types.ObjectId.isValid(quizId) ||
-      !mongoose.Types.ObjectId.isValid(teamId) ||
-      !mongoose.Types.ObjectId.isValid(questionId)
-    )
-      return res.status(400).json({ message: "Invalid IDs provided" });
+    if (!mongoose.Types.ObjectId.isValid(quizId))
+      return res.status(400).json({ message: "Invalid quizId" });
+    if (!mongoose.Types.ObjectId.isValid(roundId))
+      return res.status(400).json({ message: "Invalid roundId" });
 
-    const question = await Question.findById(questionId);
-    const team = await Team.findById(teamId);
-    if (!question || !team)
-      return res.status(404).json({ message: "Question or Team not found" });
+    const quiz = await Quiz.findById(quizId).populate("teams");
+    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
 
-    const round = await Round.findById(question.roundId);
+    const round = await Round.findById(roundId);
     if (!round) return res.status(404).json({ message: "Round not found" });
 
-    const enableNegative: boolean = !!round.rules?.enableNegative;
+    const question = await Question.findById(questionId);
+    if (!question)
+      return res.status(404).json({ message: "Question not found" });
 
-    let isCorrect = false;
-    let pointsEarned = 0;
+    const rules = round.rules;
+    const roundNumber = round.roundNumber || 1;
 
-    if (isPassed) {
-      pointsEarned = enableNegative ? -5 : 0;
-    } else {
-      const selectedOption = question.options?.find(
-        (opt: any) => String(opt._id) === String(answerId)
-      );
-      if (!selectedOption)
-        return res.status(400).json({ message: "Invalid option selected" });
+    // =========== ESTIMATION ROUND ===========
+    if (round.category === "estimation round") {
+      if (!answers || !Array.isArray(answers) || answers.length === 0) {
+        return res
+          .status(400)
+          .json({ message: "Estimation round requires answers array" });
+      }
 
-      isCorrect = String(question.correctAnswer) === String(answerId);
-      pointsEarned = isCorrect ? 10 : enableNegative ? -5 : 0;
-    }
+      const submittedTeams: { teamId: string; numericAnswer: number }[] = [];
 
-    // ✅ Upsert: Create or update the submission for this question
-    await Submit.findOneAndUpdate(
-      { quizId, roundNumber, teamId, questionId },
-      {
-        quizId,
-        roundId: round._id,
-        roundNumber,
-        teamId,
-        questionId,
-        isCorrect,
-        pointsEarned,
-      },
-      { upsert: true, new: true }
-    );
+      // Step 1: Collect all answers first (don't save yet)
+      for (const ans of answers) {
+        const { teamId, givenAnswer } = ans;
+        if (!mongoose.Types.ObjectId.isValid(teamId)) continue;
+        const team = await Team.findById(teamId);
+        if (!team) continue;
 
-    // --- Find or create QuizHistory ---
-    let quizHistory = await QuizHistory.findOne({ quizId });
-    if (!quizHistory) {
-      const quiz = await Quiz.findById(quizId)
-        .populate("rounds")
-        .populate("teams");
-      if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+        const numericAnswer = Number(givenAnswer);
+        if (isNaN(numericAnswer)) continue;
 
-      quizHistory = new QuizHistory({
-        quizId,
-        rounds: quiz.rounds.map((r: any, i: number) => ({
-          roundNumber: i + 1,
-          roundId: r._id,
-          roundName: r.name,
-          enableNegativePoints: r.rules?.enableNegative || false,
-          teams: quiz.teams.map((t: any) => ({
-            teamId: t._id,
-            teamName: t.name,
-            attempted: 0,
-            correct: 0,
-            wrong: 0,
-            points: 0,
-          })),
-        })),
-        total: quiz.teams.map((t: any) => ({
-          teamId: t._id,
-          teamName: t.name,
-          attempted: 0,
-          correct: 0,
-          wrong: 0,
-          points: 0,
-        })),
+        submittedTeams.push({ teamId, numericAnswer });
+      }
+
+      // Step 2: Check if all teams have submitted
+      if (submittedTeams.length === quiz.teams.length) {
+        const correctAnswerNum = Number(
+          question.shortAnswer?.text ?? question.correctAnswer
+        );
+        if (isNaN(correctAnswerNum)) {
+          return res.status(400).json({
+            message:
+              "Estimation question must have a numeric correct answer or shortAnswer",
+          });
+        }
+
+        // Filter answers that are <= correctAnswer
+        const validTeams = submittedTeams.filter(
+          (t) => t.numericAnswer <= correctAnswerNum
+        );
+        if (validTeams.length === 0) {
+          return res.status(200).json({
+            message: "No team submitted an answer <= correct answer",
+            correctAnswer: correctAnswerNum,
+          });
+        }
+
+        // Find closest answer without exceeding
+        const firstTeam = validTeams[0];
+        if (!firstTeam) {
+          return res.status(400).json({ message: "No valid teams found" });
+        }
+        let closestTeamId = firstTeam.teamId;
+        let closestAnswer = firstTeam.numericAnswer;
+        let minDiff = correctAnswerNum - firstTeam.numericAnswer;
+        for (const t of validTeams) {
+          const diff = correctAnswerNum - t.numericAnswer;
+          if (diff < minDiff) {
+            closestTeamId = t.teamId;
+            closestAnswer = t.numericAnswer;
+            minDiff = diff;
+          }
+        }
+
+        const pointsToAward = Number(rules.points || 0);
+
+        // Save all submissions with correct points (check for existing first)
+        for (const t of submittedTeams) {
+          const isWinner = t.teamId === closestTeamId;
+          const points = isWinner ? pointsToAward : 0;
+          const correct = isWinner;
+
+          // Check if submission already exists for this team and question
+          const existingSubmit = await Submit.findOne({
+            quizId,
+            roundId,
+            teamId: t.teamId,
+            questionId: question._id as any,
+          });
+
+          if (!existingSubmit) {
+            // Create Submit document only if it doesn't exist
+            await Submit.create({
+              quizId,
+              roundId,
+              roundNumber,
+              teamId: t.teamId,
+              questionId: question._id as any,
+              givenAnswer: t.numericAnswer,
+              pointsEarned: points,
+              isCorrect: correct,
+            });
+
+            // Update QuizHistory
+            let history = await QuizHistory.findOne({
+              quizId,
+              roundId,
+              teamId: t.teamId,
+            });
+            const answerObj = {
+              questionId: question._id as any,
+              givenAnswer: t.numericAnswer,
+              pointsEarned: points,
+              isCorrect: correct,
+              isPassed: false,
+            } as any;
+
+            if (!history) {
+              await QuizHistory.create({
+                quizId,
+                roundId,
+                teamId: t.teamId,
+                answers: [answerObj],
+                totalPoints: points,
+              });
+            } else {
+              // Check if answer for this question already exists in history
+              const answerExists = history.answers.some(
+                (a: any) =>
+                  a.questionId.toString() === (question._id as any).toString()
+              );
+              if (!answerExists) {
+                (history.answers as any).push(answerObj);
+                history.totalPoints += points;
+                await history.save();
+              }
+            }
+          }
+        }
+
+        // Update winner's team points (only once)
+        const existingWinnerSubmit = await Submit.findOne({
+          quizId,
+          roundId,
+          teamId: closestTeamId,
+          questionId: question._id as any,
+        });
+
+        if (existingWinnerSubmit && existingWinnerSubmit.pointsEarned === 0) {
+          // First time awarding points to winner
+          const winnerTeam = await Team.findById(closestTeamId);
+          if (winnerTeam) {
+            winnerTeam.points = (winnerTeam.points || 0) + pointsToAward;
+            await winnerTeam.save();
+          }
+        }
+
+        return res.status(200).json({
+          message: "Estimation answers submitted and scored",
+          correctAnswer: correctAnswerNum,
+          winner: {
+            teamId: closestTeamId,
+            givenAnswer: closestAnswer,
+            pointsAwarded: pointsToAward,
+          },
+        });
+      }
+
+      return res.status(200).json({
+        message: "Estimation answers submitted, waiting for remaining teams",
+        teamsSubmitted: submittedTeams.length,
+        totalTeams: quiz.teams.length,
       });
     }
 
-    // --- Recalculate round stats ---
-    const roundAnswers = await Submit.find({ quizId, roundNumber, teamId });
-    const roundPoints = roundAnswers.reduce(
-      (sum, a) => sum + a.pointsEarned,
-      0
-    );
+    // =========== NORMAL ROUNDS ===========
+    if (!teamId || givenAnswer === undefined)
+      return res
+        .status(400)
+        .json({ message: "teamId and givenAnswer required for normal rounds" });
+    if (!mongoose.Types.ObjectId.isValid(teamId))
+      return res.status(400).json({ message: "Invalid teamId" });
 
-    const roundStats = quizHistory.rounds.find(
-      (r) => r.roundNumber === roundNumber
-    );
-    const teamStats = roundStats?.teams.find(
-      (t) => String(t.teamId) === String(teamId)
-    );
-    if (teamStats) {
-      teamStats.attempted = roundAnswers.length;
-      teamStats.correct = roundAnswers.filter((a) => a.isCorrect).length;
-      teamStats.wrong = roundAnswers.filter((a) => !a.isCorrect).length;
-      teamStats.points = roundPoints;
+    const team = await Team.findById(teamId);
+    if (!team) return res.status(404).json({ message: "Team not found" });
+
+    const correctAnswerStr = question.correctAnswer?.toString();
+    const submittedAnswerStr = givenAnswer.toString();
+
+    if (!correctAnswerStr)
+      return res
+        .status(400)
+        .json({ message: "Question does not have a correct answer" });
+
+    let pointsEarned = 0;
+    let isCorrect = false;
+
+    if (submittedAnswerStr === correctAnswerStr) {
+      isCorrect = true;
+      pointsEarned = isPassed
+        ? Number(rules.passedPoints || 0)
+        : Number(rules.points || 0);
+    } else {
+      pointsEarned =
+        rules.enableNegative && !isPassed
+          ? -Number(rules.negativePoints || 0)
+          : 0;
     }
 
-    // --- Recalculate total stats ---
-    const allRounds = await Submit.find({ quizId, teamId });
-    const totalPoints = allRounds.reduce((sum, a) => sum + a.pointsEarned, 0);
-
-    const totalStats = quizHistory.total.find(
-      (t) => String(t.teamId) === String(teamId)
-    );
-    if (totalStats) {
-      totalStats.attempted = allRounds.length;
-      totalStats.correct = allRounds.filter((a) => a.isCorrect).length;
-      totalStats.wrong = allRounds.filter((a) => !a.isCorrect).length;
-      totalStats.points = totalPoints;
-    }
-
-    await quizHistory.save();
-
-    // --- Update team points ---
-    team.points = totalPoints;
+    // Update team points
+    team.points = (team.points || 0) + pointsEarned;
     await team.save();
 
-    return res.json({
-      message: isCorrect
-        ? "✅ Correct answer!"
-        : isPassed
-        ? "➡️ Question passed (counted as wrong)"
-        : enableNegative && !isCorrect
-        ? "❌ Wrong answer! (-5 points)"
-        : "❌ Wrong answer!",
+    const answerObj = {
+      questionId: question._id as any,
+      givenAnswer,
       pointsEarned,
-      teamPoints: totalPoints,
+      isCorrect,
+      isPassed,
+    };
+
+    // Update or create QuizHistory
+    let history = await QuizHistory.findOne({ quizId, roundId, teamId });
+    if (!history) {
+      // Create new history record
+      history = await QuizHistory.create({
+        quizId,
+        roundId,
+        teamId,
+        answers: [answerObj],
+        totalPoints: pointsEarned,
+      });
+    } else {
+      // Check if answer for this question already exists
+      const existingAnswerIndex = (history.answers as any[]).findIndex(
+        (a: any) => a.questionId.toString() === (question._id as any).toString()
+      );
+
+      if (existingAnswerIndex !== -1) {
+        // Update existing answer
+        const oldPoints = (history.answers as any)[existingAnswerIndex]
+          .pointsEarned;
+        (history.answers as any)[existingAnswerIndex] = answerObj;
+        history.totalPoints = history.totalPoints - oldPoints + pointsEarned;
+      } else {
+        // Add new answer
+        (history.answers as any).push(answerObj);
+        history.totalPoints += pointsEarned;
+      }
+      await history.save();
+    }
+
+    // Create Submit record
+    await Submit.create({
+      quizId,
+      roundId,
+      roundNumber,
+      teamId,
+      questionId: question._id as any,
+      givenAnswer,
+      pointsEarned,
+      isCorrect,
     });
-  } catch (err) {
-    console.error("Submit error:", err);
-    return res.status(500).json({ message: "Internal server error" });
+
+    return res.status(200).json({
+      message: "Answer submitted successfully",
+      pointsEarned,
+      isCorrect,
+      teamPoints: team.points,
+    });
+  } catch (err: any) {
+    console.error("SubmitController Error:", err);
+    return res
+      .status(500)
+      .json({ message: "Internal server error", error: err.message });
   }
 };

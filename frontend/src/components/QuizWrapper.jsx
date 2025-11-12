@@ -26,7 +26,7 @@ const QuizWrapper = ({ children }) => {
           withCredentials: true,
         });
 
-        const allQuizzes = res.data.quiz || [];
+        const allQuizzes = res.data.quizzes || [];
         const currentQuiz = allQuizzes.find((q) => q._id === quizId);
         if (!currentQuiz) {
           console.warn("⚠️ No quiz found for quizId:", quizId);
