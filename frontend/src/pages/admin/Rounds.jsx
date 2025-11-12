@@ -16,7 +16,7 @@ export default function CreateQuiz() {
       name: "",
       category: "general round",
       rules: {
-        enableTimer: true,
+        enableTimer: false,
         timerType: "perQuestion",
         timeLimitValue: 30,
         enableNegative: false,
@@ -75,7 +75,7 @@ export default function CreateQuiz() {
           name: "",
           category: "general round",
           rules: {
-            enableTimer: true,
+            enableTimer: false,
             timerType: "perQuestion",
             timeLimitValue: 30,
             enableNegative: false,
@@ -105,7 +105,14 @@ export default function CreateQuiz() {
 
   const handleRuleChange = (index, field, value) => {
     const updated = [...rounds];
-    updated[index].rules = { ...updated[index].rules, [field]: value };
+    const current = { ...updated[index].rules, [field]: value };
+
+    // ✅ Auto-disable timer if "forAllTeams" is chosen
+    if (field === "assignQuestionType" && value === "forAllTeams") {
+      current.enableTimer = false;
+    }
+
+    updated[index].rules = current;
     setRounds(updated);
   };
 
