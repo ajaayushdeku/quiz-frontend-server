@@ -11,12 +11,13 @@ import {
 } from "react-icons/md";
 import "../../styles/Dashboard.css"; // Make sure to create this CSS
 import { BsPersonFill } from "react-icons/bs";
+import { IoExtensionPuzzle } from "react-icons/io5";
 
 export default function AdminLayout() {
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard /> },
     { name: "Questions", path: "/admin/questions", icon: <MdQuestionAnswer /> },
-    { name: "Create-Quiz", path: "/admin/rounds", icon: <MdQuiz /> },
+    { name: "Create-Quiz", path: "/admin/rounds", icon: <IoExtensionPuzzle /> },
     {
       name: "Create Quiz-Master",
       path: "/admin/create",

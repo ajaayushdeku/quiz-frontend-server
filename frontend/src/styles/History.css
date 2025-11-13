@@ -1,191 +1,156 @@
-.quiz-history-container {
-  margin: 20px auto;
+.white-theme {
+  background-color: #ffffff;
+  color: #222;
   padding: 20px;
-  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.quiz-title {
-  font-size: 1.8rem;
-  margin-bottom: 20px;
-  color: #333;
-}
-
-.quiz-name {
-  font-weight: bold;
-  color: #007bff;
-}
-
-.team-stats-card,
-.round-history-card {
-  background-color: #f9f9f9;
-  border-radius: 10px;
-  padding: 15px 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
-}
-
-.card-title {
-  font-size: 1.2rem;
-  margin-bottom: 15px;
-  font-weight: 600;
-  color: #555;
-}
-
-.stat-row {
-  display: flex;
-  justify-content: space-between;
-  padding: 8px 0;
-  border-bottom: 1px solid #e0e0e0;
-}
-
-.stat-row:last-child {
-  border-bottom: none;
-}
-
-.stat-label {
-  font-weight: 500;
-  color: #666;
-}
-
-.stat-value {
-  font-weight: 600;
-  color: #333;
-}
-
-.team-stats-page {
-  padding: 2rem;
-  background: #f9f9f9;
-  color: #111;
   min-height: 100vh;
-  font-family: "Poppins", sans-serif;
+  font-family: "Segoe UI", sans-serif;
 }
 
 .team-stats-heading {
   text-align: center;
   font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
+  margin-bottom: 30px;
+  color: #333;
 }
 
 .quizzes-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 1rem;
-  margin-bottom: 2rem;
+  gap: 12px;
+  margin-bottom: 30px;
+  justify-content: center;
 }
 
 .quiz-tab {
-  flex: 1 1 calc(25% - 1rem);
-  min-width: 150px;
-  padding: 1rem;
-  background-color: #ffffff;
-  border: 1px solid #ddd;
-  border-radius: 0.5rem;
+  background: #f0f4ff;
+  padding: 12px 20px;
+  border-radius: 12px;
   cursor: pointer;
-  font-size: 1.4rem;
+  transition: all 0.3s ease;
   font-weight: 700;
+  font-size: 1.2rem;
+  min-width: 140px;
   text-align: center;
-  transition: 0.3s ease, transform 0.3s ease;
+  color: rgb(40, 134, 166);
 }
 
 .quiz-tab:hover {
-  background-color: rgb(1, 193, 59);
-  color: #fff;
-  transform: translateY(-3px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+  background-color: #d0e4ff;
 }
 
 .quiz-tab.active {
-  background-color: #55ec82ff;
+  background-color: #3185fa;
+  border-color: #3185fa;
   color: #fff;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 }
 
 .teams-container {
-  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .team-card {
-  width: 100%;
-  background: #ffffff;
-  padding: 1rem;
-  border-radius: 1rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background: #f0f4ff;
+  border-radius: 12px;
+  padding: 20px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .team-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .team-name {
-  font-weight: 700;
-  margin-bottom: 1rem;
-  font-size: 1.3rem;
-  color: #55ec82ff;
+  font-size: 1.5rem;
+  color: #063e8d;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 15px;
 }
 
-.rounds {
+.rounds-scroll {
   display: flex;
-  flex-direction: column;
-  gap: 0.5rem;
   overflow-x: auto;
+  gap: 12px;
+  padding: 10px 0;
+  margin-bottom: 20px;
+  overflow: auto;
+  overflow-y: hidden;
 }
 
-.round-row {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: space-between;
-  background: #f0f0f0;
-  padding: 8px;
-  border-radius: 0.5rem;
-  font-weight: 600;
-  color: #111;
-  transition: background 0.3s ease, transform 0.3s ease;
+.round-tab {
+  min-width: 150px;
+  width: 21rem;
+  background: #6098e8;
+  border-radius: 12px;
+  padding: 1rem 2rem;
+  flex-shrink: 0;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
+  transition: transform 0.2s;
 }
 
-.round-row:hover {
-  background: #55ec82ff;
-  color: #fff;
-  transform: translateY(-2px);
+.round-scroll::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}
+
+.round-tab:hover {
+  transform: translateY(-3px);
+}
+
+.round-title {
+  font-weight: 700;
+  margin-bottom: 8px;
+  color: rgb(252, 252, 252);
+  padding-bottom: 0.3rem;
+  border-bottom: 1px dashed rgb(255, 255, 255);
+}
+
+.round-stats span {
+  display: block;
+  font-size: 0.9rem;
+  color: rgb(252, 252, 252);
+  margin-bottom: 2px;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.score-bar {
+  height: 5px;
+  background: linear-gradient(90deg, #55ec82, #00c8ff);
+  border-radius: 4px;
+  margin-top: 8px;
 }
 
 .overall-summary {
-  background: #eaeaea;
-  border-radius: 0.5rem;
-  padding: 10px;
-  margin-top: 1rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #6098e8;
+  padding: 12px 16px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  margin-top: 15px;
+}
+
+.summary-title {
+  color: #ffffff;
   font-weight: 700;
-  color: #111;
 }
 
-.no-history-text {
-  text-align: center;
-  color: #555;
-  padding: 1rem;
+.summary-values {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 15px;
+  font-weight: 700;
+  font-size: 1.1rem;
 }
 
-/* Responsive */
-@media (max-width: 1024px) {
-  .quiz-tab {
-    flex: 1 1 calc(33% - 1rem);
-  }
-}
-
-@media (max-width: 768px) {
-  .quiz-tab {
-    flex: 1 1 calc(50% - 1rem);
-  }
-}
-
-@media (max-width: 480px) {
-  .quiz-tab {
-    flex: 1 1 100%;
-  }
-  .round-row {
-    flex-direction: column;
-    gap: 4px;
-  }
+.summary-values span {
+  color: #ffffff;
+  min-width: 120px;
 }

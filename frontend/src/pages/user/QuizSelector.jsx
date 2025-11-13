@@ -68,16 +68,16 @@ const QuizSelector = () => {
               onClick={() => handleSelectQuiz(quiz._id)}
             >
               <div className="quiz-card-header">
-                <h3 className="quiz-title">{quiz.name}</h3>
+                <h3 className="quiz-topic">{quiz.name}</h3>
               </div>
 
               <div className="quiz-card-body">
                 {quiz.rounds?.length > 0 && (
                   <div className="quiz-rounds">
-                    <strong>
+                    <div className="card-topic">
                       <BsFillPatchQuestionFill className="icon" />
-                      <h3> Rounds:</h3>
-                    </strong>
+                      <strong>Rounds:</strong>
+                    </div>
                     <ul>
                       {quiz.rounds.map((round) => (
                         <li key={round._id}>{round.name}</li>
@@ -88,10 +88,12 @@ const QuizSelector = () => {
 
                 {quiz.teams?.length > 0 && (
                   <div className="quiz-teams">
-                    <strong>
+                    <div className="card-topic">
+                      {" "}
                       <RiTeamFill className="icon" />
-                      <h3>Teams:</h3>
-                    </strong>
+                      <strong>Teams:</strong>
+                    </div>
+
                     <ul>
                       {quiz.teams.map((team) => (
                         <li key={team._id}>{team.name}</li>
