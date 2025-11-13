@@ -4,6 +4,7 @@ import Quiz from "../models/createQuiz";
 import Round from "../models/createRounds";
 import Team from "../models/team";
 import { AuthRequest } from "./types";
+import User from "../models/User";
 
 interface RoundInput {
   name: string;
@@ -208,7 +209,18 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
 
 export const getQuiz = async (req: AuthRequest, res: Response) => {
   try {
-    const adminId = req.user?.id;
+    const currentUser = req.user;
+    if (!currentUser) return res.status(401).json({ message: "Unauthorized" });
+
+    // Determine adminId based on role
+    let adminId: string | undefined;
+    if (currentUser.role === "admin") {
+      adminId = currentUser.id;
+    } else if (currentUser.role === "user") {
+      const user = await User.findById(currentUser.id).lean();
+      adminId = user?.createdBy?.toString(); // assuming user.createdBy stores admin _id
+    }
+
     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
 
     const quizzes = await Quiz.find({ adminId })
@@ -225,6 +237,71 @@ export const getQuiz = async (req: AuthRequest, res: Response) => {
     });
   } catch (error: any) {
     console.error("Error fetching quizzes:", error);
+    return res.status(500).json({
+      message: "Failed to fetch quizzes",
+      error: error.message,
+    });
+  }
+};
+
+export const getQuizById = async (req: AuthRequest, res: Response) => {
+  try {
+    const currentUser = req.user;
+    const { quizId } = req.params;
+    if (!currentUser) return res.status(401).json({ message: "Unauthorized" });
+    if (!quizId)
+      return res.status(400).json({ message: "Quiz ID is required" });
+
+    let adminId: string | undefined;
+    if (currentUser.role === "admin") {
+      adminId = currentUser.id;
+    } else if (currentUser.role === "user") {
+      const user = await User.findById(currentUser.id).lean();
+      adminId = user?.createdBy?.toString();
+    }
+
+    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+
+    const quiz = await Quiz.findOne({ _id: quizId, adminId })
+      .populate("rounds")
+      .populate("teams")
+      .lean();
+
+    if (!quiz) return res.status(404).json({ message: "Quiz not found" });
+
+    return res.status(200).json({
+      message: "Quiz fetched successfully",
+      quiz,
+    });
+  } catch (error: any) {
+    console.error("Error fetching quiz by ID:", error);
+    return res.status(500).json({
+      message: "Failed to fetch quiz",
+      error: error.message,
+    });
+  }
+};
+
+export const getQuizzesByAdmin = async (req: AuthRequest, res: Response) => {
+  try {
+    const { adminId } = req.params;
+    if (!adminId)
+      return res.status(400).json({ message: "Admin ID is required" });
+
+    const quizzes = await Quiz.find({ adminId })
+      .populate("rounds")
+      .populate("teams")
+      .sort({ createdAt: -1 })
+      .lean();
+
+    return res.status(200).json({
+      message: quizzes.length
+        ? "Quizzes fetched successfully"
+        : "No quizzes found",
+      quizzes,
+    });
+  } catch (error: any) {
+    console.error("Error fetching quizzes by admin:", error);
     return res.status(500).json({
       message: "Failed to fetch quizzes",
       error: error.message,

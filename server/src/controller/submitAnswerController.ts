@@ -93,33 +93,53 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
         const validTeams = submittedTeams.filter(
           (t) => t.numericAnswer <= correctAnswerNum
         );
-        if (validTeams.length === 0) {
-          return res.status(200).json({
-            message: "No team submitted an answer <= correct answer",
-            correctAnswer: correctAnswerNum,
-          });
-        }
 
-        // Find closest answer without exceeding
-        const firstTeam = validTeams[0];
-        if (!firstTeam) {
-          return res.status(400).json({ message: "No valid teams found" });
-        }
-        let closestTeamId = firstTeam.teamId;
-        let closestAnswer = firstTeam.numericAnswer;
-        let minDiff = correctAnswerNum - firstTeam.numericAnswer;
-        for (const t of validTeams) {
-          const diff = correctAnswerNum - t.numericAnswer;
-          if (diff < minDiff) {
-            closestTeamId = t.teamId;
-            closestAnswer = t.numericAnswer;
-            minDiff = diff;
+        let closestTeamId: string;
+        let closestAnswer: number;
+        let minDiff: number;
+
+        if (validTeams.length === 0) {
+          // No team answered <= correct answer
+          // Award to the team with answer closest to correct (even if exceeds)
+          const firstTeam = submittedTeams[0];
+          if (!firstTeam) {
+            return res.status(400).json({ message: "No valid teams found" });
+          }
+          closestTeamId = firstTeam.teamId;
+          closestAnswer = firstTeam.numericAnswer;
+          minDiff = Math.abs(correctAnswerNum - firstTeam.numericAnswer);
+
+          for (const t of submittedTeams) {
+            const diff = Math.abs(correctAnswerNum - t.numericAnswer);
+            if (diff < minDiff) {
+              closestTeamId = t.teamId;
+              closestAnswer = t.numericAnswer;
+              minDiff = diff;
+            }
+          }
+        } else {
+          // Find closest answer without exceeding
+          const firstTeam = validTeams[0];
+          if (!firstTeam) {
+            return res.status(400).json({ message: "No valid teams found" });
+          }
+          closestTeamId = firstTeam.teamId;
+          closestAnswer = firstTeam.numericAnswer;
+          minDiff = correctAnswerNum - firstTeam.numericAnswer;
+
+          for (const t of validTeams) {
+            const diff = correctAnswerNum - t.numericAnswer;
+            if (diff < minDiff) {
+              closestTeamId = t.teamId;
+              closestAnswer = t.numericAnswer;
+              minDiff = diff;
+            }
           }
         }
 
         const pointsToAward = Number(rules.points || 0);
 
-        // Save all submissions with correct points (check for existing first)
+        // Save all submissions with correct points (update if exists)
         for (const t of submittedTeams) {
           const isWinner = t.teamId === closestTeamId;
           const points = isWinner ? pointsToAward : 0;
@@ -133,8 +153,24 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
             questionId: question._id as any,
           });
 
-          if (!existingSubmit) {
-            // Create Submit document only if it doesn't exist
+          if (existingSubmit) {
+            // Update existing Submit document
+            const oldPoints = existingSubmit.pointsEarned;
+            existingSubmit.givenAnswer = t.numericAnswer;
+            existingSubmit.pointsEarned = points;
+            existingSubmit.isCorrect = correct;
+            await existingSubmit.save();
+
+            // Adjust team points if points changed
+            if (oldPoints !== points) {
+              const team = await Team.findById(t.teamId);
+              if (team) {
+                team.points = (team.points || 0) - oldPoints + points;
+                await team.save();
+              }
+            }
+          } else {
+            // Create new Submit document
             await Submit.create({
               quizId,
               roundId,
@@ -145,45 +181,54 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
               pointsEarned: points,
               isCorrect: correct,
             });
+          }
 
-            // Update QuizHistory
-            let history = await QuizHistory.findOne({
+          // Update QuizHistory
+          let history = await QuizHistory.findOne({
+            quizId,
+            roundId,
+            teamId: t.teamId,
+          });
+          const answerObj = {
+            questionId: question._id as any,
+            givenAnswer: t.numericAnswer,
+            pointsEarned: points,
+            isCorrect: correct,
+            isPassed: false,
+          } as any;
+
+          if (!history) {
+            await QuizHistory.create({
               quizId,
               roundId,
               teamId: t.teamId,
+              answers: [answerObj],
+              totalPoints: points,
             });
-            const answerObj = {
-              questionId: question._id as any,
-              givenAnswer: t.numericAnswer,
-              pointsEarned: points,
-              isCorrect: correct,
-              isPassed: false,
-            } as any;
-
-            if (!history) {
-              await QuizHistory.create({
-                quizId,
-                roundId,
-                teamId: t.teamId,
-                answers: [answerObj],
-                totalPoints: points,
-              });
+          } else {
+            // Check if answer for this question already exists in history
+            const existingAnswerIndex = (history.answers as any[]).findIndex(
+              (a: any) =>
+                a.questionId.toString() === (question._id as any).toString()
+            );
+            if (existingAnswerIndex !== -1) {
+              // Update existing answer
+              const oldHistoryPoints = (history.answers as any)[
+                existingAnswerIndex
+              ].pointsEarned;
+              (history.answers as any)[existingAnswerIndex] = answerObj;
+              history.totalPoints =
+                history.totalPoints - oldHistoryPoints + points;
             } else {
-              // Check if answer for this question already exists in history
-              const answerExists = history.answers.some(
-                (a: any) =>
-                  a.questionId.toString() === (question._id as any).toString()
-              );
-              if (!answerExists) {
-                (history.answers as any).push(answerObj);
-                history.totalPoints += points;
-                await history.save();
-              }
+              // Add new answer
+              (history.answers as any).push(answerObj);
+              history.totalPoints += points;
             }
+            await history.save();
           }
         }
 
-        // Update winner's team points (only once)
+        // Update winner's team points (only if first time or points changed)
         const existingWinnerSubmit = await Submit.findOne({
           quizId,
           roundId,
@@ -191,14 +236,8 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
           questionId: question._id as any,
         });
 
-        if (existingWinnerSubmit && existingWinnerSubmit.pointsEarned === 0) {
-          // First time awarding points to winner
-          const winnerTeam = await Team.findById(closestTeamId);
-          if (winnerTeam) {
-            winnerTeam.points = (winnerTeam.points || 0) + pointsToAward;
-            await winnerTeam.save();
-          }
-        }
+        // Only add points if this is first submission (handled above in the loop now)
+        // Points adjustment is handled in the update logic above
 
         return res.status(200).json({
           message: "Estimation answers submitted and scored",

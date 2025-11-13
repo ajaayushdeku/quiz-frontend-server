@@ -523,68 +523,86 @@ const RapidFireRound = ({ onFinish }) => {
     if (!currentQuestion || !activeTeam?.id) return;
     const rules = activeRound?.rules || {};
 
-    // ❌ noPass condition → disallow
-    if (rules.passCondition === "noPass" || !rules.enablePass) {
+    // ❌ Passing disabled
+    if (!rules.enablePass || rules.passCondition === "noPass") {
       showToast("⛔ Passing is disabled for this round!");
       return;
     }
 
     // ⚠️ Check pass limit
-    if (
-      rules.enablePass &&
-      rules.passLimit &&
-      teams[activeIndex]?.passesUsed >= rules.passLimit
-    ) {
-      setPassIt(false);
-      showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
+    if (rules.passLimit && teams[activeIndex].passesUsed >= rules.passLimit) {
+      showToast(`⚠️ Team ${activeTeam.name} has reached the pass limit!`);
       return;
     }
 
-    // ✅ wrongIfPassed condition
-    if (rules.passCondition === "wrongIfPassed") {
-      // Double-check pass limit again for safety
-      if (rules.passLimit && activeTeam.passesUsed >= rules.passLimit) {
-        showToast(`⚠️ Team ${activeTeam.name} has reached the pass limit!`);
-        return;
-      }
+    // Add locally for UI tracking
+    setAnsweredQuestions((prev) => [
+      ...prev,
+      {
+        id: currentQuestion.id,
+        question: currentQuestion.question,
+        correctAnswer:
+          currentQuestion.options.find(
+            (opt) => opt.id === currentQuestion.correctOptionId
+          )?.text || "",
+        isCorrect: false,
+        isPassed: true,
+      },
+    ]);
 
-      // Add locally for UI tracking
-      setAnsweredQuestions((prev) => [
-        ...prev,
-        {
-          id: currentQuestion.id,
-          question: currentQuestion.question,
-          correctAnswer:
-            currentQuestion.options.find(
-              (opt) => opt.id === currentQuestion.correctOptionId
-            )?.text || "",
-          isCorrect: false,
-          isPassed: true,
-        },
-      ]);
+    const correctOption = currentQuestion.options.find(
+      (opt) => opt.id === currentQuestion.correctOptionId
+    );
 
-      const passResult = await submitAnswerToBackend({
+    // Find selected option (by text match)
+    const selectedOption = currentQuestion.options.find(
+      (opt) => normalize(opt.text) === normalize(answerInput)
+    );
+
+    const wrongOption = currentQuestion.options.find(
+      (opt) => opt.originalId !== correctOption.originalId
+    );
+    let answerId = wrongOption ? wrongOption.originalId : -1;
+
+    // Use originalId for submission
+    const givenAnswer = answerId;
+    if (!givenAnswer) {
+      console.warn("Option has no originalId, cannot submit", selectedOption);
+      return;
+    }
+
+    // Submit pass to backend
+    try {
+      const result = await submitAnswerToBackend({
         teamId: activeTeam.id,
         questionId: currentQuestion.id,
-        givenAnswer: null,
+        givenAnswer,
         isPassed: true,
       });
 
-      if (passResult) {
-        showToast(`⏩ Question passed!`);
+      if (result) {
+        const { pointsEarned } = result;
+        const msg = `⏩ Question passed! ${
+          pointsEarned ? `Points: ${pointsEarned}` : ""
+        }`;
+        setScoreMessage((prev) => [...prev, msg]);
+        showToast(msg);
       }
-
-      // increment passesUsed locally
-      setTeams((prevTeams) =>
-        prevTeams.map((team) =>
-          team.id === activeTeam.id
-            ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
-            : team
-        )
-      );
+    } catch (err) {
+      console.error("Submission Error:", err?.response?.data || err);
+      showToast("Failed to submit answer!");
     }
 
-    // move to next question
+    // Increment passesUsed locally
+    setTeams((prevTeams) =>
+      prevTeams.map((team) =>
+        team.id === activeTeam.id
+          ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
+          : team
+      )
+    );
+
+    // Move to next question
     if (isLastQuestion) {
       setFinishQus(true);
       pauseTimer();
@@ -643,7 +661,7 @@ const RapidFireRound = ({ onFinish }) => {
       roundStarted &&
       activeRound?.rules?.enablePass
     ) {
-      handleAnswer();
+      passQuestion();
     }
   }, [currentQuestion, finishQus, finalFinished, roundStarted]);
 

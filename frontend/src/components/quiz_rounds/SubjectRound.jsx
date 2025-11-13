@@ -58,22 +58,30 @@ const SubjectRound = ({ onFinish }) => {
   const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
 
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const adminId = queryParams.get("adminId"); // this will be null if admin view
+
   // ---------------- Fetch Quiz Data ----------------
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quiz",
-          { withCredentials: true }
-        );
+        // Fetch quizzes (admin or user)
+        let url = "http://localhost:4000/api/quiz/get-quiz";
+        if (adminId) {
+          url = `http://localhost:4000/api/quiz/get-quizbyadmin/${adminId}`;
+        }
 
+        const quizRes = await axios.get(url, { withCredentials: true });
         const allQuizzes = quizRes.data.quizzes || [];
+
+        // Find the current quiz by quizId or roundId
         const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds.some((r) => r._id === roundId)
+          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
         );
         if (!currentQuiz) return console.warn("Quiz not found");
 
-        // Teams
+        // Format Teams
         const formattedTeams = (currentQuiz.teams || []).map((team, index) => ({
           id: team._id,
           name: team.name || `Team ${index + 1}`,
@@ -82,7 +90,7 @@ const SubjectRound = ({ onFinish }) => {
         }));
         setTeams(formattedTeams);
 
-        // Round
+        // Find Active Round
         const round = currentQuiz.rounds.find((r) => r._id === roundId);
         if (!round) return console.warn("Round not found");
         setActiveRound(round);
@@ -94,42 +102,49 @@ const SubjectRound = ({ onFinish }) => {
         setRoundTime(round?.rules?.timeLimitValue || TEAM_TIME_LIMIT);
         if (round?.rules?.enableNegative) setReduceBool(true);
 
-        // Questions
+        // Fetch Questions
         const questionRes = await axios.get(
           "http://localhost:4000/api/question/get-questions",
           { withCredentials: true }
         );
         const allQuestions = questionRes.data.data || [];
+
         const filteredQuestions = allQuestions.filter((q) =>
           round.questions.includes(q._id)
         );
 
         const formattedQuestions = filteredQuestions.map((q) => {
-          const optionsArray =
-            typeof q.options[0] === "string"
-              ? JSON.parse(q.options[0])
-              : q.options;
+          let optionsArray = [];
+          if (q.options?.length) {
+            optionsArray =
+              typeof q.options[0] === "string"
+                ? JSON.parse(q.options[0])
+                : q.options;
+          }
 
           const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx),
+            id: String.fromCharCode(97 + idx), // a, b, c, ...
             text: typeof opt === "string" ? opt : opt.text || "",
             originalId: opt._id || null,
           }));
 
+          // Determine correct option
           const correctIndex = mappedOptions.findIndex(
             (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
           );
+          const correctOptionId =
+            correctIndex >= 0
+              ? mappedOptions[correctIndex].id
+              : mappedOptions[0]?.id || null;
 
           return {
             id: q._id,
             question: q.text,
             options: mappedOptions,
-            correctOptionId:
-              correctIndex >= 0
-                ? mappedOptions[correctIndex].id
-                : mappedOptions[0].id,
-            mediaType: q.mediaType || q.media?.type || "none",
-            mediaUrl: q.mediaUrl || q.media?.url || "",
+            correctOptionId,
+            mediaType: q.media?.type || "none",
+            mediaUrl: q.media?.url || "",
+            shortAnswer: q.shortAnswer || null,
           };
         });
 
@@ -141,7 +156,7 @@ const SubjectRound = ({ onFinish }) => {
     };
 
     if (quizId && roundId) fetchQuizData();
-  }, [quizId, roundId]);
+  }, [quizId, roundId, adminId]);
 
   // ---------------- Team Color Assignment ----------------
   const generateTeamColors = (teams) => {
@@ -194,8 +209,18 @@ const SubjectRound = ({ onFinish }) => {
 
   // ---------------- Auto pass on timeout ----------------
   useEffect(() => {
-    if (!activeRound?.rules?.enablePass) return;
+    // if (!activeRound?.rules?.enablePass) return;
     if (!isRunning && timeRemaining === 0) handlePass();
+
+    if (!activeRound?.rules?.enablePass && !isRunning && timeRemaining === 0) {
+      goToNextTeam();
+      nextQuestion();
+      setQuestionDisplay(false);
+      resetTimer(roundTime);
+      resetAnswer();
+      setScoreMessage("");
+      console.log("IF no pass and timeout, mov to next team:");
+    }
   }, [isRunning, timeRemaining, activeRound]);
 
   // ---------------- Submit to backend ----------------
@@ -265,7 +290,7 @@ const SubjectRound = ({ onFinish }) => {
         teamId: activeTeam.id,
         questionId: currentQuestion.id,
         givenAnswer,
-        isPassed: false,
+        isPassed: passIt ? true : false,
       });
 
       if (result) {
@@ -325,16 +350,56 @@ const SubjectRound = ({ onFinish }) => {
       return;
     }
 
-    const passResult = await submitAnswerToBackend({
-      teamId: activeTeam.id,
-      questionId: currentQuestion.id,
-      givenAnswer: null,
-      isPassed: true,
-    });
+    // const passResult = await submitAnswerToBackend({
+    //   teamId: activeTeam.id,
+    //   questionId: currentQuestion.id,
+    //   givenAnswer: null,
+    //   isPassed: true,
+    // });
 
-    if (passResult) {
-      setScoreMessage(`⏩ Question passed!`);
-      showToast(`⏩ Question passed!`);
+    const correctOption = currentQuestion.options.find(
+      (opt) => opt.id === currentQuestion.correctOptionId
+    );
+
+    const wrongOption = currentQuestion.options.find(
+      (opt) => opt.originalId !== correctOption.originalId
+    );
+    let answerId = wrongOption ? wrongOption.originalId : -1;
+
+    // Use originalId for submission
+    const givenAnswer = answerId;
+    if (!givenAnswer) {
+      return;
+    }
+
+    try {
+      const passResult = await submitAnswerToBackend({
+        teamId: activeTeam.id,
+        questionId: currentQuestion.id,
+        givenAnswer,
+        isPassed: true,
+      });
+
+      if (passResult) {
+        const { pointsEarned, isCorrect, teamPoints } = result;
+
+        const msg = isCorrect
+          ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
+          : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
+              activeTeam.name
+            }`;
+
+        setScoreMessage(msg);
+        showToast(msg);
+      }
+
+      if (passResult) {
+        setScoreMessage(`⏩ Question passed!`);
+        showToast(`⏩ Question passed!`);
+      }
+    } catch (err) {
+      console.error("Submission Error:", err?.response?.data || err);
+      showToast("Failed to submit answer!");
     }
 
     setTeams((prevTeams) =>

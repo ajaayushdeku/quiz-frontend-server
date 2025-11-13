@@ -58,6 +58,7 @@ const BuzzerRound = ({ onFinish }) => {
   const [activeRound, setActiveRound] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [results, setResults] = useState(null);
+  const [fullscreenMedia, setFullscreenMedia] = useState(null);
 
   const normalize = (str) => str?.trim().toLowerCase() || "";
 
@@ -303,6 +304,16 @@ const BuzzerRound = ({ onFinish }) => {
     if (!questionDisplay) setQuestionDisplay(true);
   }, [questionDisplay]);
 
+  const handleMediaClick = (url) => setFullscreenMedia(url);
+  const closeFullscreen = () => setFullscreenMedia(null);
+
+  useEffect(() => {
+    const details = document.getElementsByClassName("detail-info");
+    Array.from(details).forEach((el) => {
+      el.style.display = quizCompleted ? "none" : "block";
+    });
+  }, [quizCompleted]);
+
   return (
     <div className="quiz-container">
       {scoreMessage.length > 0 && (
@@ -344,6 +355,7 @@ const BuzzerRound = ({ onFinish }) => {
               category={currentQuestion.category}
               mediaType={currentQuestion.mediaType}
               mediaUrl={currentQuestion.mediaUrl}
+              onMediaClick={handleMediaClick}
             />
 
             {showCorrectAnswer ? (
@@ -398,6 +410,16 @@ const BuzzerRound = ({ onFinish }) => {
         )
       ) : (
         <FinishDisplay onFinish={onFinish} message="Buzzer Round Finished!" />
+      )}
+
+      {fullscreenMedia && (
+        <div className="fullscreen-overlay" onClick={closeFullscreen}>
+          {fullscreenMedia.endsWith(".mp4") ? (
+            <video src={fullscreenMedia} controls autoPlay />
+          ) : (
+            <img src={fullscreenMedia} alt="Question Media" />
+          )}
+        </div>
       )}
 
       <div id="toast-container"></div>

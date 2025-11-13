@@ -32,7 +32,7 @@ const EstimationRound = ({ onFinish }) => {
   const [questions, setQuestions] = useState([]);
   const [questionDisplay, setQuestionDisplay] = useState(false);
   const [quizCompleted, setQuizCompleted] = useState(false);
-
+  const [fullscreenMedia, setFullscreenMedia] = useState(null);
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [showQuestion, setShowQuestion] = useState(false);
   const [teamAnswers, setTeamAnswers] = useState({});
@@ -166,6 +166,9 @@ const EstimationRound = ({ onFinish }) => {
   }, [showQuestion]);
 
   //---------------- When all question finishes, hide components ----------------
+  const handleMediaClick = (url) => setFullscreenMedia(url);
+  const closeFullscreen = () => setFullscreenMedia(null);
+
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
     Array.from(details).forEach(
@@ -270,6 +273,7 @@ const EstimationRound = ({ onFinish }) => {
               }`}
               mediaType={currentQuestion.mediaType}
               mediaUrl={currentQuestion.mediaUrl}
+              onMediaClick={handleMediaClick}
             />
 
             <TeamAnswerBoxes
@@ -295,6 +299,16 @@ const EstimationRound = ({ onFinish }) => {
           message="Estimation Round Finished!"
         />
       )} */}
+
+      {fullscreenMedia && (
+        <div className="fullscreen-overlay" onClick={closeFullscreen}>
+          {fullscreenMedia.endsWith(".mp4") ? (
+            <video src={fullscreenMedia} controls autoPlay />
+          ) : (
+            <img src={fullscreenMedia} alt="Question Media" />
+          )}
+        </div>
+      )}
 
       <div id="toast-container"></div>
     </section>

@@ -895,11 +895,11 @@
 .winner-item {
   background: linear-gradient(145deg, #353535, #323131);
   padding: 12px 18px;
-  margin-bottom: 12px;
+  margin-bottom: auto;
   border-radius: 1rem;
   font-size: 1.4rem;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   transition: all 0.3s ease;
 }
@@ -914,6 +914,7 @@
 .winner-team-list {
   display: flex;
   flex-wrap: wrap; /* allows responsiveness */
+  justify-content: center;
   gap: 2.5rem;
   width: 100%;
   max-width: 1000px; /* increased max width */

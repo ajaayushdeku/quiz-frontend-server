@@ -140,6 +140,9 @@ export default function QuestionForm() {
     "Geography",
     "Sports",
     "General Knowledge",
+    "Technology / IT",
+    "Current Affairs / News",
+    "Fun",
   ];
 
   return (

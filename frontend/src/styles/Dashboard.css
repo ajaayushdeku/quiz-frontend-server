@@ -811,7 +811,7 @@ button:hover {
   width: 48px;
   height: 48px;
   margin-bottom: 15px;
-  color: #22c55e;
+  color: rgb(1, 193, 59);
 }
 
 .card-title {
@@ -855,7 +855,8 @@ button:hover {
 }
 
 .dashboard-header-icon {
-  color: #f6a037;
+  /* color: rgb(1, 193, 59); */
+  color: rgb(0, 0, 0);
   width: 36px;
   height: 36px;
 }
@@ -899,7 +900,7 @@ button:hover {
   width: 35px;
   height: 35px;
   margin: auto;
-  color: #f6a037;
+  color: rgb(1, 193, 59);
 }
 
 .card-title {
@@ -922,7 +923,7 @@ button:hover {
   background-color: #ffffff;
   min-height: 80vh;
   padding: 30px;
-  border: 2px solid #cccccc;
+  /* border: 2px solid #cccccc; */
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }

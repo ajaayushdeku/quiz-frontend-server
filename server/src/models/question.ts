@@ -22,7 +22,10 @@ export interface IQuestion extends Document {
     | "History"
     | "Geography"
     | "Sports"
-    | "General Knowledge";
+    | "General Knowledge"
+    | "Technology / IT"
+    | "Current Affairs / News"
+    | "Fun";
   roundId?: Types.ObjectId;
   media?: {
     type: "image" | "video" | "file" | null;
@@ -59,6 +62,9 @@ const questionSchema = new Schema<IQuestion>(
         "Geography",
         "Sports",
         "General Knowledge",
+        "Technology / IT",
+        "Current Affairs / News",
+        "Fun",
       ],
       required: true,
     },

@@ -37,14 +37,28 @@ export default function AuthForm() {
             email: formData.email,
             password: formData.password,
           },
-          { withCredentials: true } // 👈 allows backend to set cookie
+          { withCredentials: true }
         );
-        console.log("Login response:", res.data); // ✅
-        setMessage("Login successful!");
-        navigate("/admin"); // 👈 redirect to round creation page
+
+        const user = res.data.user;
+        console.log("Login response:", user);
+
+        if (user.role === "admin") {
+          navigate("/admin/dashboard");
+        } else if (user.role === "user") {
+          // For user, pass the adminId of the creator to fetch quizzes
+          const adminId = user.createdBy;
+          if (!adminId) {
+            setMessage("No admin assigned. Cannot fetch quizzes.");
+            return;
+          }
+          navigate(`/quizselect?adminId=${adminId}`);
+        } else {
+          setMessage("Unknown user role.");
+        }
       }
     } catch (err) {
-      console.log("Login error:", err.response?.data); // ✅
+      console.log("Login error:", err.response?.data);
       setMessage(
         err.response?.data?.message || "Something went wrong, try again"
       );
@@ -114,16 +128,6 @@ export default function AuthForm() {
             {isRegister ? "Register" : "Login"}
           </button>
         </form>
-
-        <p className="toggle-text">
-          {isRegister ? "Already have an account?" : "Don't have an account?"}{" "}
-          <span
-            className="toggle-link"
-            onClick={() => setIsRegister(!isRegister)}
-          >
-            {isRegister ? "Login" : "Register"}
-          </span>
-        </p>
       </div>
     </div>
   );

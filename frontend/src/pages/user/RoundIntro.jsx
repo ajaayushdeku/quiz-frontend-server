@@ -1,6 +1,5 @@
-// export default RoundIntro;
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import axios from "axios";
 import { FaArrowRight } from "react-icons/fa";
 import "../../styles/Round.css";
@@ -8,57 +7,73 @@ import "../../styles/Quiz.css";
 import rulesConfig from "../../config/rulesConfig";
 
 const RoundIntro = () => {
-  const { quizId, roundId } = useParams(); // get quizId and roundId from URL
+  const { quizId, roundId } = useParams();
+  const location = useLocation();
   const navigate = useNavigate();
+
   const [roundInfo, setRoundInfo] = useState(null);
   const [showIntro, setShowIntro] = useState(true);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  // Fetch the quiz and round info
+  // Extract adminId from query param (for user)
+  const queryParams = new URLSearchParams(location.search);
+  const adminId = queryParams.get("adminId");
+
   useEffect(() => {
     const fetchRound = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
           withCredentials: true,
         });
 
         const quizzes = res.data.quizzes || [];
         const selectedQuiz = quizzes.find((q) => q._id === quizId);
-        const selectedRound = selectedQuiz?.rounds.find(
+        if (!selectedQuiz) {
+          setError("Quiz not found.");
+          return;
+        }
+
+        const selectedRound = selectedQuiz.rounds.find(
           (r) => r._id === roundId
         );
+        if (!selectedRound) {
+          setError("Round not found.");
+          return;
+        }
 
-        // Normalize category to match rulesConfig keys
         const normalizeCategory = (category) =>
           category.toLowerCase().replace(/\s+/g, "_");
 
-        // Get category from DB round (e.g., "General", "RapidFire")
         const categoryKey = normalizeCategory(
           selectedRound.category || selectedRound.name
         );
 
-        // Get default rules from rulesConfig for this category
         const configRules = rulesConfig[categoryKey]?.rules || [];
-
-        // Merge config rules on top and DB rules below
-        // const combinedRules = [...configRules, ...(selectedRound.rules || [])];
 
         setRoundInfo({
           roundNumber: String(
             selectedQuiz.rounds.indexOf(selectedRound) + 1
           ).padStart(2, ""),
           roundTitle: selectedRound.name,
-          rules: configRules || [],
+          rules: configRules,
           category: categoryKey,
         });
       } catch (err) {
         console.error("Error fetching round info:", err);
+        setError("Failed to fetch round info.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchRound();
-  }, [quizId, roundId]);
+  }, [quizId, roundId, adminId]);
 
-  if (!roundInfo)
+  if (loading) {
     return (
       <section className="home-wrapper">
         <div className="loading-screen">
@@ -66,10 +81,52 @@ const RoundIntro = () => {
         </div>
       </section>
     );
+  }
+
+  if (error) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p className="error-message">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!roundInfo) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p>No round info available.</p>
+        </div>
+      </section>
+    );
+  }
+
+  const handleNextClick = () => {
+    switch (roundInfo.category) {
+      case "general_round":
+        navigate(`/quiz/${quizId}/round/${roundId}/general`);
+        break;
+      case "rapid_fire_round":
+        navigate(`/quiz/${quizId}/round/${roundId}/rapidfire`);
+        break;
+      case "buzzer_round":
+        navigate(`/quiz/${quizId}/round/${roundId}/buzzer`);
+        break;
+      case "estimation_round":
+        navigate(`/quiz/${quizId}/round/${roundId}/estimation`);
+        break;
+      case "subject_round":
+        navigate(`/quiz/${quizId}/round/${roundId}/subjective`);
+        break;
+      default:
+        navigate(`/quiz/${quizId}/round/${roundId}`);
+    }
+  };
 
   return (
     <section className="home-wrapper">
-      {/* Round Screen */}
       {showIntro ? (
         <section className="main-container">
           <div className="content">
@@ -78,11 +135,9 @@ const RoundIntro = () => {
               <div className="round-label">ROUND</div>
             </div>
             <div className="round-title-container">
-              <p>
-                {roundInfo.roundTitle}
-                <p style={{ fontSize: "2rem", padding: "0" }}>
-                  "{roundInfo.category.toUpperCase().replace("_", " ")}"
-                </p>
+              <p>{roundInfo.roundTitle}</p>
+              <p style={{ fontSize: "2rem", padding: "0" }}>
+                "{roundInfo.category.toUpperCase().replace("_", " ")}"
               </p>
             </div>
           </div>
@@ -100,38 +155,15 @@ const RoundIntro = () => {
           <div className="round-rules-content">
             <div className="rules-box">
               <div className="rules-heading">RULES</div>
-              <div className="rules-list">
+              <ul className="rules-list">
                 {roundInfo.rules.map((rule, index) => (
                   <li key={index}>{rule}</li>
                 ))}
-              </div>
+              </ul>
             </div>
           </div>
           <div className="round-next-btn-container">
-            <button
-              className="round-next-btn"
-              onClick={() => {
-                switch (roundInfo.category) {
-                  case "general_round":
-                    navigate(`/quiz/${quizId}/round/${roundId}/general`);
-                    break;
-                  case "rapid_fire_round":
-                    navigate(`/quiz/${quizId}/round/${roundId}/rapidfire`);
-                    break;
-                  case "buzzer_round":
-                    navigate(`/quiz/${quizId}/round/${roundId}/buzzer`);
-                    break;
-                  case "estimation_round":
-                    navigate(`/quiz/${quizId}/round/${roundId}/estimation`);
-                    break;
-                  case "subject_round":
-                    navigate(`/quiz/${quizId}/round/${roundId}/subjective`);
-                    break;
-                  default:
-                    navigate(`/quiz/${quizId}/round/${roundId}`); // fallback
-                }
-              }}
-            >
+            <button className="round-next-btn" onClick={handleNextClick}>
               <FaArrowRight />
             </button>
           </div>

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { BiShow } from "react-icons/bi";
 import axios from "axios";
 
@@ -56,22 +56,30 @@ const GeneralRound = ({ onFinish }) => {
   const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
 
+  const location = useLocation();
+  const queryParams = new URLSearchParams(location.search);
+  const adminId = queryParams.get("adminId"); // this will be null if admin view
+
   // ---------------- Fetch Quiz Data ----------------
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quiz",
-          { withCredentials: true }
-        );
+        // Fetch quizzes (admin or user)
+        let url = "http://localhost:4000/api/quiz/get-quiz";
+        if (adminId) {
+          url = `http://localhost:4000/api/quiz/get-quizbyadmin/${adminId}`;
+        }
 
+        const quizRes = await axios.get(url, { withCredentials: true });
         const allQuizzes = quizRes.data.quizzes || [];
+
+        // Find the current quiz by quizId or roundId
         const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds.some((r) => r._id === roundId)
+          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
         );
         if (!currentQuiz) return console.warn("Quiz not found");
 
-        // Teams
+        // Format Teams
         const formattedTeams = (currentQuiz.teams || []).map((team, index) => ({
           id: team._id,
           name: team.name || `Team ${index + 1}`,
@@ -80,7 +88,7 @@ const GeneralRound = ({ onFinish }) => {
         }));
         setTeams(formattedTeams);
 
-        // Round
+        // Find Active Round
         const round = currentQuiz.rounds.find((r) => r._id === roundId);
         if (!round) return console.warn("Round not found");
         setActiveRound(round);
@@ -92,34 +100,36 @@ const GeneralRound = ({ onFinish }) => {
         setRoundTime(round?.rules?.timeLimitValue || TEAM_TIME_LIMIT);
         if (round?.rules?.enableNegative) setReduceBool(true);
 
-        // Questions
+        // Fetch Questions
         const questionRes = await axios.get(
           "http://localhost:4000/api/question/get-questions",
           { withCredentials: true }
         );
         const allQuestions = questionRes.data.data || [];
+
         const filteredQuestions = allQuestions.filter((q) =>
           round.questions.includes(q._id)
         );
 
         const formattedQuestions = filteredQuestions.map((q) => {
-          const optionsArray =
-            typeof q.options[0] === "string"
-              ? JSON.parse(q.options[0])
-              : q.options;
+          let optionsArray = [];
+          if (q.options?.length) {
+            optionsArray =
+              typeof q.options[0] === "string"
+                ? JSON.parse(q.options[0])
+                : q.options;
+          }
 
           const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx),
+            id: String.fromCharCode(97 + idx), // a, b, c, ...
             text: typeof opt === "string" ? opt : opt.text || "",
             originalId: opt._id || null,
           }));
 
-          // Find correct option
+          // Determine correct option
           const correctIndex = mappedOptions.findIndex(
             (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
           );
-
-          // If correctOption not in options, maybe shortAnswer
           const correctOptionId =
             correctIndex >= 0
               ? mappedOptions[correctIndex].id
@@ -144,7 +154,7 @@ const GeneralRound = ({ onFinish }) => {
     };
 
     if (quizId && roundId) fetchQuizData();
-  }, [quizId, roundId]);
+  }, [quizId, roundId, adminId]);
 
   // ---------------- Team Color Assignment ----------------
   const generateTeamColors = (teams) => {
@@ -345,11 +355,26 @@ const GeneralRound = ({ onFinish }) => {
     //   isPassed: true,
     // });
 
+    const correctOption = currentQuestion.options.find(
+      (opt) => opt.id === currentQuestion.correctOptionId
+    );
+
+    const wrongOption = currentQuestion.options.find(
+      (opt) => opt.originalId !== correctOption.originalId
+    );
+    let answerId = wrongOption ? wrongOption.originalId : -1;
+
+    // Use originalId for submission
+    const givenAnswer = answerId;
+    if (!givenAnswer) {
+      return;
+    }
+
     try {
       const passResult = await submitAnswerToBackend({
         teamId: activeTeam.id,
         questionId: currentQuestion.id,
-        givenAnswer: null,
+        givenAnswer,
         isPassed: true,
       });
 

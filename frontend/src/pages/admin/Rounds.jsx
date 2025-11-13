@@ -242,7 +242,7 @@ export default function CreateQuiz() {
           rules: {
             enableTimer: true,
             timerType: "perQuestion",
-            timeLimitValue: 30,
+            timeLimitValue: 10,
             enableNegative: false,
             negativePoints: 0,
             enablePass: false,

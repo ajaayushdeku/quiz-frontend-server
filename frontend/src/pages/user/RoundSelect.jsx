@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams, useLocation } from "react-router-dom";
 import "../../styles/Round.css";
 import "../../styles/Quiz.css";
 import "../../styles/Home.css";
@@ -21,15 +21,26 @@ const roundImages = {
 const RoundSelect = () => {
   const navigate = useNavigate();
   const { quizId } = useParams();
+  const location = useLocation();
 
   const [quizRounds, setQuizRounds] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  // Extract adminId from query params if present (for user role)
+  const queryParams = new URLSearchParams(location.search);
+  const adminId = queryParams.get("adminId");
 
   useEffect(() => {
     const fetchQuiz = async () => {
       try {
-        const res = await axios.get(`http://localhost:4000/api/quiz/get-quiz`, {
+        setLoading(true);
+        setError("");
+
+        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
           withCredentials: true,
         });
+
         const quizzes = res.data.quizzes || [];
         const selectedQuiz = quizzes.find((q) => q._id === quizId);
 
@@ -41,39 +52,58 @@ const RoundSelect = () => {
             _id: round._id,
             roundNumber: String(idx + 1).padStart(2, "0"),
             roundTitle: round.name,
-            rules: round.rules || [], // or get from config if needed
-            category: normalizeCategory(round.category) || "General",
+            rules: round.rules || {},
+            category: normalizeCategory(round.category) || "general_round",
           }));
           setQuizRounds(formattedRounds);
         }
       } catch (err) {
         console.error("Error fetching quiz rounds:", err);
+        setError("Failed to fetch quiz rounds. Try again.");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchQuiz();
-  }, [quizId]);
+  }, [quizId, adminId]);
 
   const handleRoundSelect = (round) => {
-    navigate(`/round/${quizId}/${round._id}`); // Pass quizId & roundId
+    navigate(`/round/${quizId}/${round._id}`);
   };
 
-  if (!quizRounds.length) {
-    return <p className="text-gray-400 mt-4">Loading rounds...</p>;
-  }
-
-  if (!quizRounds)
+  if (loading) {
     return (
       <section className="home-wrapper">
         <div className="loading-screen">
-          <p>Loading quiz...</p>
+          <p>Loading quiz rounds...</p>
         </div>
       </section>
     );
+  }
+
+  if (error) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p className="error-message">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (!quizRounds.length) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p>No rounds found for this quiz.</p>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="home-wrapper">
-      {" "}
       <div className="main-container">
         <div className="round-select-content">
           <div className="round-select-header">ROUNDS</div>
@@ -87,17 +117,13 @@ const RoundSelect = () => {
                 <div className="round-image-wrapper">
                   <img
                     src={roundImages[round.category] || general}
-                    alt={round.name}
+                    alt={round.roundTitle}
                   />
-
-                  <h1 className="round-number">
-                    {String(index + 1).padStart(2, "0")}
-                  </h1>
+                  <h1 className="round-number">{round.roundNumber}</h1>
                 </div>
-
                 <h2 className="round-title">{round.roundTitle}</h2>
                 <h2 className="round-title">
-                  ( {round.category.toUpperCase().replace("_", " ")} )
+                  ({round.category.toUpperCase().replace("_", " ")})
                 </h2>
               </div>
             ))}
