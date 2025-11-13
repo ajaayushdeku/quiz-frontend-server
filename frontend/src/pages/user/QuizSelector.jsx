@@ -5,6 +5,7 @@ import "../../styles/Quiz.css";
 import "../../styles/QuizSelector.css";
 import { BsFillPatchQuestionFill } from "react-icons/bs";
 import { RiTeamFill } from "react-icons/ri";
+import { IoExtensionPuzzle } from "react-icons/io5";
 
 const QuizSelector = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -75,12 +76,14 @@ const QuizSelector = () => {
                 {quiz.rounds?.length > 0 && (
                   <div className="quiz-rounds">
                     <div className="card-topic">
-                      <BsFillPatchQuestionFill className="icon" />
+                      <IoExtensionPuzzle className="icon" />
                       <strong>Rounds:</strong>
                     </div>
                     <ul>
-                      {quiz.rounds.map((round) => (
-                        <li key={round._id}>{round.name}</li>
+                      {quiz.rounds.map((round, idx) => (
+                        <li key={round._id}>
+                          {idx + 1}. {round.name}
+                        </li>
                       ))}
                     </ul>
                   </div>
@@ -95,8 +98,10 @@ const QuizSelector = () => {
                     </div>
 
                     <ul>
-                      {quiz.teams.map((team) => (
-                        <li key={team._id}>{team.name}</li>
+                      {quiz.teams.map((team, idx) => (
+                        <li key={team._id}>
+                          {idx + 1}. {team.name}
+                        </li>
                       ))}
                     </ul>
                   </div>

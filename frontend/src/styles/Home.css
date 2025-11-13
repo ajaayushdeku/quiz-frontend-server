@@ -82,6 +82,10 @@
 /* ==========================
    Start Button
 ========================== */
+.nav-link {
+  text-decoration: none;
+}
+
 .start-btn {
   display: flex;
   align-items: center;

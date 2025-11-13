@@ -1,7 +1,7 @@
 .quiz-selector-header {
   font-size: 2.8rem;
   font-weight: 800;
-  margin-bottom: 2rem;
+  margin: 2rem 0;
   text-align: center;
   color: #e5e5e1;
   text-shadow: 0 0 10px #808080;
@@ -99,7 +99,7 @@
 
 .icon {
   font-size: 1.2rem;
-  color: #78f092;
+  color: #6098e8;
 }
 
 @media (max-width: 768px) {

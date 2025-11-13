@@ -4,7 +4,6 @@ import axios from "axios";
 import { FaArrowRight } from "react-icons/fa";
 import "../../styles/Round.css";
 import "../../styles/Quiz.css";
-import rulesConfig from "../../config/rulesConfig";
 
 const RoundIntro = () => {
   const { quizId, roundId } = useParams();
@@ -16,7 +15,6 @@ const RoundIntro = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
-  // Extract adminId from query param (for user)
   const queryParams = new URLSearchParams(location.search);
   const adminId = queryParams.get("adminId");
 
@@ -45,22 +43,24 @@ const RoundIntro = () => {
           return;
         }
 
-        const normalizeCategory = (category) =>
-          category.toLowerCase().replace(/\s+/g, "_");
-
-        const categoryKey = normalizeCategory(
-          selectedRound.category || selectedRound.name
-        );
-
-        const configRules = rulesConfig[categoryKey]?.rules || [];
+        // Get regulations description and split by period
+        let roundRules = [];
+        if (selectedRound.regulation?.description) {
+          roundRules = selectedRound.regulation.description
+            .split(".")
+            .map((r) => r.trim())
+            .filter(Boolean);
+        }
 
         setRoundInfo({
           roundNumber: String(
             selectedQuiz.rounds.indexOf(selectedRound) + 1
-          ).padStart(2, ""),
+          ).padStart(2, "0"),
           roundTitle: selectedRound.name,
-          rules: configRules,
-          category: categoryKey,
+          rules: roundRules,
+          category:
+            selectedRound.category?.toLowerCase().replace(/\s+/g, "_") ||
+            "general_round",
         });
       } catch (err) {
         console.error("Error fetching round info:", err);

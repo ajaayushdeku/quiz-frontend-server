@@ -79,7 +79,7 @@ const TeamStats = () => {
               <div className="rounds-scroll">
                 {team.roundWiseStats.map((round, i) => (
                   <div key={i} className="round-tab">
-                    <div className="round-title">
+                    <div className="round-topic">
                       {round.roundName} ({round.category})
                     </div>
                     <div className="round-stats">
