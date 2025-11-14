@@ -192,6 +192,7 @@
 .round-card {
   width: 100%;
   height: 100vh;
+  padding: 2rem 2rem;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -212,8 +213,8 @@
 
 /* Image + Round Info */
 .round-image-wrapper {
-  width: 5.5rem;
-  height: 5.5rem;
+  width: 5rem;
+  height: 5rem;
   gap: 1.5rem;
   margin-bottom: 0.5rem;
   animation: zoomInOut 7s ease-in-out infinite;

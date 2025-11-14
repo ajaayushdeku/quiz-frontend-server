@@ -40,170 +40,125 @@ interface QuizInput {
 }
 
 export const createQuiz = async (req: AuthRequest, res: Response) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
     const adminId = req.user?.id;
-    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+    if (!adminId) {
+      await session.abortTransaction();
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
     const { name, rounds, teams } = req.body as QuizInput;
 
-    if (!name?.trim())
-      return res.status(400).json({ message: "Quiz name is required" });
-    if (!rounds?.length)
-      return res
-        .status(400)
-        .json({ message: "At least one round is required" });
-    if (!teams?.length)
-      return res.status(400).json({ message: "At least one team is required" });
+    if (!name?.trim()) throw new Error("Quiz name is required");
+    if (!rounds?.length) throw new Error("At least one round is required");
+    if (!teams?.length) throw new Error("At least one team is required");
 
-    // Validate unique team names
+    // Unique team names
     const teamNames = teams.map((t) => t.name.trim().toLowerCase());
     if (new Set(teamNames).size !== teamNames.length) {
-      return res
-        .status(400)
-        .json({ message: "Team names must be unique within this quiz" });
+      throw new Error("Team names must be unique within this quiz");
     }
 
+    // Prevent duplicate quizzes
     const existingQuiz = await Quiz.findOne({ name: name.trim(), adminId });
-    if (existingQuiz) {
-      return res.status(400).json({
-        message: `You already have a quiz named "${name.trim()}". Please choose a different name.`,
-      });
-    }
+    if (existingQuiz) throw new Error(`Quiz "${name}" already exists`);
 
-    // Step 1: Create teams
     const createdTeams = await Team.insertMany(
-      teams.map((t) => ({ name: t.name, points: 0, adminId }))
+      teams.map((t) => ({ name: t.name, points: 0, adminId })),
+      { session }
     );
     const numTeams = createdTeams.length;
 
-    // Step 2: Create rounds
     const createdRounds: any[] = [];
-    for (const [index, r] of rounds.entries()) {
-      if (!r.name?.trim())
-        return res
-          .status(400)
-          .json({ message: `Round ${index + 1}: Name is required` });
-      if (!r.category)
-        return res
-          .status(400)
-          .json({ message: `Round ${index + 1}: Category is required` });
-      if (!r.rules)
-        return res
-          .status(400)
-          .json({ message: `Round ${index + 1}: Rules are required` });
+
+    for (const [i, r] of rounds.entries()) {
+      if (!r.name?.trim()) throw new Error(`Round ${i + 1}: Name required`);
+      if (!r.category) throw new Error(`Round ${i + 1}: Category required`);
+      if (!r.rules) throw new Error(`Round ${i + 1}: Rules required`);
 
       const rules = r.rules;
 
-      // Validate assignQuestionType
       if (!["forAllTeams", "forEachTeam"].includes(rules.assignQuestionType))
-        return res.status(400).json({
-          message: `Round ${index + 1}: Invalid assignQuestionType`,
-        });
+        throw new Error(`Round ${i + 1}: Invalid assignQuestionType`);
 
-      // Timer cannot be enabled for "forAllTeams"
-      if (rules.assignQuestionType === "forAllTeams" && rules.enableTimer) {
-        return res.status(400).json({
-          message: `Round ${
-            index + 1
-          }: enableTimer must be false for assignQuestionType "forAllTeams"`,
-        });
-      }
+      if (rules.assignQuestionType === "forAllTeams" && rules.enableTimer)
+        throw new Error(
+          `Round ${i + 1}: enableTimer must be false for forAllTeams`
+        );
 
-      // Validate numberOfQuestion and points
       if (!rules.numberOfQuestion || rules.numberOfQuestion <= 0)
-        return res.status(400).json({
-          message: `Round ${
-            index + 1
-          }: numberOfQuestion must be greater than 0`,
-        });
+        throw new Error(
+          `Round ${i + 1}: numberOfQuestion must be greater than 0`
+        );
 
       if (!rules.points || rules.points <= 0)
-        return res.status(400).json({
-          message: `Round ${index + 1}: points must be greater than 0`,
-        });
+        throw new Error(`Round ${i + 1}: points must be greater than 0`);
 
-      // Negative points validation
-      if (
-        rules.enableNegative &&
-        (!rules.negativePoints || rules.negativePoints <= 0)
-      ) {
-        return res
-          .status(400)
-          .json({ message: `Round ${index + 1}: negativePoints must be > 0` });
-      }
-
-      // Pass validation
-      if (rules.enablePass) {
-        if (!rules.passCondition)
-          return res
-            .status(400)
-            .json({ message: `Round ${index + 1}: passCondition is required` });
-
-        if (rules.passCondition === "onceToNextTeam") {
-          if (!rules.passedPoints || rules.passedPoints <= 0)
-            return res.status(400).json({
-              message: `Round ${index + 1}: passedPoints must be > 0`,
-            });
-          if (!rules.passedTime || rules.passedTime <= 0)
-            return res
-              .status(400)
-              .json({ message: `Round ${index + 1}: passedTime must be > 0` });
-        }
-      }
-
-      // Validate total questions for "forEachTeam"
-      const requiredQuestionCount =
+      const requiredCount =
         rules.assignQuestionType === "forEachTeam"
           ? rules.numberOfQuestion * numTeams
           : rules.numberOfQuestion;
 
-      if (!r.questions || r.questions.length < requiredQuestionCount) {
-        return res.status(400).json({
-          message: `Round ${
-            index + 1
-          }: You must select ${requiredQuestionCount} questions because assignQuestionType is "${
-            rules.assignQuestionType
-          }" and there are ${numTeams} teams.`,
-        });
-      }
+      if (!r.questions || r.questions.length < requiredCount)
+        throw new Error(
+          `Round ${
+            i + 1
+          }: You must select ${requiredCount} questions for ${numTeams} teams`
+        );
 
-      const selectedQuestions = r.questions.slice(0, requiredQuestionCount);
+      const round = await Round.create(
+        [
+          {
+            roundNumber: i + 1,
+            name: r.name,
+            category: r.category,
+            rules,
+            regulation: { description: r.regulation?.description || "" },
+            questions: r.questions.slice(0, requiredCount),
+            adminId,
+            points: rules.points,
+          },
+        ],
+        { session }
+      );
 
-      // Create round
-      const round = await Round.create({
-        roundNumber: index + 1,
-        name: r.name,
-        category: r.category,
-        rules,
-        regulation: { description: r.regulation?.description || "" },
-        questions: selectedQuestions,
-        adminId,
-        points: rules.points,
-      });
-
-      createdRounds.push(round);
+      createdRounds.push(round[0]);
     }
 
-    // Step 3: Create quiz
-    const quiz = await Quiz.create({
-      name,
-      adminId,
-      rounds: createdRounds.map((r) => r._id),
-      teams: createdTeams.map((t) => t._id),
-      numTeams,
-    });
+    const quiz = await Quiz.create(
+      [
+        {
+          name,
+          adminId,
+          rounds: createdRounds.map((r) => r._id),
+          teams: createdTeams.map((t) => t._id),
+          numTeams,
+        },
+      ],
+      { session }
+    );
+
+    // SUCCESS → COMMIT TRANSACTION
+    await session.commitTransaction();
+    session.endSession();
 
     return res.status(201).json({
-      message: "✅ Quiz created successfully",
-      quiz,
+      message: "Quiz created successfully",
+      quiz: quiz[0],
       rounds: createdRounds,
       teams: createdTeams,
     });
   } catch (error: any) {
     console.error("Error creating quiz:", error);
-    return res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+    await session.abortTransaction();
+    session.endSession();
+
+    return res.status(400).json({
+      message: error.message || "Failed to create quiz",
+    });
   }
 };
 

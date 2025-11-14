@@ -26,7 +26,7 @@ import { useParams } from "react-router-dom";
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
 const COLORS = [
-  "#8d1734ff",
+  "#d61344ff",
   "#0ab9d4ff",
   "#32be76ff",
   "#e5d51eff",
@@ -361,7 +361,7 @@ const BuzzerRound = ({ onFinish }) => {
             {showCorrectAnswer ? (
               <>
                 <div className="correct-answer-display">
-                  ✅ Correct Answer:{" "}
+                  🎯 Correct Answer:{" "}
                   <strong style={{ color: "#32be76ff" }}>
                     {correctAnswerValue}
                   </strong>

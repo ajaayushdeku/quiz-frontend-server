@@ -122,9 +122,7 @@ const RoundSelect = () => {
                   <h1 className="round-number">{round.roundNumber}</h1>
                 </div>
                 <h2 className="round-title">{round.roundTitle}</h2>
-                <h2 className="round-title">
-                  ({round.category.toUpperCase().replace("_", " ")})
-                </h2>
+                {/* <h5>({round.category.toUpperCase().replace("_", " ")})</h5> */}
               </div>
             ))}
           </div>

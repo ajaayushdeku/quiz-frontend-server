@@ -28,7 +28,7 @@ const { settings } = rulesConfig.rapid_fire_round;
 const INITIAL_TIMER = settings.roundTime;
 
 const COLORS = [
-  "#8d1734ff",
+  "#d61344ff",
   "#0ab9d4ff",
   "#32be76ff",
   "#e5d51eff",
@@ -776,7 +776,7 @@ const RapidFireRound = ({ onFinish }) => {
                       Your Answer is {q.isCorrect ? "✅ Correct" : "❌ Wrong"}
                     </p>
                     <p className="team-summary-answer">
-                      <span> ✅ Correct Answer:</span> <br />
+                      <span> 🎯 Correct Answer:</span> <br />
                       {q.correctAnswer}
                     </p>
                   </div>

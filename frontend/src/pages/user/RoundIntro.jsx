@@ -154,7 +154,7 @@ const RoundIntro = () => {
         <div className="main-container" id="about">
           <div className="round-rules-content">
             <div className="rules-box">
-              <div className="rules-heading">RULES</div>
+              <div className="rules-heading">RULES / REGULATIONS</div>
               <ul className="rules-list">
                 {roundInfo.rules.map((rule, index) => (
                   <li key={index}>{rule}</li>

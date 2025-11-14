@@ -5,6 +5,7 @@ import "../../styles/Dashboard.css";
 import { MdAddBox, MdQuiz } from "react-icons/md";
 import { BiAddToQueue, BiImageAdd } from "react-icons/bi";
 import { Footprints, FootprintsIcon, StepBackIcon } from "lucide-react";
+import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 
 export default function CreateQuiz() {
   const [step, setStep] = useState(1);
@@ -100,6 +101,31 @@ export default function CreateQuiz() {
   const handleRoundChange = (index, field, value) => {
     const updated = [...rounds];
     updated[index][field] = value;
+
+    // 🧹 RESET RULES WHEN CATEGORY CHANGES
+    if (field === "category") {
+      updated[index].rules = {
+        enableNegative: false,
+        negativePoints: 0,
+        enablePass: false,
+        passCondition: "noPass",
+        passLimit: 0,
+        passedPoints: 0,
+        passedTime: 0,
+        enableTimer: false,
+        timerType:
+          value === "general round" || value === "subjective round"
+            ? "perQuestion"
+            : "allQuestions",
+        timerSeconds: 0,
+        // 🔹 FORCE assignQuestionType based on category
+        assignQuestionType:
+          value === "estimation round" || value === "buzzer round"
+            ? "forAllTeams"
+            : "forEachTeam",
+      };
+    }
+
     setRounds(updated);
   };
 
@@ -198,8 +224,9 @@ export default function CreateQuiz() {
 
     if (c === "rapid fire round") {
       return { onlyAllQuestions: true };
+    } else if (c === "general round" || c === "subject round") {
+      return { onlyAllQuestions: false };
     }
-    return { onlyAllQuestions: false };
   };
 
   // --- CHECKBOX ---
@@ -375,7 +402,7 @@ export default function CreateQuiz() {
                 onClick={() => setStep(2)}
                 disabled={!quizName.trim()}
               >
-                Next
+                Next <FaArrowRight />
               </button>
             </div>
           </section>
@@ -414,6 +441,7 @@ export default function CreateQuiz() {
                 className="secondary-btn"
                 onClick={() => setStep(1)}
               >
+                <FaArrowLeft />
                 Back
               </button>
               <button
@@ -422,7 +450,7 @@ export default function CreateQuiz() {
                 onClick={() => setStep(3)}
                 disabled={teams.some((t) => !t.name.trim())}
               >
-                Next
+                Next <FaArrowRight />
               </button>
             </div>
           </section>
@@ -531,9 +559,9 @@ export default function CreateQuiz() {
                                   <option value="perQuestion">
                                     Per Question
                                   </option>
-                                  <option value="allQuestions">
+                                  {/* <option value="allQuestions">
                                     All Questions
-                                  </option>
+                                  </option> */}
                                 </>
                               )}
                             </select>
@@ -561,7 +589,9 @@ export default function CreateQuiz() {
                   )}
                   {/* Enable Negative */}
                   {/* ⛔ Hide Negative & Pass for Estimation + Buzzer rounds */}
-                  {![""].includes(round.category.toLowerCase()) && (
+                  {!["estimation round"].includes(
+                    round.category.toLowerCase()
+                  ) ? (
                     <>
                       {/* Enable Negative */}
                       <label className="quiz-label choose-rule">
@@ -602,6 +632,10 @@ export default function CreateQuiz() {
                         </div>
                       )}
                     </>
+                  ) : (
+                    <label className="quiz-label choose-rule">
+                      No Rules for this Round Types
+                    </label>
                   )}
 
                   {!["estimation round", "buzzer round"].includes(
@@ -855,11 +889,12 @@ export default function CreateQuiz() {
                 className="secondary-btn"
                 onClick={() => setStep(2)}
               >
+                <FaArrowLeft />
                 Back
               </button>
               <button
                 type="submit"
-                className="primary-btn"
+                className="primary-btn add-question-btn"
                 onClick={handleSubmit}
                 disabled={loading}
               >

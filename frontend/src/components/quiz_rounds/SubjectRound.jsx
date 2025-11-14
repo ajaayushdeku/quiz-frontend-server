@@ -31,7 +31,7 @@ const TEAM_TIME_LIMIT = settings.teamTimeLimit;
 // const PASS_TIME_LIMIT = settings.passTimeLimit;
 
 const COLORS = [
-  "#8d1734ff",
+  "#d61344ff",
   "#0ab9d4ff",
   "#32be76ff",
   "#e5d51eff",

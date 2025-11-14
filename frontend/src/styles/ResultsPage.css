@@ -138,12 +138,20 @@
   font-size: 1.8rem;
   font-weight: 700;
   color: #222;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
 .team-points {
   font-size: 2.2rem;
   font-weight: 700;
   color: #ffffff;
+  display: flex;
+  gap: 1rem;
+  justify-content: center;
+  align-items: center;
 }
 
 /* ==========================
@@ -208,19 +216,20 @@
   border-radius: 16px;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
   text-align: center;
-  padding: 2.5rem 5rem;
+
   max-width: 900px;
   width: 100%;
-
   color: #e0e0e0;
   border: 2px dashed #555;
 }
 
 .finish-display-container {
   margin-top: -8rem;
+  padding: 1.5rem 4rem;
 }
 .finish-container {
   margin-top: 1rem;
+  padding: 2.5rem 5rem;
 }
 /* ==========================
    Headings & Button
@@ -242,7 +251,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
-  margin-bottom: 2rem;
+  /* margin-bottom: 2rem; */
 }
 
 .next-round-btn:hover {

@@ -235,24 +235,34 @@ const EstimationRound = ({ onFinish }) => {
 
               {result?.winner ? (
                 <div className="winner-list">
-                  <h4>🏆 Closest Team(s) : </h4>
+                  <h4 className="winner-team">🏆 Closest Team(s) : </h4>
                   {([result.winner] || []).map((w) => {
                     const teamName =
                       teams.find((t) => t.id === w.teamId)?.name || "Unknown";
                     return (
                       <div className="winner-team-list">
                         <div>
-                          {" "}
                           <strong className="winner-team">
                             <MdGroup className="team-icon" />
                             <h3>{teamName.toUpperCase()}</h3>
                           </strong>
                           <p key={w.teamId} className="winner-item">
                             <div className="winner-team-info">
-                              Team's Answer: <h3> {w.givenAnswer}</h3>
+                              <div>
+                                {" "}
+                                Team's Answer: <h3> {w.givenAnswer}</h3>
+                              </div>
                               {/* Difference from the Estimation:{" "} */}
                               {/* <h3>{w.difference}</h3> */}
-                              Points Earned: <h3> {w.pointsAwarded}</h3>
+                              <div
+                                style={{
+                                  paddingLeft: "2rem",
+                                  borderLeft: "2px solid #c9c9c9ff",
+                                }}
+                              >
+                                {" "}
+                                Points Earned: <h3> {w.pointsAwarded}</h3>
+                              </div>
                             </div>
                           </p>
                         </div>
@@ -284,6 +294,15 @@ const EstimationRound = ({ onFinish }) => {
               handleSubmit={handleSubmit}
               disabled={submitted}
             />
+
+            <div className="submit-btn-container">
+              <Button
+                onClick={handleSubmit}
+                // disabled={!teamAnswers.length === teams.length}
+                children="Submit"
+                className="submit-button"
+              />
+            </div>
           </>
         )
       ) : (

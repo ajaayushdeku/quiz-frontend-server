@@ -59,23 +59,26 @@ const FinishDisplay = ({ onFinish, message }) => {
               .map((team) => {
                 const isWinner = team.points === maxPoints && maxPoints > 0;
                 return (
-                  <div
-                    key={team.id}
-                    className={`scoreboard-card ${
-                      isWinner ? "winner-card" : ""
-                    }`}
-                  >
-                    <div className="team-title">
-                      <MdGroup className="team-icon" />
+                  <>
+                    {" "}
+                    <div>{isWinner ? "👑 " : ""}</div>
+                    <div
+                      key={team.id}
+                      className={`scoreboard-card ${
+                        isWinner ? "winner-card" : ""
+                      }`}
+                    >
+                      <div className="team-title">
+                        <MdGroup className="team-icon" />
 
-                      <div>{team.name.toUpperCase()}</div>
+                        <div>{team.name.toUpperCase()}</div>
+                      </div>
+                      <div className="team-points">
+                        {" "}
+                        <div> {team.points}</div>
+                      </div>
                     </div>
-                    <div className="team-points">
-                      {" "}
-                      <div>{isWinner ? "👑 " : ""}</div>
-                      {team.points}
-                    </div>
-                  </div>
+                  </>
                 );
               })
           ) : (

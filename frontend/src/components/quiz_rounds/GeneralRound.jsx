@@ -29,7 +29,7 @@ const { settings } = rulesConfig.general_round;
 const TEAM_TIME_LIMIT = settings.teamTimeLimit;
 
 const COLORS = [
-  "#8d1734ff",
+  "#d61344ff",
   "#0ab9d4ff",
   "#32be76ff",
   "#e5d51eff",
@@ -41,6 +41,7 @@ const COLORS = [
 
 const GeneralRound = ({ onFinish }) => {
   const { quizId, roundId } = useParams();
+
   const { showToast } = useUIHelpers();
 
   const [quesFetched, setQuesFetched] = useState([]);
@@ -57,6 +58,9 @@ const GeneralRound = ({ onFinish }) => {
   const [passIt, setPassIt] = useState(false);
 
   const location = useLocation();
+
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const queryParams = new URLSearchParams(location.search);
   const adminId = queryParams.get("adminId"); // this will be null if admin view
 
@@ -64,6 +68,9 @@ const GeneralRound = ({ onFinish }) => {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
+        setLoading(true);
+        setError("");
+
         // Fetch quizzes (admin or user)
         let url = "http://localhost:4000/api/quiz/get-quiz";
         if (adminId) {
@@ -150,6 +157,8 @@ const GeneralRound = ({ onFinish }) => {
       } catch (error) {
         console.error("Fetch Error:", error);
         showToast("Failed to fetch quiz data!");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -469,6 +478,26 @@ const GeneralRound = ({ onFinish }) => {
       el.style.display = quizCompleted ? "none" : "block";
     });
   }, [quizCompleted]);
+
+  if (loading) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p>Loading round info...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p className="error-message">{error}</p>
+        </div>
+      </section>
+    );
+  }
 
   // ---------------- Render ----------------
   return (
