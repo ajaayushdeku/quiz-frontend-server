@@ -111,6 +111,14 @@ export default function CreateQuiz() {
     if (field === "assignQuestionType" && value === "forAllTeams") {
       current.enableTimer = false;
     }
+    // --- Mutual exclusivity logic ---
+    if (field === "enableNegative" && value === true) {
+      current.enablePass = false; // disable pass if negative selected
+    }
+
+    if (field === "enablePass" && value === true) {
+      current.enableNegative = false; // disable negative if pass selected
+    }
 
     updated[index].rules = current;
     setRounds(updated);
@@ -138,6 +146,60 @@ export default function CreateQuiz() {
 
     updatedRounds[roundIndex] = round;
     setRounds(updatedRounds);
+  };
+
+  // --- FILTER QUESTIONS BASED ON ROUND CATEGORY ---
+  const getFilteredQuestions = (category) => {
+    if (!questions.length) return [];
+
+    // Estimation Round → only questions with shortAnswer
+    if (category === "estimation round") {
+      return questions.filter((q) => q.shortAnswer);
+    }
+
+    // Other rounds → only MCQ
+    return questions.filter((q) => q.options && q.options.length > 0);
+  };
+
+  const getRoundRules = (category) => {
+    const c = category.toLowerCase();
+
+    return {
+      isGeneral: c === "general round",
+      isRapid: c === "rapid fire round",
+      isSubjective: c === "subject round",
+      isEstimation: c === "estimation round",
+      isBuzzer: c === "buzzer round",
+    };
+  };
+
+  const getAssignQuestionOptions = (category) => {
+    const c = category.toLowerCase();
+
+    // For these rounds → only "forEachTeam"
+    if (
+      c === "general round" ||
+      c === "subject round" ||
+      c === "rapid fire round"
+    ) {
+      return { showForEach: true, showForAll: false };
+    }
+
+    // For these rounds → only "forAllTeams"
+    if (c === "estimation round" || c === "buzzer round") {
+      return { showForEach: false, showForAll: true };
+    }
+
+    return { showForEach: true, showForAll: true };
+  };
+
+  const getTimerTypeOptions = (category) => {
+    const c = category.toLowerCase();
+
+    if (c === "rapid fire round") {
+      return { onlyAllQuestions: true };
+    }
+    return { onlyAllQuestions: false };
   };
 
   // --- CHECKBOX ---
@@ -397,7 +459,7 @@ export default function CreateQuiz() {
                 </label>
 
                 <label className="quiz-label input-title">
-                  Category:
+                  Round Category:
                   <select
                     value={round.category}
                     onChange={(e) =>
@@ -423,189 +485,240 @@ export default function CreateQuiz() {
                   </label>
 
                   {/* Timer Options */}
-                  <label className="quiz-label choose-rule">
-                    <input
-                      type="checkbox"
-                      checked={round.rules.enableTimer}
-                      onChange={(e) =>
-                        handleRuleChange(index, "enableTimer", e.target.checked)
-                      }
-                      className="rules-checkbox"
-                    />
-                    Enable Timer
-                  </label>
-
-                  {round.rules.enableTimer && (
-                    <div className="multi-input-container">
-                      <label className="quiz-label-d">
-                        Timer Type:
-                        <select
-                          value={round.rules.timerType}
-                          onChange={(e) =>
-                            handleRuleChange(index, "timerType", e.target.value)
-                          }
-                          className="quiz-input-d select"
-                        >
-                          <option value="perQuestion">Per Question</option>
-                          <option value="allQuestions">All Questions</option>
-                        </select>
-                      </label>
-
-                      <label className="quiz-label-d">
-                        Time Limit (sec):
+                  {/* Hide timer for estimation & buzzer */}
+                  {!["estimation round", "buzzer round"].includes(
+                    round.category.toLowerCase()
+                  ) && (
+                    <>
+                      <label className="quiz-label choose-rule">
                         <input
-                          type="number"
-                          min="1"
-                          value={round.rules.timeLimitValue}
+                          type="checkbox"
+                          checked={round.rules.enableTimer}
                           onChange={(e) =>
                             handleRuleChange(
                               index,
-                              "timeLimitValue",
-                              parseInt(e.target.value)
+                              "enableTimer",
+                              e.target.checked
                             )
                           }
-                          className="quiz-input-d"
+                          className="rules-checkbox"
                         />
+                        Enable Timer
                       </label>
-                    </div>
-                  )}
 
+                      {round.rules.enableTimer && (
+                        <div className="multi-input-container">
+                          <label className="quiz-label-d">
+                            Timer Type:
+                            <select
+                              value={round.rules.timerType}
+                              onChange={(e) =>
+                                handleRuleChange(
+                                  index,
+                                  "timerType",
+                                  e.target.value
+                                )
+                              }
+                              className="quiz-input-d select"
+                            >
+                              {getTimerTypeOptions(round.category)
+                                .onlyAllQuestions ? (
+                                <option value="allQuestions">
+                                  All Questions
+                                </option>
+                              ) : (
+                                <>
+                                  <option value="perQuestion">
+                                    Per Question
+                                  </option>
+                                  <option value="allQuestions">
+                                    All Questions
+                                  </option>
+                                </>
+                              )}
+                            </select>
+                          </label>
+
+                          <label className="quiz-label-d">
+                            Time Limit (sec):
+                            <input
+                              type="number"
+                              min="1"
+                              value={round.rules.timeLimitValue}
+                              onChange={(e) =>
+                                handleRuleChange(
+                                  index,
+                                  "timeLimitValue",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="quiz-input-d"
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </>
+                  )}
                   {/* Enable Negative */}
-                  <label className="quiz-label choose-rule">
-                    <input
-                      type="checkbox"
-                      checked={round.rules.enableNegative}
-                      onChange={(e) =>
-                        handleRuleChange(
-                          index,
-                          "enableNegative",
-                          e.target.checked
-                        )
-                      }
-                      className="rules-checkbox"
-                    />
-                    Enable Negative Points
-                  </label>
-
-                  {round.rules.enableNegative && (
-                    <div className="multi-input-container">
-                      {" "}
-                      <label className="quiz-label-d">
-                        Negative Points:
+                  {/* ⛔ Hide Negative & Pass for Estimation + Buzzer rounds */}
+                  {![""].includes(round.category.toLowerCase()) && (
+                    <>
+                      {/* Enable Negative */}
+                      <label className="quiz-label choose-rule">
                         <input
-                          type="number"
-                          min="0"
-                          value={round.rules.negativePoints}
+                          type="checkbox"
+                          checked={round.rules.enableNegative}
                           onChange={(e) =>
                             handleRuleChange(
                               index,
-                              "negativePoints",
-                              parseInt(e.target.value)
+                              "enableNegative",
+                              e.target.checked
                             )
                           }
-                          className="quiz-input-d"
+                          className="rules-checkbox"
                         />
+                        Enable Negative Points
                       </label>
-                      <div></div>
-                    </div>
+
+                      {round.rules.enableNegative && (
+                        <div className="multi-input-container">
+                          <label className="quiz-label-d">
+                            Negative Points:
+                            <input
+                              type="number"
+                              min="0"
+                              value={round.rules.negativePoints}
+                              onChange={(e) =>
+                                handleRuleChange(
+                                  index,
+                                  "negativePoints",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="quiz-input-d"
+                            />
+                          </label>
+                          <div></div>
+                        </div>
+                      )}
+                    </>
                   )}
 
-                  {/* Enable Pass */}
-                  <label className="quiz-label choose-rule">
-                    <input
-                      type="checkbox"
-                      checked={round.rules.enablePass}
-                      onChange={(e) =>
-                        handleRuleChange(index, "enablePass", e.target.checked)
-                      }
-                      className="rules-checkbox"
-                    />
-                    Enable Pass
-                  </label>
-
-                  {round.rules.enablePass && (
-                    <div className="multi-input-container">
-                      <label className="quiz-label-d">
-                        Pass Condition:
-                        <select
-                          value={round.rules.passCondition}
-                          onChange={(e) => {
-                            const value = e.target.value;
-
-                            // ✅ Reset all pass-related values to zero when "No Pass" is selected
-                            if (value === "noPass") {
-                              handleRuleChange(index, "passCondition", value);
-                              handleRuleChange(index, "passLimit", 0);
-                              handleRuleChange(index, "passedPoints", 0);
-                              handleRuleChange(index, "passedTime", 0);
-                            } else {
-                              handleRuleChange(index, "passCondition", value);
-                            }
-                          }}
-                          className="quiz-input-d select"
-                        >
-                          <option value="noPass">No Pass</option>
-                          <option value="onceToNextTeam">
-                            Once To Next Team
-                          </option>
-                          <option value="wrongIfPassed">Wrong If Passed</option>
-                        </select>
-                      </label>
-
-                      <label className="quiz-label-d">
-                        Pass Limit:
+                  {!["estimation round", "buzzer round"].includes(
+                    round.category.toLowerCase()
+                  ) && (
+                    <>
+                      {/* Enable Pass */}
+                      <label className="quiz-label choose-rule">
                         <input
-                          type="number"
-                          min="0"
-                          value={round.rules.passLimit}
+                          type="checkbox"
+                          checked={round.rules.enablePass}
                           onChange={(e) =>
                             handleRuleChange(
                               index,
-                              "passLimit",
-                              parseInt(e.target.value)
+                              "enablePass",
+                              e.target.checked
                             )
                           }
-                          className="quiz-input-d"
-                          disabled={round.rules.passCondition === "noPass"} // Disable input for No Pass
+                          className="rules-checkbox"
                         />
+                        Enable Pass
                       </label>
 
-                      <label className="quiz-label-d">
-                        Passed Points:
-                        <input
-                          type="number"
-                          min="0"
-                          value={round.rules.passedPoints}
-                          onChange={(e) =>
-                            handleRuleChange(
-                              index,
-                              "passedPoints",
-                              parseInt(e.target.value)
-                            )
-                          }
-                          className="quiz-input-d"
-                          disabled={round.rules.passCondition === "noPass"} // Disable input for No Pass
-                        />
-                      </label>
+                      {round.rules.enablePass && (
+                        <div className="multi-input-container">
+                          <label className="quiz-label-d">
+                            Pass Condition:
+                            <select
+                              value={round.rules.passCondition}
+                              onChange={(e) => {
+                                const value = e.target.value;
 
-                      <label className="quiz-label-d">
-                        Passed Time (sec):
-                        <input
-                          type="number"
-                          min="0"
-                          value={round.rules.passedTime}
-                          onChange={(e) =>
-                            handleRuleChange(
-                              index,
-                              "passedTime",
-                              parseInt(e.target.value)
-                            )
-                          }
-                          className="quiz-input-d"
-                          disabled={round.rules.passCondition === "noPass"} // Disable input for No Pass
-                        />
-                      </label>
-                    </div>
+                                if (value === "noPass") {
+                                  handleRuleChange(
+                                    index,
+                                    "passCondition",
+                                    value
+                                  );
+                                  handleRuleChange(index, "passLimit", 0);
+                                  handleRuleChange(index, "passedPoints", 0);
+                                  handleRuleChange(index, "passedTime", 0);
+                                } else {
+                                  handleRuleChange(
+                                    index,
+                                    "passCondition",
+                                    value
+                                  );
+                                }
+                              }}
+                              className="quiz-input-d select"
+                            >
+                              <option value="noPass">No Pass</option>
+                              <option value="onceToNextTeam">
+                                Once To Next Team
+                              </option>
+                              <option value="wrongIfPassed">
+                                Wrong If Passed
+                              </option>
+                            </select>
+                          </label>
+
+                          <label className="quiz-label-d">
+                            Pass Limit:
+                            <input
+                              type="number"
+                              min="0"
+                              value={round.rules.passLimit}
+                              onChange={(e) =>
+                                handleRuleChange(
+                                  index,
+                                  "passLimit",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="quiz-input-d"
+                              disabled={round.rules.passCondition === "noPass"}
+                            />
+                          </label>
+
+                          <label className="quiz-label-d">
+                            Passed Points:
+                            <input
+                              type="number"
+                              min="0"
+                              value={round.rules.passedPoints}
+                              onChange={(e) =>
+                                handleRuleChange(
+                                  index,
+                                  "passedPoints",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="quiz-input-d"
+                              disabled={round.rules.passCondition === "noPass"}
+                            />
+                          </label>
+
+                          <label className="quiz-label-d">
+                            Passed Time (sec):
+                            <input
+                              type="number"
+                              min="0"
+                              value={round.rules.passedTime}
+                              onChange={(e) =>
+                                handleRuleChange(
+                                  index,
+                                  "passedTime",
+                                  parseInt(e.target.value)
+                                )
+                              }
+                              className="quiz-input-d"
+                              disabled={round.rules.passCondition === "noPass"}
+                            />
+                          </label>
+                        </div>
+                      )}
+                    </>
                   )}
                 </div>
 
@@ -631,8 +744,15 @@ export default function CreateQuiz() {
                         }
                         className="quiz-input-d select"
                       >
-                        <option value="forAllTeams">For All Teams</option>
-                        <option value="forEachTeam">For Each Team</option>
+                        {getAssignQuestionOptions(round.category)
+                          .showForAll && (
+                          <option value="forAllTeams">For All Teams</option>
+                        )}
+
+                        {getAssignQuestionOptions(round.category)
+                          .showForEach && (
+                          <option value="forEachTeam">For Each Team</option>
+                        )}
                       </select>
                     </label>
 
@@ -687,12 +807,15 @@ export default function CreateQuiz() {
                 <label className="quiz-label input-title">
                   Select Questions:
                 </label>
+
                 <div className="question-round-container">
-                  {questions.map((q) => {
+                  {getFilteredQuestions(round.category).map((q) => {
                     const selectedInOtherRound =
                       usedQuestions.includes(q._id) &&
                       !round.questions.includes(q._id);
+
                     const checked = round.questions.includes(q._id);
+
                     return (
                       <label
                         key={q._id}
@@ -718,7 +841,7 @@ export default function CreateQuiz() {
                           style={{ display: "none" }}
                         />
                         <Checkbox checked={checked} />
-                        {q.text}
+                        {q.text} ({q.category.toUpperCase()})
                       </label>
                     );
                   })}

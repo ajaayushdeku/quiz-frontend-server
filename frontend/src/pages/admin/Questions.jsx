@@ -175,8 +175,11 @@ export default function QuestionForm() {
             onChange={handleTypeChange}
             className="quiz-input select"
           >
-            <option value="multiple-choice">Multiple Choice</option>
-            <option value="short-answer">Short / Estimation</option>
+            <option value="multiple-choice">
+              Multiple Choice ( For General, Subjective, Rapid Fire, Buzzer
+              Rounds)
+            </option>
+            <option value="short-answer">Short ( Estimation Round )</option>
           </select>
         </label>
 
