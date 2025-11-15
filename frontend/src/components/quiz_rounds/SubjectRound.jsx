@@ -347,12 +347,19 @@ const SubjectRound = ({ onFinish }) => {
 
     // Move to next team / next question
     setTimeout(() => {
+      const wasSecondHand = secondHand;
+
       if (!secondHand) {
+        // First-hand completed, move to next team
         goToNextTeam();
         // Reset category for next team's first-hand
         setSelectedCategory(null);
       } else {
+        // Second-hand completed, reset to first-hand and move to next team
         setSecondHand(false);
+        goToNextTeam();
+        // Reset category for next team's first-hand
+        setSelectedCategory(null);
       }
 
       // Check if quiz is completed
