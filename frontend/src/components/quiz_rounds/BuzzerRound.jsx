@@ -212,6 +212,22 @@ const BuzzerRound = ({ onFinish }) => {
     }
   }, [timeRemaining]);
 
+  useEffect(() => {
+    const handleKeyPress = (e) => {
+      const key = e.key.toUpperCase();
+      const index = key.charCodeAt(0) - 65; // A=0, B=1, C=2...
+      if (index >= 0 && index < teams.length) {
+        const teamName = teams[index].name;
+        handleBuzzer(teamName);
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyPress);
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
+    };
+  }, [teams, handleBuzzer]);
+
   const submitAnswerToBackend = async ({
     teamId,
     questionId,
@@ -313,6 +329,43 @@ const BuzzerRound = ({ onFinish }) => {
       el.style.display = quizCompleted ? "none" : "block";
     });
   }, [quizCompleted]);
+
+  useEffect(() => {
+    const handleTimeout = async () => {
+      if (buzzerPressed && activeTeam) {
+        if (reduceBool) {
+          try {
+            const result = await submitAnswerToBackend({
+              teamId: activeTeam.id,
+              questionId: currentQuestion.id,
+              givenAnswer: -1, // negative/timeout
+            });
+
+            if (!result) return;
+
+            const { pointsEarned } = result;
+            const msg = `⏰ Time's up! ${
+              pointsEarned < 0 ? pointsEarned : 0
+            } points for ${activeTeam.name}`;
+            showToast(msg);
+            setScoreMessage((prev) => [...prev, msg]);
+          } catch (err) {
+            console.error(err);
+            showToast("Failed to submit timeout penalty!");
+          } finally {
+            setIsSubmitting(false);
+            setTeamAnswer("");
+          }
+        } else {
+          showToast(`⏰ Time's up! Team ${activeTeam.name} missed their turn.`);
+        }
+
+        moveToNextTeamOrQuestion();
+      }
+    };
+
+    if (timeRemaining === 0) handleTimeout();
+  }, [timeRemaining, buzzerPressed, activeTeam, reduceBool]);
 
   return (
     <div className="quiz-container">

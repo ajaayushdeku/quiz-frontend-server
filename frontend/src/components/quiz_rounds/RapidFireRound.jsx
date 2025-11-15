@@ -232,15 +232,16 @@ const RapidFireRound = ({ onFinish }) => {
   });
 
   // ---------------- Timer ----------------
-  // const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
-  //   activeRound?.rules?.enableTimer ? roundTime : 0,
-  //   false
-  // );
-
   const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
     roundTime,
     true
   );
+
+  useEffect(() => {
+    if (activeRound?.rules?.enableTimer && roundTime) {
+      resetTimer(roundTime);
+    }
+  }, [roundTime, activeRound]);
 
   const activeTeamName =
     typeof activeTeam === "string" ? activeTeam : activeTeam?.name || ""; //Ensure activeTeam is a string (team name) or get its name if it's an object
@@ -267,129 +268,7 @@ const RapidFireRound = ({ onFinish }) => {
       .trim()
       .toLowerCase();
 
-  // ---------------- Handle Scoring ----------------
-  // const handleScoring = async (isCorrect, isPassed) => {
-  //   if (isPassed) {
-  //     showToast(`⏩ Question passed! No points for ${activeTeam?.name}`);
-  //     return;
-  //   }
-
-  //   const endpoint = isCorrect
-  //     ? `http://localhost:4000/api/team/teams/${activeTeam.id}/add`
-  //     : reduceBool
-  //     ? `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`
-  //     : null;
-
-  //   if (!endpoint) {
-  //     showToast(`❌ Wrong answer! No deduction for ${activeTeam?.name}`);
-  //     return;
-  //   }
-
-  //   try {
-  //     await axios.patch(
-  //       endpoint,
-  //       { points: Number(roundPoints) || 0 },
-  //       { withCredentials: true }
-  //     );
-
-  //     const msg = isCorrect
-  //       ? `✅ +${roundPoints} points to ${activeTeam?.name}!`
-  //       : `❌ -${roundPoints} points from ${activeTeam?.name}!`;
-
-  //     setScoreMessage((prev) => [...prev, msg]);
-  //     showToast(msg);
-  //   } catch (err) {
-  //     console.error("⚠️ Scoring update failed:", err);
-  //     showToast("Error updating score!");
-  //   }
-  // };
-  // const handleScoring = async (isCorrect, isPassed = false) => {
-  //   if (!activeTeam?.id || !activeRound?.rules) return;
-  //   const rules = activeRound.rules;
-
-  //   try {
-  //     // =======================
-  //     // ⏩ PASS HANDLING
-  //     // =======================
-  //     if (isPassed) {
-  //       if (rules.passCondition === "noPass" || !rules.enablePass) {
-  //         showToast("⛔ Passing is disabled in this round!");
-  //         return;
-  //       }
-
-  //       // if (rules.passCondition === "wrongIfPassed") {
-  //       //   // deduct pass points (passedPoints)
-  //       //   const passPts = Number(rules.passedPoints) || 0;
-
-  //       //   if (passPts > 0) {
-  //       //     await axios.patch(
-  //       //       `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
-  //       //       { points: passPts },
-  //       //       { withCredentials: true }
-  //       //     );
-  //       //     const msg = `⏩ Passed (wrongIfPassed). -${passPts} points from ${activeTeam.name}`;
-  //       //     setScoreMessage((prev) => [...prev, msg]);
-  //       //     showToast(msg);
-  //       //   } else {
-  //       //     showToast(`⏩ Question passed. No points deducted.`);
-  //       //   }
-  //       return; // stop further logic
-  //     }
-
-  //     // =======================
-  //     // 🟢 CORRECT ANSWER
-  //     // =======================
-  //     if (isCorrect) {
-  //       const points = !passIt
-  //         ? Number(rules.points) || 0
-  //         : Number(rules.passedPoints) || 0;
-
-  //       await axios.patch(
-  //         `http://localhost:4000/api/team/teams/${activeTeam.id}/add`,
-  //         { points },
-  //         { withCredentials: true }
-  //       );
-
-  //       const msg = `✅ Correct! +${points} points for ${activeTeam.name}`;
-  //       setScoreMessage((prev) => [...prev, msg]);
-  //       showToast(msg);
-  //       return;
-  //     }
-
-  //     // =======================
-  //     // 🔴 WRONG ANSWER
-  //     // =======================
-  //     if (!isCorrect) {
-  //       if (
-  //         (rules.passCondition === "noPass" &&
-  //           rules.enableNegative &&
-  //           rules.negativePoints > 0) ||
-  //         (rules.passCondition === "wrongIfPassed" &&
-  //           rules.enableNegative &&
-  //           rules.negativePoints > 0)
-  //       ) {
-  //         const penalty = Number(rules.negativePoints);
-  //         await axios.patch(
-  //           `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
-  //           { points: penalty },
-  //           { withCredentials: true }
-  //         );
-
-  //         const msg = `❌ Wrong! -${penalty} points for ${activeTeam.name}`;
-  //         setScoreMessage((prev) => [...prev, msg]);
-  //         showToast(msg);
-  //       } else {
-  //         const msg = `❌ Wrong answer! No points deducted for ${activeTeam.name}`;
-  //         setScoreMessage((prev) => [...prev, msg]);
-  //         showToast(msg);
-  //       }
-  //     }
-  //   } catch (err) {
-  //     console.error("⚠️ Scoring update failed:", err);
-  //     showToast("Error updating score!");
-  //   }
-  // };
-
+  // ---------------- Submit To DB ----------------
   const submitAnswerToBackend = async ({
     teamId,
     questionId,
@@ -423,7 +302,7 @@ const RapidFireRound = ({ onFinish }) => {
     }
   };
 
-  // // ---------------- Handle Answer Submission ----------------
+  // ---------------- Handle Answer Submission ----------------
   const handleAnswer = async (submitted = false) => {
     if (!currentQuestion || !activeTeam?.id) return;
 
@@ -615,13 +494,79 @@ const RapidFireRound = ({ onFinish }) => {
     if (submitted) resetAnswer();
   };
 
-  // ---------------- Handle Timer End ----------------
+  // ---------------- Handle Timer End with Negative Points ----------------
+  const [timeoutApplied, setTimeoutApplied] = useState(false);
+
   useEffect(() => {
-    if (timeRemaining === 0 && !finishQus && !finalFinished && roundStarted) {
+    const handleTimeout = async () => {
+      if (!activeTeam || !activeRound) return;
+
+      const currentTeamName =
+        typeof activeTeam === "string" ? activeTeam : activeTeam?.name || "";
+      const teamQs = teamQuestions[currentTeamName] || [];
+      const unansweredQs = teamQs.filter(
+        (q) => !answeredQuestions.some((aq) => aq.id === q.id)
+      );
+
+      if (unansweredQs.length === 0) return;
+
+      if (reduceBool && activeRound.rules.enableNegative) {
+        const penaltyPerQuestion = Number(
+          activeRound.rules.negativePoints || 0
+        );
+
+        for (const q of unansweredQs) {
+          try {
+            await submitAnswerToBackend({
+              teamId: activeTeam.id,
+              questionId: q.id,
+              givenAnswer: -1, // indicate timeout/unanswered
+              isPassed: false,
+            });
+
+            const msg = `⏰ Time's up! -${penaltyPerQuestion} points for unanswered question: "${q.question}"`;
+            setScoreMessage((prev) => [...prev, msg]);
+            showToast(msg);
+          } catch (err) {
+            console.error("Timeout penalty error:", err);
+            showToast("Failed to deduct points for timeout!");
+          }
+        }
+      }
+
       setFinishQus(true);
       pauseTimer();
+      setTimeoutApplied(true); // ✅ mark as applied
+    };
+
+    if (
+      timeRemaining === 0 &&
+      !finishQus &&
+      !finalFinished &&
+      roundStarted &&
+      !timeoutApplied
+    ) {
+      handleTimeout();
     }
-  }, [timeRemaining, finishQus, finalFinished, roundStarted]);
+  }, [
+    timeRemaining,
+    finishQus,
+    finalFinished,
+    roundStarted,
+    activeTeam,
+    activeRound,
+    teamQuestions,
+    answeredQuestions,
+    timeoutApplied,
+  ]);
+
+  // ---------------- Handle Timer End ----------------
+  // useEffect(() => {
+  //   if (timeRemaining === 0 && !finishQus && !finalFinished && roundStarted) {
+  //     setFinishQus(true);
+  //     pauseTimer();
+  //   }
+  // }, [timeRemaining, finishQus, finalFinished, roundStarted]);
 
   // ---------------- Handle Next Team ----------------
   const handleNextTeam = () => {
@@ -650,6 +595,7 @@ const RapidFireRound = ({ onFinish }) => {
     setAnswerInput("");
     setAnsweredQuestions([]);
     setScoreMessage([]);
+    setTimeoutApplied(false); // ✅ Reset for next team
   };
 
   // ---------------- Keyboard Shortcuts ----------------

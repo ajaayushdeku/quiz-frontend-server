@@ -217,17 +217,18 @@ const GeneralRound = ({ onFinish }) => {
   // ---------------- Auto pass on timeout ----------------
   useEffect(() => {
     // if (!activeRound?.rules?.enablePass) return;
-    if (!isRunning && timeRemaining === 0) handlePass();
+    if (!isRunning && timeRemaining === 0 && activeRound?.rules?.enablePass)
+      handlePass();
 
-    if (!activeRound?.rules?.enablePass && !isRunning && timeRemaining === 0) {
-      goToNextTeam();
-      nextQuestion();
-      setQuestionDisplay(false);
-      resetTimer(roundTime);
-      resetAnswer();
-      setScoreMessage("");
-      console.log("IF no pass and timeout, mov to next team:");
-    }
+    // if (!activeRound?.rules?.enablePass && !isRunning && timeRemaining === 0) {
+    //   goToNextTeam();
+    //   nextQuestion();
+    //   setQuestionDisplay(false);
+    //   resetTimer(roundTime);
+    //   resetAnswer();
+    //   setScoreMessage("");
+    //   console.log("IF no pass and timeout, mov to next team:");
+    // }
   }, [isRunning, timeRemaining, activeRound]);
 
   // ---------------- Submit to backend ----------------
@@ -449,6 +450,83 @@ const GeneralRound = ({ onFinish }) => {
 
     setQuestionDisplay(false);
   };
+
+  // ---------------- Auto penalty on timeout ----------------
+  useEffect(() => {
+    const handleTimeout = async () => {
+      if (!activeTeam || !currentQuestion) return;
+
+      const correctOption = currentQuestion.options.find(
+        (opt) => opt.id === currentQuestion.correctOptionId
+      );
+
+      const wrongOption = currentQuestion.options.find(
+        (opt) => opt.originalId !== correctOption.originalId
+      );
+      let answerId = wrongOption ? wrongOption.originalId : -1;
+
+      // Use originalId for submission
+      const givenAnswer = answerId;
+      if (!givenAnswer) {
+        return;
+      }
+
+      // Only trigger if timer is zero and negative scoring is enabled
+      if (
+        reduceBool &&
+        activeRound?.rules?.enableTimer &&
+        !activeRound?.rules?.enablePass &&
+        timeRemaining === 0 &&
+        !isRunning
+      ) {
+        try {
+          const result = await submitAnswerToBackend({
+            teamId: activeTeam.id,
+            questionId: currentQuestion.id,
+            givenAnswer, // negative/timeout
+            isPassed: false,
+          });
+
+          if (!result) return;
+
+          const { pointsEarned } = result;
+
+          const msg = `⏰ Time's up! ${
+            pointsEarned < 0 ? pointsEarned : 0
+          } points for ${activeTeam.name}`;
+          showToast(msg);
+          setScoreMessage(msg);
+
+          // Update team points locally for instant UI feedback
+          setTeams((prevTeams) =>
+            prevTeams.map((team) =>
+              team.id === activeTeam.id
+                ? {
+                    ...team,
+                    points: team.points + (pointsEarned || -roundPoints),
+                  }
+                : team
+            )
+          );
+        } catch (err) {
+          console.error("Timeout penalty error:", err);
+          showToast("Failed to submit timeout penalty!");
+        } finally {
+          setScoreMessage(""); // reset after showing
+        }
+      }
+
+      goToNextTeam();
+      nextQuestion();
+      setQuestionDisplay(false);
+      resetTimer(roundTime);
+      resetAnswer();
+      setScoreMessage("");
+      console.log("Timeout: moved to next team/question (no pass enabled)");
+    };
+
+    if (timeRemaining === 0 && !isRunning) handleTimeout();
+  }, [timeRemaining, activeTeam, currentQuestion, reduceBool]);
 
   // ---------------- Keyboard Shortcuts ----------------
   useCtrlKeyPass(() => {
