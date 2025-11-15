@@ -41,10 +41,8 @@ const COLORS = [
 
 const SubjectRound = ({ onFinish }) => {
   const { quizId, roundId } = useParams();
+
   const { showToast } = useUIHelpers();
-  const location = useLocation();
-  const queryParams = new URLSearchParams(location.search);
-  const adminId = queryParams.get("adminId");
 
   const [quesFetched, setQuesFetched] = useState([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
@@ -58,13 +56,13 @@ const SubjectRound = ({ onFinish }) => {
   const [scoreMessage, setScoreMessage] = useState();
   const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
+
+  const location = useLocation();
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  // Category selection
-  const [categoryCounts, setCategoryCounts] = useState({});
-  const [selectedCategory, setSelectedCategory] = useState("");
-  const [prevCategory, setPrevCategory] = useState("");
+  const queryParams = new URLSearchParams(location.search);
+  const adminId = queryParams.get("adminId"); // this will be null if admin view
 
   // ---------------- Fetch Quiz Data ----------------
   useEffect(() => {
@@ -73,19 +71,22 @@ const SubjectRound = ({ onFinish }) => {
         setLoading(true);
         setError("");
 
+        // Fetch quizzes (admin or user)
         let url = "http://localhost:4000/api/quiz/get-quiz";
-        if (adminId)
+        if (adminId) {
           url = `http://localhost:4000/api/quiz/get-quizbyadmin/${adminId}`;
+        }
 
         const quizRes = await axios.get(url, { withCredentials: true });
         const allQuizzes = quizRes.data.quizzes || [];
 
+        // Find the current quiz by quizId or roundId
         const currentQuiz = allQuizzes.find(
           (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
         );
         if (!currentQuiz) return console.warn("Quiz not found");
 
-        // Format teams
+        // Format Teams
         const formattedTeams = (currentQuiz.teams || []).map((team, index) => ({
           id: team._id,
           name: team.name || `Team ${index + 1}`,
@@ -94,10 +95,11 @@ const SubjectRound = ({ onFinish }) => {
         }));
         setTeams(formattedTeams);
 
-        // Active round
+        // Find Active Round
         const round = currentQuiz.rounds.find((r) => r._id === roundId);
         if (!round) return console.warn("Round not found");
         setActiveRound(round);
+
         setCurrentRoundNumber(
           currentQuiz.rounds.findIndex((r) => r._id === roundId) + 1
         );
@@ -105,7 +107,7 @@ const SubjectRound = ({ onFinish }) => {
         setRoundTime(round?.rules?.timeLimitValue || TEAM_TIME_LIMIT);
         if (round?.rules?.enableNegative) setReduceBool(true);
 
-        // Fetch questions
+        // Fetch Questions
         const questionRes = await axios.get(
           "http://localhost:4000/api/question/get-questions",
           { withCredentials: true }
@@ -126,11 +128,12 @@ const SubjectRound = ({ onFinish }) => {
           }
 
           const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx),
+            id: String.fromCharCode(97 + idx), // a, b, c, ...
             text: typeof opt === "string" ? opt : opt.text || "",
             originalId: opt._id || null,
           }));
 
+          // Determine correct option
           const correctIndex = mappedOptions.findIndex(
             (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
           );
@@ -152,16 +155,9 @@ const SubjectRound = ({ onFinish }) => {
         });
 
         setQuesFetched(formattedQuestions);
-
-        // Setup category counts
-        const counts = {};
-        formattedQuestions.forEach((q) => {
-          if (q.category) counts[q.category] = (counts[q.category] || 0) + 1;
-        });
-        setCategoryCounts(counts);
-      } catch (err) {
-        console.error(err);
-        setError("Failed to fetch quiz data!");
+      } catch (error) {
+        console.error("Fetch Error:", error);
+        showToast("Failed to fetch quiz data!");
       } finally {
         setLoading(false);
       }
@@ -170,22 +166,33 @@ const SubjectRound = ({ onFinish }) => {
     if (quizId && roundId) fetchQuizData();
   }, [quizId, roundId, adminId]);
 
-  // ---------------- Team Colors ----------------
-  const TEAM_COLORS = teams.reduce((acc, team, idx) => {
-    acc[team.name || `Team${idx + 1}`] = COLORS[idx % COLORS.length];
-    return acc;
-  }, {});
+  // ---------------- Team Color Assignment ----------------
+  const generateTeamColors = (teams) => {
+    const teamColors = {};
+    teams.forEach((team, index) => {
+      const color = COLORS[index % COLORS.length];
+      teamColors[team.name || `Team${index + 1}`] = color;
+    });
+    return teamColors;
+  };
+  const TEAM_COLORS = generateTeamColors(teams);
 
-  // ---------------- Question Manager ----------------
-  const {
-    currentQuestion,
-    nextQuestion,
-    isLastQuestion,
-    addQuestions,
-    resetQuestion,
-  } = useQuestionManager([]);
+  // ---------------- Hooks ----------------
+  const [selectedCategory, setSelectedCategory] = useState(null);
 
-  // ---------------- Team Queue ----------------
+  const filteredQuestionsByCategory = selectedCategory
+    ? quesFetched.filter((q) => q.category === selectedCategory)
+    : quesFetched;
+
+  const { currentQuestion, nextQuestion, isLastQuestion } =
+    useQuestionManager(quesFetched);
+
+  const displayedQuestion = selectedCategory
+    ? currentQuestion?.category === selectedCategory
+      ? currentQuestion
+      : null
+    : currentQuestion;
+
   const {
     activeTeam,
     activeIndex,
@@ -195,11 +202,10 @@ const SubjectRound = ({ onFinish }) => {
     setSecondHand,
   } = useTeamQueue({
     totalTeams: teams.length,
-    teams,
+    teams: teams,
     maxQuestionsPerTeam: activeRound?.rules?.numberOfQuestion || 1,
   });
 
-  // ---------------- Timer ----------------
   const { timeRemaining, isRunning, startTimer, pauseTimer, resetTimer } =
     useTimer(activeRound?.rules?.enableTimer ? roundTime : 0, true);
 
@@ -208,10 +214,11 @@ const SubjectRound = ({ onFinish }) => {
     : 0;
 
   useEffect(() => {
-    if (activeRound?.rules?.enableTimer && roundTime) resetTimer(roundTime);
-  }, [roundTime, activeRound, resetTimer]);
+    if (activeRound?.rules?.enableTimer && roundTime) {
+      resetTimer(roundTime);
+    }
+  }, [roundTime, activeRound]);
 
-  // ---------------- Answer Handler ----------------
   const { selectedAnswer, selectAnswer, resetAnswer } = useAnswerHandler(
     currentQuestion?.correctOptionId
   );
@@ -220,77 +227,111 @@ const SubjectRound = ({ onFinish }) => {
 
   const handLabel = secondHand ? "Second-hand Question" : "First-hand Question";
 
-  // ---------------- Category Selection ----------------
-  const handleCategorySelect = (category) => {
-    if (!categoryCounts[category] || categoryCounts[category] <= 0) return;
+  // ---------------- Auto pass on timeout ----------------
+  useEffect(() => {
+    // if (!activeRound?.rules?.enablePass) return;
+    if (!isRunning && timeRemaining === 0 && activeRound?.rules?.enablePass)
+      handlePass();
 
-    setCategoryCounts((prev) => {
-      const updated = { ...prev };
+    // if (!activeRound?.rules?.enablePass && !isRunning && timeRemaining === 0) {
+    //   goToNextTeam();
+    //   nextQuestion();
+    //   setQuestionDisplay(false);
+    //   resetTimer(roundTime);
+    //   resetAnswer();
+    //   setScoreMessage("");
+    //   console.log("IF no pass and timeout, mov to next team:");
+    // }
+  }, [isRunning, timeRemaining, activeRound]);
 
-      // Restore previous category
-      if (prevCategory)
-        updated[prevCategory] = (updated[prevCategory] || 0) + 1;
+  // ---------------- Submit to backend ----------------
+  const submitAnswerToBackend = async ({
+    teamId,
+    questionId,
+    givenAnswer = null,
+    isPassed = false,
+  }) => {
+    if (!teamId || !questionId) return null;
 
-      // Decrease selected category count
-      updated[category] = updated[category] - 1;
+    const payload = {
+      quizId: quizId,
+      roundId,
+      teamId,
+      questionId,
+      givenAnswer,
+      isPassed,
+    };
 
-      return updated;
-    });
+    console.log("Payload", payload);
+    try {
+      const res = await axios.post(
+        "http://localhost:4000/api/history/submit-ans",
+        payload,
+        { withCredentials: true }
+      );
 
-    setPrevCategory(category);
-    setSelectedCategory(category);
-
-    // Filter questions and add to question manager
-    const filteredQuestions = quesFetched.filter(
-      (q) => q.category === category
-    );
-    if (filteredQuestions.length > 0) {
-      resetQuestion();
-      addQuestions(filteredQuestions);
+      return res.data; // contains pointsEarned, isCorrect, teamPoints
+    } catch (err) {
+      console.error("Submission Error:", err);
+      showToast("Failed to submit answer!");
+      return null;
     }
   };
 
   // ---------------- Option Selection ----------------
   const handleOptionSelection = async (optionId) => {
-    if (!currentQuestion || !activeTeam) return;
+    if (!currentQuestion) return;
+    if (!activeTeam) {
+      console.warn("No active team to submit for");
+      return;
+    }
 
+    // Find the selected option
     const selectedOption = currentQuestion.options.find(
-      (o) => o.id === optionId
+      (opt) => opt.id === optionId
     );
-    if (!selectedOption) return;
+
+    if (!selectedOption) {
+      console.warn("Selected option not found", optionId);
+      return;
+    }
+
+    // Use originalId for submission
+    const givenAnswer = selectedOption.originalId;
+    if (!givenAnswer) {
+      console.warn("Option has no originalId, cannot submit", selectedOption);
+      return;
+    }
 
     selectAnswer(optionId);
     pauseTimer();
 
-    // Submit answer to backend
     try {
-      const res = await axios.post(
-        "http://localhost:4000/api/history/submit-ans",
-        {
-          quizId,
-          roundId,
-          teamId: activeTeam.id,
-          questionId: currentQuestion.id,
-          givenAnswer: selectedOption.originalId,
-          isPassed: passIt,
-        },
-        { withCredentials: true }
-      );
+      const result = await submitAnswerToBackend({
+        teamId: activeTeam.id,
+        questionId: currentQuestion.id,
+        givenAnswer,
+        isPassed: passIt ? true : false,
+      });
 
-      const { pointsEarned, isCorrect } = res.data;
-      const msg = isCorrect
-        ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
-        : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
-            activeTeam.name
-          }`;
-      showToast(msg);
-      setScoreMessage(msg);
+      if (result) {
+        const { pointsEarned, isCorrect, teamPoints } = result;
+
+        const msg = isCorrect
+          ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
+          : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
+              activeTeam.name
+            }`;
+
+        setScoreMessage(msg);
+        showToast(msg);
+      }
     } catch (err) {
-      console.error(err);
+      console.error("Submission Error:", err?.response?.data || err);
       showToast("Failed to submit answer!");
     }
 
-    // Move to next question/team
+    // Move to next team / next question
     setTimeout(() => {
       if (!secondHand) goToNextTeam();
       else setSecondHand(false);
@@ -298,6 +339,8 @@ const SubjectRound = ({ onFinish }) => {
       if (isLastQuestion) setQuizCompleted(true);
       else {
         nextQuestion();
+        setSelectedCategory(null);
+
         resetTimer(roundTime);
         resetAnswer();
         setScoreMessage("");
@@ -305,16 +348,207 @@ const SubjectRound = ({ onFinish }) => {
       }
 
       setQuestionDisplay(false);
-    }, 1500);
+    }, 3000);
+
+    console.log("Active Team:", activeTeam);
+    console.log("Active Index:", activeIndex);
+    console.log("Current Question:", currentQuestion);
+    console.log("Selected Option:", selectedOption);
   };
 
-  // ---------------- Fullscreen Media ----------------
-  const handleMediaClick = (url) => setFullscreenMedia(url);
-  const closeFullscreen = () => setFullscreenMedia(null);
+  // ---------------- Pass Handling ----------------
+  const handlePass = async () => {
+    if (!questionDisplay) return;
+
+    const rules = activeRound?.rules || {};
+    if (!rules.enablePass || rules.passCondition === "noPass") {
+      setPassIt(false);
+      showToast("⚠️ Passing is disabled for this round!");
+      return;
+    }
+
+    if (rules.passLimit && teams[activeIndex]?.passesUsed >= rules.passLimit) {
+      setPassIt(false);
+      showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
+      return;
+    }
+
+    // const passResult = await submitAnswerToBackend({
+    //   teamId: activeTeam.id,
+    //   questionId: currentQuestion.id,
+    //   givenAnswer: null,
+    //   isPassed: true,
+    // });
+
+    const correctOption = currentQuestion.options.find(
+      (opt) => opt.id === currentQuestion.correctOptionId
+    );
+
+    const wrongOption = currentQuestion.options.find(
+      (opt) => opt.originalId !== correctOption.originalId
+    );
+    let answerId = wrongOption ? wrongOption.originalId : -1;
+
+    // Use originalId for submission
+    const givenAnswer = answerId;
+    if (!givenAnswer) {
+      return;
+    }
+
+    try {
+      const passResult = await submitAnswerToBackend({
+        teamId: activeTeam.id,
+        questionId: currentQuestion.id,
+        givenAnswer,
+        isPassed: true,
+      });
+
+      if (passResult) {
+        const { pointsEarned, isCorrect, teamPoints } = result;
+
+        const msg = isCorrect
+          ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
+          : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
+              activeTeam.name
+            }`;
+
+        setScoreMessage(msg);
+        showToast(msg);
+      }
+
+      if (passResult) {
+        setScoreMessage(`⏩ Question passed!`);
+        showToast(`⏩ Question passed!`);
+      }
+    } catch (err) {
+      console.error("Submission Error:", err?.response?.data || err);
+      showToast("Failed to submit answer!");
+    }
+
+    setTeams((prevTeams) =>
+      prevTeams.map((team) =>
+        team.id === activeTeam.id
+          ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
+          : team
+      )
+    );
+
+    // Second-hand handling
+    if (
+      rules.passCondition === "onceToNextTeam" ||
+      rules.passCondition === "wrongIfPassed"
+    ) {
+      if (!secondHand) {
+        const nextTeam = passToNextTeam();
+        setSecondHand(true);
+        resetTimer(rules.passedTime || PASS_TIME_LIMIT);
+        startTimer();
+        setPassIt(true);
+        showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
+      } else {
+        showToast(`( > O < ) Back to Team ${activeTeam?.name}!`);
+        setPassIt(false);
+        setSecondHand(false);
+        if (isLastQuestion) setQuizCompleted(true);
+        else {
+          nextQuestion();
+          setSelectedCategory(null);
+
+          resetTimer(roundTime);
+          startTimer();
+        }
+      }
+    } else {
+      const nextTeam = passToNextTeam();
+      resetTimer(rules.passedTime || PASS_TIME_LIMIT);
+      startTimer();
+      showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
+    }
+
+    setQuestionDisplay(false);
+  };
+
+  // ---------------- Auto penalty on timeout ----------------
+  useEffect(() => {
+    const handleTimeout = async () => {
+      if (!activeTeam || !currentQuestion) return;
+
+      const correctOption = currentQuestion.options.find(
+        (opt) => opt.id === currentQuestion.correctOptionId
+      );
+
+      const wrongOption = currentQuestion.options.find(
+        (opt) => opt.originalId !== correctOption.originalId
+      );
+      let answerId = wrongOption ? wrongOption.originalId : -1;
+
+      // Use originalId for submission
+      const givenAnswer = answerId;
+      if (!givenAnswer) {
+        return;
+      }
+
+      // Only trigger if timer is zero and negative scoring is enabled
+      if (
+        reduceBool &&
+        activeRound?.rules?.enableTimer &&
+        !activeRound?.rules?.enablePass &&
+        timeRemaining === 0 &&
+        !isRunning
+      ) {
+        try {
+          const result = await submitAnswerToBackend({
+            teamId: activeTeam.id,
+            questionId: currentQuestion.id,
+            givenAnswer, // negative/timeout
+            isPassed: false,
+          });
+
+          if (!result) return;
+
+          const { pointsEarned } = result;
+
+          const msg = `⏰ Time's up! ${
+            pointsEarned < 0 ? pointsEarned : 0
+          } points for ${activeTeam.name}`;
+          showToast(msg);
+          setScoreMessage(msg);
+
+          // Update team points locally for instant UI feedback
+          setTeams((prevTeams) =>
+            prevTeams.map((team) =>
+              team.id === activeTeam.id
+                ? {
+                    ...team,
+                    points: team.points + (pointsEarned || -roundPoints),
+                  }
+                : team
+            )
+          );
+        } catch (err) {
+          console.error("Timeout penalty error:", err);
+          showToast("Failed to submit timeout penalty!");
+        } finally {
+          setScoreMessage(""); // reset after showing
+        }
+      }
+
+      goToNextTeam();
+      nextQuestion();
+      setQuestionDisplay(false);
+      resetTimer(roundTime);
+      resetAnswer();
+      setScoreMessage("");
+      console.log("Timeout: moved to next team/question (no pass enabled)");
+    };
+
+    if (timeRemaining === 0 && !isRunning) handleTimeout();
+  }, [timeRemaining, activeTeam, currentQuestion, reduceBool]);
 
   // ---------------- Keyboard Shortcuts ----------------
   useCtrlKeyPass(() => {
     if (!activeRound?.rules?.enablePass) return;
+    if (teams[activeIndex]?.passesUsed >= activeRound.rules.passLimit) return;
     handlePass();
   }, [activeTeam, secondHand, currentQuestion, questionDisplay, activeRound]);
 
@@ -325,34 +559,42 @@ const SubjectRound = ({ onFinish }) => {
     }
   }, [questionDisplay]);
 
-  // ---------------- Pass Handling ----------------
-  const handlePass = async () => {
-    if (!currentQuestion || !activeTeam || !activeRound) return;
+  useEffect(() => {
+    if (!questionDisplay && activeRound?.rules?.enableTimer) pauseTimer();
+  }, [questionDisplay, activeRound, pauseTimer]);
 
-    const rules = activeRound.rules || {};
-    if (!rules.enablePass) return showToast("Passing not allowed!");
+  // ---------------- Fullscreen Media ----------------
+  const handleMediaClick = (url) => setFullscreenMedia(url);
+  const closeFullscreen = () => setFullscreenMedia(null);
 
-    // Increase pass used
-    setTeams((prevTeams) =>
-      prevTeams.map((t) =>
-        t.id === activeTeam.id
-          ? { ...t, passesUsed: (t.passesUsed || 0) + 1 }
-          : t
-      )
+  useEffect(() => {
+    const details = document.getElementsByClassName("detail-info");
+    Array.from(details).forEach((el) => {
+      el.style.display = quizCompleted ? "none" : "block";
+    });
+  }, [quizCompleted]);
+
+  if (loading) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p>Loading round info...</p>
+        </div>
+      </section>
     );
+  }
 
-    const nextTeam = passToNextTeam();
-    setSecondHand(true);
-    resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-    startTimer();
-    setPassIt(true);
-    showToast(`⏩ Passed to Team ${nextTeam?.name}!`);
-    setQuestionDisplay(false);
-  };
+  if (error) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p className="error-message">{error}</p>
+        </div>
+      </section>
+    );
+  }
 
-  if (loading) return <p className="loading-screen">Loading round info...</p>;
-  if (error) return <p className="error-message">{error}</p>;
-
+  // ---------------- Render ----------------
   return (
     <section className="quiz-container">
       {scoreMessage && (
@@ -368,10 +610,10 @@ const SubjectRound = ({ onFinish }) => {
         timeRemaining={timeRemaining}
         TEAM_COLORS={TEAM_COLORS}
         formatTime={formatTime}
-        headMessage={"Choose one of the options to answer"}
+        headMessage={"Choose one of the option to answer"}
         toastMessage={
           activeRound?.rules?.enablePass
-            ? "Press 'Ctrl' to Pass"
+            ? " Press 'Ctrl' to Pass The Question"
             : "No passing allowed"
         }
         passEnable={activeRound?.rules?.enablePass || false}
@@ -380,55 +622,68 @@ const SubjectRound = ({ onFinish }) => {
         highTimer={roundTime}
       />
 
-      {!quizCompleted ? (
-        !questionDisplay ? (
-          !currentQuestion ? (
-            <div className="centered-control">
-              <p className="form-heading">Select a category to start</p>
-              <div className="categories">
-                {Object.keys(categoryCounts).map((cat) => (
-                  <button
-                    key={cat}
-                    disabled={categoryCounts[cat] <= 0}
-                    className={`category-btn ${
-                      selectedCategory === cat ? "selected" : ""
-                    }`}
-                    onClick={() => handleCategorySelect(cat)}
-                  >
-                    {cat} ({categoryCounts[cat]})
-                  </button>
-                ))}
+      <>
+        {" "}
+        {!quizCompleted ? (
+          !questionDisplay ? (
+            !currentQuestion ? (
+              <div className="centered-control">
+                <p className="form-heading">Loading questions...</p>
               </div>
-            </div>
+            ) : !secondHand && !selectedCategory ? (
+              <div className="centered-control category-select">
+                <p className="form-heading">Select a Category</p>
+                <div className="category-options">
+                  {[...new Set(quesFetched.map((q) => q.category))].map(
+                    (cat) => (
+                      <Button
+                        key={cat}
+                        className="category-btn"
+                        onClick={() => setSelectedCategory(cat)}
+                      >
+                        {cat}
+                      </Button>
+                    )
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="centered-control">
+                <Button
+                  className="start-question-btn"
+                  onClick={() => {
+                    setQuestionDisplay(true);
+                    if (activeRound?.rules?.enableTimer) {
+                      const timeLimit = isPassed
+                        ? PASS_TIME_LIMIT
+                        : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
+                      resetTimer(timeLimit);
+                      startTimer();
+                    }
+                  }}
+                >
+                  Show Question <BiShow className="icon" />
+                </Button>
+              </div>
+            )
           ) : (
-            <div className="centered-control">
-              <Button
-                className="start-question-btn"
-                onClick={() => {
-                  setQuestionDisplay(true);
-                  if (activeRound?.rules?.enableTimer) {
-                    const timeLimit =
-                      activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
-                    resetTimer(timeLimit);
-                    startTimer();
-                  }
-                }}
-              >
-                Show Question <BiShow className="icon" />
-              </Button>
-            </div>
-          )
-        ) : (
-          currentQuestion && (
             <>
-              <QuestionCard
-                questionText={currentQuestion.question}
-                displayedText={`Q. ${displayedText}`}
-                mediaType={currentQuestion.mediaType}
-                mediaUrl={currentQuestion.mediaUrl}
-                category={currentQuestion.category}
-                onMediaClick={handleMediaClick}
-              />
+              {currentQuestion ? (
+                <QuestionCard
+                  questionText={
+                    currentQuestion?.question ?? "No question loaded"
+                  }
+                  displayedText={`Q. ${displayedText}`}
+                  mediaType={currentQuestion.mediaType}
+                  mediaUrl={currentQuestion.mediaUrl}
+                  onMediaClick={handleMediaClick}
+                  category={currentQuestion.category}
+                />
+              ) : (
+                <p className="text-gray-400 mt-4">
+                  No questions in this category.
+                </p>
+              )}
               <OptionList
                 options={currentQuestion.options}
                 selectedAnswer={selectedAnswer}
@@ -438,13 +693,13 @@ const SubjectRound = ({ onFinish }) => {
               />
             </>
           )
-        )
-      ) : (
-        <FinishDisplay
-          onFinish={onFinish}
-          message={"Subject Round Finished!"}
-        />
-      )}
+        ) : (
+          <FinishDisplay
+            onFinish={onFinish}
+            message={"General Round Finished!"}
+          />
+        )}
+      </>
 
       {activeRound?.rules?.enableTimer && (
         <TimerControls

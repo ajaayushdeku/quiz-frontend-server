@@ -3,7 +3,7 @@ import { FaDiamond } from "react-icons/fa6";
 import "../../styles/Quiz.css";
 
 const OptionList = ({
-  options,
+  options = [], // <-- default to empty array
   selectedAnswer,
   correctAnswer,
   handleSelect,

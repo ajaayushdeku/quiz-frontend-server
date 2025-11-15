@@ -437,12 +437,14 @@ const GeneralRound = ({ onFinish }) => {
         if (isLastQuestion) setQuizCompleted(true);
         else {
           nextQuestion();
+
           resetTimer(roundTime);
           startTimer();
         }
       }
     } else {
       const nextTeam = passToNextTeam();
+      setRoundTime(PASS_TIME_LIMIT);
       resetTimer(rules.passedTime || PASS_TIME_LIMIT);
       startTimer();
       showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
@@ -533,6 +535,7 @@ const GeneralRound = ({ onFinish }) => {
     if (!activeRound?.rules?.enablePass) return;
     if (teams[activeIndex]?.passesUsed >= activeRound.rules.passLimit) return;
     handlePass();
+    resetTimer(PASS_TIME_LIMIT);
   }, [activeTeam, secondHand, currentQuestion, questionDisplay, activeRound]);
 
   useShiftToShow(() => {
@@ -620,8 +623,9 @@ const GeneralRound = ({ onFinish }) => {
                   onClick={() => {
                     setQuestionDisplay(true);
                     if (activeRound?.rules?.enableTimer) {
-                      const timeLimit =
-                        activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
+                      const timeLimit = isPassed
+                        ? PASS_TIME_LIMIT
+                        : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
                       resetTimer(timeLimit);
                       startTimer();
                     }

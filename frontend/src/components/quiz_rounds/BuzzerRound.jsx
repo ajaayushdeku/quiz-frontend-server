@@ -25,6 +25,7 @@ import { useParams } from "react-router-dom";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
+const PreBuzzedTimer = 20;
 const COLORS = [
   "#d61344ff",
   "#0ab9d4ff",
@@ -59,6 +60,11 @@ const BuzzerRound = ({ onFinish }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [results, setResults] = useState(null);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
+
+  const [preBuzzTime, setPreBuzzTime] = useState(PreBuzzedTimer); // e.g., 5s to buzz
+  const [preBuzzActive, setPreBuzzActive] = useState(false);
+
+  const [teamsAttempted, setTeamsAttempted] = useState([]); // Track all teams attempted
 
   const normalize = (str) => str?.trim().toLowerCase() || "";
 
@@ -156,27 +162,48 @@ const BuzzerRound = ({ onFinish }) => {
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 50);
 
   // -------------------- Buzzer Logic --------------------
+  // -------------------- Buzzer Logic --------------------
   const handleBuzzer = (teamName) => {
-    if (
-      teamQueue.find((t) => t.name === teamName) ||
-      activeTeam?.name === teamName
-    )
-      return;
+    // Only register during pre-buzz phase
+    if (!preBuzzActive) return;
+    if (teamQueue.find((t) => t.name === teamName)) return;
 
     const teamObj = teams.find((t) => t.name === teamName);
     if (!teamObj) return;
 
-    if (!activeTeam) {
-      setActiveTeam(teamObj);
-      setBuzzerPressed(teamObj.name);
-      resetTimer(roundTime);
-      startTimer();
-    } else {
-      setTeamQueue((prev) => [...prev, teamObj]);
-    }
-
+    setTeamQueue((prev) => [...prev, teamObj]);
     showToast(`🔔 Team ${teamObj.name} pressed the buzzer!`);
   };
+
+  // Pre-buzz timer
+  useEffect(() => {
+    if (!preBuzzActive) return;
+
+    if (preBuzzTime <= 0) {
+      setPreBuzzActive(false);
+      // Start first team's turn from queue if available
+      if (teamQueue.length > 0) {
+        const [firstTeam, ...rest] = teamQueue;
+        setActiveTeam(firstTeam);
+        setBuzzerPressed(firstTeam.name);
+        setTeamQueue(rest);
+        resetTimer(roundTime); // start team turn timer
+        startTimer();
+        showToast(`👉 Team ${firstTeam.name} now answers!`);
+      } else {
+        // No team buzzed → show correct answer
+        const correctOption = currentQuestion.options.find(
+          (opt) => opt.id === currentQuestion.correctOptionId
+        );
+        setCorrectAnswerValue(correctOption?.text || "");
+        setShowCorrectAnswer(true);
+      }
+      return;
+    }
+
+    const timer = setTimeout(() => setPreBuzzTime((t) => t - 1), 1000);
+    return () => clearTimeout(timer);
+  }, [preBuzzTime, preBuzzActive, teamQueue, currentQuestion]);
 
   const moveToNextTeamOrQuestion = () => {
     pauseTimer();
@@ -307,6 +334,8 @@ const BuzzerRound = ({ onFinish }) => {
         moveToNextTeamOrQuestion();
       }
 
+      setTeamsAttempted((prev) => [...new Set([...prev, activeTeam.id])]);
+
       console.log("Result:", result);
     } catch (err) {
       console.error(err);
@@ -316,6 +345,14 @@ const BuzzerRound = ({ onFinish }) => {
     }
   };
 
+  useEffect(() => {
+    if (questionDisplay) {
+      setPreBuzzActive(true);
+      setPreBuzzTime(PreBuzzedTimer); // reset
+    }
+  }, [questionDisplay]);
+
+  // -------------- SHIFT to show the question ---------------
   useShiftToShow(() => {
     if (!questionDisplay) setQuestionDisplay(true);
   }, [questionDisplay]);
@@ -330,42 +367,42 @@ const BuzzerRound = ({ onFinish }) => {
     });
   }, [quizCompleted]);
 
-  useEffect(() => {
-    const handleTimeout = async () => {
-      if (buzzerPressed && activeTeam) {
-        if (reduceBool) {
-          try {
-            const result = await submitAnswerToBackend({
-              teamId: activeTeam.id,
-              questionId: currentQuestion.id,
-              givenAnswer: -1, // negative/timeout
-            });
+  // useEffect(() => {
+  //   const handleTimeout = async () => {
+  //     if (buzzerPressed && activeTeam) {
+  //       if (reduceBool) {
+  //         try {
+  //           const result = await submitAnswerToBackend({
+  //             teamId: activeTeam.id,
+  //             questionId: currentQuestion.id,
+  //             givenAnswer: -1, // negative/timeout
+  //           });
 
-            if (!result) return;
+  //           if (!result) return;
 
-            const { pointsEarned } = result;
-            const msg = `⏰ Time's up! ${
-              pointsEarned < 0 ? pointsEarned : 0
-            } points for ${activeTeam.name}`;
-            showToast(msg);
-            setScoreMessage((prev) => [...prev, msg]);
-          } catch (err) {
-            console.error(err);
-            showToast("Failed to submit timeout penalty!");
-          } finally {
-            setIsSubmitting(false);
-            setTeamAnswer("");
-          }
-        } else {
-          showToast(`⏰ Time's up! Team ${activeTeam.name} missed their turn.`);
-        }
+  //           const { pointsEarned } = result;
+  //           const msg = `⏰ Time's up! ${
+  //             pointsEarned < 0 ? pointsEarned : 0
+  //           } points for ${activeTeam.name}`;
+  //           showToast(msg);
+  //           setScoreMessage((prev) => [...prev, msg]);
+  //         } catch (err) {
+  //           console.error(err);
+  //           showToast("Failed to submit timeout penalty!");
+  //         } finally {
+  //           setIsSubmitting(false);
+  //           setTeamAnswer("");
+  //         }
+  //       } else {
+  //         showToast(`⏰ Time's up! Team ${activeTeam.name} missed their turn.`);
+  //       }
 
-        moveToNextTeamOrQuestion();
-      }
-    };
+  //       moveToNextTeamOrQuestion();
+  //     }
+  //   };
 
-    if (timeRemaining === 0) handleTimeout();
-  }, [timeRemaining, buzzerPressed, activeTeam, reduceBool]);
+  //   if (timeRemaining === 0) handleTimeout();
+  // }, [timeRemaining, buzzerPressed, activeTeam, reduceBool]);
 
   return (
     <div className="quiz-container">
@@ -391,12 +428,21 @@ const BuzzerRound = ({ onFinish }) => {
         highTimer={roundTime}
       />
 
+      {preBuzzActive && (
+        <div className="hand-notifier first-hand detail-info">
+          ⏱️ All Team Buzz within: {preBuzzTime}s
+        </div>
+      )}
+
       {!quizCompleted ? (
         !questionDisplay ? (
           <div className="centered-control">
             <Button
               className="start-question-btn"
-              onClick={() => setQuestionDisplay(true)}
+              onClick={() => {
+                setQuestionDisplay(true);
+                setPreBuzzActive(true);
+              }}
             >
               Show Question <BiShow className="icon" />
             </Button>
@@ -430,6 +476,9 @@ const BuzzerRound = ({ onFinish }) => {
                       setActiveTeam(null);
                       setBuzzerPressed(null);
                       setTeamQueue([]);
+                      setPreBuzzTime(PreBuzzedTimer);
+                      setPreBuzzActive(false);
+                      setTeamsAttempted([]);
                       resetTimer(roundTime);
                       setScoreMessage([]);
                     } else setQuizCompleted(true);

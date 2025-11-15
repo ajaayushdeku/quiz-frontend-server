@@ -984,3 +984,64 @@
     transform: translateY(-6px);
   }
 }
+
+/* Container */
+.centered-control.category-select {
+  text-align: center;
+  margin: auto;
+  padding: 25px;
+  /* border: 2px solid black; */
+  border-radius: 16px;
+
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+/* Heading */
+.centered-control.category-select .form-heading {
+  font-size: 26px;
+  font-weight: 700;
+  margin-bottom: 20px;
+  color: #b0b0b0;
+}
+
+/* Category buttons container */
+.category-options {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}
+
+/* Category Button */
+.category-btn {
+  background: #2e68db !important;
+  color: #ffffff !important;
+  padding: 14px 28px;
+  border-radius: 12px;
+  font-size: 18px;
+  font-weight: 600;
+  transition: all 0.25s ease;
+  border: none;
+}
+
+/* Hover */
+.category-btn:hover {
+  background: #244a96 !important;
+  transform: translateY(-3px);
+}
+
+/* Active Press */
+.category-btn:active {
+  transform: scale(0.96);
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+  .category-btn {
+    padding: 12px 20px;
+    font-size: 16px;
+  }
+}
