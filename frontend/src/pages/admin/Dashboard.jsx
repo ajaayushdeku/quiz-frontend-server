@@ -32,7 +32,7 @@ export default function Dashboard() {
       {/* Header */}
       <div className="dashboard-header">
         <LayoutDashboard className="dashboard-header-icon" />
-        <h4>Admin Dashboard</h4>
+        <h4 className="form-heading">Admin Dashboard</h4>
       </div>
 
       {/* Card Grid */}

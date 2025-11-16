@@ -4,6 +4,7 @@ import axios from "axios";
 import logo from "../../assets/images/logo.png";
 import "../../styles/ResultsPage.css"; // using the updated CSS
 import { MdGroup } from "react-icons/md";
+import { GiFinishLine } from "react-icons/gi";
 
 const ResultsPage = () => {
   const { quizId } = useParams();
@@ -97,8 +98,9 @@ const ResultsPage = () => {
           </div>
         </div>
       ) : (
-        <button className="next-round-btn" onClick={() => setShowScores(true)}>
-          Show Results
+        <button className="show-result-btn" onClick={() => setShowScores(true)}>
+          <GiFinishLine />
+          <div>Show Results</div> <GiFinishLine />
         </button>
       )}
     </section>

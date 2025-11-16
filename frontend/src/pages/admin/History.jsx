@@ -25,7 +25,7 @@ const History = () => {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <BsClockHistory className="header-icon" />
-        <h4>History</h4>
+        <h4 className="form-heading">History</h4>
       </div>
 
       <div className="card-grid">

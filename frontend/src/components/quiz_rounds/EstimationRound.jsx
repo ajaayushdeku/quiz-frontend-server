@@ -220,7 +220,7 @@ const EstimationRound = ({ onFinish }) => {
               <div className="correct-answer-display">
                 <p>
                   🎯 Correct Answer:{" "}
-                  <strong style={{ color: "#c9c9c9ff" }}>
+                  <strong style={{ color: "#32be76ff" }}>
                     {result.correctAnswer}
                   </strong>
                 </p>

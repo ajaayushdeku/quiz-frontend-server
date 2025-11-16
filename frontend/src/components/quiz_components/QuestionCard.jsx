@@ -20,7 +20,7 @@ const QuestionCard = ({ mediaType, mediaUrl, displayedText, category }) => {
         <div className="questions-container">
           <div className="qn">
             {/* Category */}
-            {category && <div className="quiz-category">{category}</div>}
+            {/* {category && <div className="quiz-category">{category}</div>} */}
 
             {displayedText}
 

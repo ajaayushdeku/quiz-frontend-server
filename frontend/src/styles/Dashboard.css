@@ -1248,3 +1248,32 @@ button:hover {
 
   /* background-color: #0056b3; */
 }
+
+@media (max-width: 720px) {
+  .form-heading {
+    font-size: 1.3rem;
+  }
+
+  .step-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    /* border-radius: 8px; */
+    background-color: transparent;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+    /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); */
+  }
+
+  .multi-option-container {
+    /* display: grid;
+  grid-template-columns: 1fr 1fr; */
+
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+    margin: 0 1.5rem;
+    width: 95%;
+  }
+}

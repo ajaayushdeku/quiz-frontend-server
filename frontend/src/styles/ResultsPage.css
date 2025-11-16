@@ -82,7 +82,7 @@
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  margin-bottom: 2rem;
+  /* margin-bottom: 2rem; */
 }
 
 .scoreboard-title {
@@ -267,6 +267,31 @@
   transform: scale(1.05);
 }
 
+.show-result-btn {
+  background-color: #c2c2c2;
+  color: #1f1f1f;
+  border: none;
+  border-radius: 40px;
+  border: 3px dashed #c2c2c2;
+  padding: 0.9rem 2rem;
+  font-size: 1.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  align-items: center;
+  /* margin-bottom: 2rem; */
+}
+
+.show-result-btn:hover {
+  background-color: #39404921;
+  border: 3px dashed rgb(138, 138, 138);
+  color: #ebebeb;
+  transform: scale(1.05);
+}
+
 /* ==========================
    Scoreboard List
 ========================== */
@@ -419,6 +444,10 @@
   .scoreboard-card {
     width: 90%;
     font-size: 0.95rem;
+  }
+
+  .scoreboard-title {
+    font-size: 2rem;
   }
 }
 

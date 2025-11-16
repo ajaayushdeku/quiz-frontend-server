@@ -262,9 +262,15 @@ const SubjectRound = ({ onFinish }) => {
 
   // ---------------- Auto pass on timeout ----------------
   useEffect(() => {
-    if (!isRunning && timeRemaining === 0 && activeRound?.rules?.enablePass)
+    if (
+      !isRunning &&
+      timeRemaining === 0 &&
+      activeRound?.rules?.enablePass &&
+      questionDisplay
+    ) {
       handlePass();
-  }, [isRunning, timeRemaining, activeRound]);
+    }
+  }, [isRunning, timeRemaining, activeRound, questionDisplay]);
 
   // ---------------- Submit to backend ----------------
   const submitAnswerToBackend = async ({
@@ -511,6 +517,7 @@ const SubjectRound = ({ onFinish }) => {
   useEffect(() => {
     const handleTimeout = async () => {
       if (!activeTeam || !currentQuestion) return;
+      if (!questionDisplay) return; // Only handle timeout if question is displayed
 
       const correctOption = currentQuestion.options.find(
         (opt) => opt.id === currentQuestion.correctOptionId
@@ -526,6 +533,8 @@ const SubjectRound = ({ onFinish }) => {
         return;
       }
 
+      // Only apply penalty if enableNegative is true AND enablePass is false
+      // If enablePass is true, the auto-pass effect will handle it
       if (
         reduceBool &&
         activeRound?.rules?.enableTimer &&
@@ -564,25 +573,33 @@ const SubjectRound = ({ onFinish }) => {
         } catch (err) {
           console.error("Timeout penalty error:", err);
           showToast("Failed to submit timeout penalty!");
-        } finally {
-          setScoreMessage("");
         }
+
+        // Mark question as used
+        markQuestionAsUsed(currentQuestion.id);
+
+        goToNextTeam();
+        setSelectedCategory(null); // Reset category for next team
+        setLockedQuestion(null); // Reset locked question
+        setQuestionDisplay(false);
+        resetTimer(roundTime);
+        resetAnswer();
+        setScoreMessage("");
+        console.log("Timeout: moved to next team/question (no pass enabled)");
       }
-
-      // Mark question as used
-      markQuestionAsUsed(currentQuestion.id);
-
-      goToNextTeam();
-      setSelectedCategory(null); // Reset category for next team
-      setQuestionDisplay(false);
-      resetTimer(roundTime);
-      resetAnswer();
-      setScoreMessage("");
-      console.log("Timeout: moved to next team/question (no pass enabled)");
     };
 
-    if (timeRemaining === 0 && !isRunning) handleTimeout();
-  }, [timeRemaining, activeTeam, currentQuestion, reduceBool]);
+    if (timeRemaining === 0 && !isRunning && questionDisplay) {
+      handleTimeout();
+    }
+  }, [
+    timeRemaining,
+    activeTeam,
+    currentQuestion,
+    reduceBool,
+    questionDisplay,
+    isRunning,
+  ]);
 
   // ---------------- Keyboard Shortcuts ----------------
   useCtrlKeyPass(() => {
@@ -711,16 +728,24 @@ const SubjectRound = ({ onFinish }) => {
           <>
             {currentQuestion ? (
               <>
-                <QuestionCard
-                  questionText={
-                    currentQuestion?.question ?? "No question loaded"
-                  }
-                  displayedText={`Q. ${displayedText}`}
-                  mediaType={currentQuestion.mediaType}
-                  mediaUrl={currentQuestion.mediaUrl}
-                  onMediaClick={handleMediaClick}
-                  category={currentQuestion.category}
-                />
+                <div className="question-category-collection">
+                  {currentQuestion.category && (
+                    <div className="quiz-category">
+                      {currentQuestion.category}
+                    </div>
+                  )}
+
+                  <QuestionCard
+                    questionText={
+                      currentQuestion?.question ?? "No question loaded"
+                    }
+                    displayedText={`Q. ${displayedText}`}
+                    mediaType={currentQuestion.mediaType}
+                    mediaUrl={currentQuestion.mediaUrl}
+                    onMediaClick={handleMediaClick}
+                    category={currentQuestion.category}
+                  />
+                </div>
                 <OptionList
                   options={currentQuestion.options}
                   selectedAnswer={selectedAnswer}

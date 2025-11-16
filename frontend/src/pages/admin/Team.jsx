@@ -68,7 +68,7 @@ export default function Team() {
     <div className="dashboard-container">
       <div className="dashboard-header">
         <MdGroup className="header-icon" />
-        <h4>Team Manager</h4>
+        <h4 className="form-heading">Team Manager</h4>
       </div>
 
       {/* Input + Add Button */}

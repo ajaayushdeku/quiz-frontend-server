@@ -22,10 +22,11 @@ import QuestionCard from "../quiz_components/QuestionCard";
 
 import axios from "axios";
 import { useParams } from "react-router-dom";
+import { formatTime } from "../../utils/formatTime";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
-const PreBuzzedTimer = 20;
+const PreBuzzedTimer = 60;
 const COLORS = [
   "#d61344ff",
   "#0ab9d4ff",
@@ -162,7 +163,6 @@ const BuzzerRound = ({ onFinish }) => {
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 50);
 
   // -------------------- Buzzer Logic --------------------
-  // -------------------- Buzzer Logic --------------------
   const handleBuzzer = (teamName) => {
     // Only register during pre-buzz phase
     if (!preBuzzActive) return;
@@ -175,7 +175,7 @@ const BuzzerRound = ({ onFinish }) => {
     showToast(`🔔 Team ${teamObj.name} pressed the buzzer!`);
   };
 
-  // Pre-buzz timer
+  // -------------------- Pre-buzz timer --------------------
   useEffect(() => {
     if (!preBuzzActive) return;
 
@@ -239,6 +239,7 @@ const BuzzerRound = ({ onFinish }) => {
     }
   }, [timeRemaining]);
 
+  // -------------------- Assign Alphabet Key as Buzzer to Teams --------------------
   useEffect(() => {
     const handleKeyPress = (e) => {
       const key = e.key.toUpperCase();
@@ -255,6 +256,7 @@ const BuzzerRound = ({ onFinish }) => {
     };
   }, [teams, handleBuzzer]);
 
+  // -------------------- Submit to the DB --------------------
   const submitAnswerToBackend = async ({
     teamId,
     questionId,
@@ -274,6 +276,7 @@ const BuzzerRound = ({ onFinish }) => {
     }
   };
 
+  // -------------------- Handle Answer Submit --------------------
   const handleSubmit = async () => {
     if (!activeTeam || !currentQuestion || isSubmitting) return;
     setIsSubmitting(true);
@@ -357,9 +360,11 @@ const BuzzerRound = ({ onFinish }) => {
     if (!questionDisplay) setQuestionDisplay(true);
   }, [questionDisplay]);
 
+  // -------------------- Media Full Screen Display --------------------
   const handleMediaClick = (url) => setFullscreenMedia(url);
   const closeFullscreen = () => setFullscreenMedia(null);
 
+  // -------------------- Hide Components When Round Finished --------------------
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
     Array.from(details).forEach((el) => {
@@ -367,42 +372,48 @@ const BuzzerRound = ({ onFinish }) => {
     });
   }, [quizCompleted]);
 
-  // useEffect(() => {
-  //   const handleTimeout = async () => {
-  //     if (buzzerPressed && activeTeam) {
-  //       if (reduceBool) {
-  //         try {
-  //           const result = await submitAnswerToBackend({
-  //             teamId: activeTeam.id,
-  //             questionId: currentQuestion.id,
-  //             givenAnswer: -1, // negative/timeout
-  //           });
+  // -------------------- Handle Time Out Effect --------------------
+  useEffect(() => {
+    const handleTimeout = async () => {
+      if (buzzerPressed && activeTeam) {
+        if (reduceBool) {
+          try {
+            const result = await submitAnswerToBackend({
+              teamId: activeTeam.id,
+              questionId: currentQuestion.id,
+              givenAnswer: -1, // negative/timeout
+            });
 
-  //           if (!result) return;
+            if (!result) return;
 
-  //           const { pointsEarned } = result;
-  //           const msg = `⏰ Time's up! ${
-  //             pointsEarned < 0 ? pointsEarned : 0
-  //           } points for ${activeTeam.name}`;
-  //           showToast(msg);
-  //           setScoreMessage((prev) => [...prev, msg]);
-  //         } catch (err) {
-  //           console.error(err);
-  //           showToast("Failed to submit timeout penalty!");
-  //         } finally {
-  //           setIsSubmitting(false);
-  //           setTeamAnswer("");
-  //         }
-  //       } else {
-  //         showToast(`⏰ Time's up! Team ${activeTeam.name} missed their turn.`);
-  //       }
+            const { pointsEarned } = result;
+            const msg = `⏰ Time's up! ${
+              pointsEarned < 0 ? pointsEarned : 0
+            } points for ${activeTeam.name}`;
+            showToast(msg);
+            setScoreMessage((prev) => [...prev, msg]);
+          } catch (err) {
+            console.error(err);
+            showToast("Failed to submit timeout penalty!");
+          } finally {
+            setIsSubmitting(false);
+            setTeamAnswer("");
+          }
+        } else {
+          showToast(`⏰ Time's up! Team ${activeTeam.name} missed their turn.`);
+        }
 
-  //       moveToNextTeamOrQuestion();
-  //     }
-  //   };
+        moveToNextTeamOrQuestion();
+      }
+    };
 
-  //   if (timeRemaining === 0) handleTimeout();
-  // }, [timeRemaining, buzzerPressed, activeTeam, reduceBool]);
+    if (timeRemaining === 0) handleTimeout();
+  }, [timeRemaining, buzzerPressed, activeTeam, reduceBool]);
+
+  const formatPreBuzzTime = (seconds) => {
+    const secs = seconds;
+    return `${secs.toString().padStart(2, "0")}`;
+  };
 
   return (
     <div className="quiz-container">
@@ -429,8 +440,9 @@ const BuzzerRound = ({ onFinish }) => {
       />
 
       {preBuzzActive && (
-        <div className="hand-notifier first-hand detail-info">
-          ⏱️ All Team Buzz within: {preBuzzTime}s
+        <div className=" pre-buzz-timer">
+          <div>⏱️ All Team must Buzz within: </div>{" "}
+          <div className="pre-timer"> {formatPreBuzzTime(preBuzzTime)}s</div>
         </div>
       )}
 
@@ -469,7 +481,7 @@ const BuzzerRound = ({ onFinish }) => {
                 </div>
                 <div>
                   <Button
-                    className="next-question-btn"
+                    className="next-question-btn-dup"
                     onClick={() => {
                       if (!isLastQuestion) {
                         nextQuestion();

@@ -97,6 +97,7 @@
   margin: 1rem 0;
   position: relative;
   top: 2rem;
+  /* align-items: center; */
 
   /* Abstract paper effect */
   background: rgba(255, 255, 255, 0.05);
@@ -208,15 +209,20 @@
 
 .quiz-category {
   position: absolute;
-  top: 0.2rem;
-  right: 0.2rem;
+  top: 35px;
+  right: -30px;
+  font-size: 1rem;
   font-size: 1.2rem;
   font-weight: 700;
   color: rgb(58, 57, 57);
   padding: 0.1rem 0.7rem;
   background-color: rgb(243, 243, 243);
   border-radius: 10px;
-  z-index: 2000;
+  z-index: 200;
+}
+
+.question-category-collection {
+  position: relative;
 }
 
 /* ======================= */
@@ -427,7 +433,7 @@
   }
 
   .quiz-questions {
-    width: 30vw;
+    width: 80vw;
     max-height: 40vh;
     font-size: 1rem;
   }
@@ -435,6 +441,11 @@
   .questions-container .qn {
     padding: 1rem;
     font-size: 1.1rem;
+  }
+
+  .quiz-category {
+    font-size: 0.9rem;
+    padding: 0.2rem 0.6rem;
   }
 
   .quiz-image,
@@ -465,7 +476,7 @@
 /* Very small devices */
 @media (max-width: 480px) {
   .quiz-questions {
-    width: 95vw;
+    width: 90vw;
     max-height: 35vh;
   }
 
@@ -475,7 +486,7 @@
   }
 
   .quiz-category {
-    font-size: 0.9rem;
+    font-size: 0.5rem;
     padding: 0.2rem 0.6rem;
   }
 
@@ -893,6 +904,19 @@
     min-width: 80px;
     padding: 0.3rem 0.6rem;
   }
+
+  .correct-answer-display {
+    margin-top: 3rem;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #eaeaea;
+    background: rgba(50, 190, 118, 0.15);
+    padding: 3px 20px;
+    /* border-radius: 10px;
+    border: 1px solid #32be76ff;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in; */
+  }
 }
 
 @media (max-width: 480px) {
@@ -1097,5 +1121,18 @@
   .category-btn {
     padding: 12px 20px;
     font-size: 16px;
+  }
+
+  .winner-list h4 {
+    font-size: 1.5rem;
+  }
+
+  .winner-team {
+    font-size: 1.2rem;
+  }
+
+  .team-icon {
+    width: 2rem;
+    height: 2rem;
   }
 }

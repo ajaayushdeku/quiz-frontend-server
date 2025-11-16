@@ -67,6 +67,7 @@
   height: 8rem;
   overflow: hidden;
   overflow-y: scroll;
+  font-weight: 700;
 }
 
 .quiz-rounds::-webkit-scrollbar,
@@ -93,7 +94,7 @@
 
 .quiz-rounds li,
 .quiz-teams li {
-  font-size: 1rem;
+  font-size: clamp(0.85rem, 2vw, 1rem);
   margin-bottom: 0.3rem;
   color: #ddd;
 }
@@ -110,5 +111,52 @@
 
   .quiz-selector-header {
     font-size: 2rem;
+  }
+
+  .quiz-select-container {
+    width: 90%;
+    flex-direction: column;
+    gap: 1rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+
+  .quiz-topic {
+    font-size: 1.2rem;
+    font-weight: 700;
+    color: #dddddd;
+  }
+
+  /* Make header a long horizontal tab */
+  .quiz-card-header.mobile-tab {
+    padding: 1rem;
+    width: 100%;
+    background: #2b2b2b;
+  }
+
+  /* Hide desktop content area */
+  .desktop-card-area {
+    display: none;
+  }
+
+  /* Accordion body (hidden by default) */
+  .mobile-body {
+    max-height: 0;
+    overflow: hidden;
+    opacity: 0;
+    transition: max-height 0.35s ease, opacity 0.25s ease;
+  }
+
+  /* When expanded */
+  .mobile-body.show {
+    max-height: 300px;
+    opacity: 1;
+    padding: 1rem 1.5rem;
+  }
+
+  .quiz-card.expanded {
+    border: 1px solid #777;
+    background: #272727;
   }
 }

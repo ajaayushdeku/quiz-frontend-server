@@ -78,3 +78,24 @@
   box-shadow: none;
   cursor: not-allowed;
 }
+
+@media (max-width: 720px) {
+  .option-btn {
+    gap: 1rem;
+    margin: 5px 20px;
+    font-size: 1.1rem; /* bigger font */
+    border-radius: 1.1rem;
+  }
+
+  .option-btn h3 {
+    color: #fff;
+    font-size: 1rem;
+    margin: 0;
+  }
+
+  .option-btn p {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: bold;
+  }
+}
