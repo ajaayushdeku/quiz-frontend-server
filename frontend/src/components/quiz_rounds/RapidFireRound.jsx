@@ -598,7 +598,7 @@ const RapidFireRound = ({ onFinish }) => {
     const nextTeamIndex = activeIndex + 1;
     if (nextTeamIndex < queue.length) {
       showToast(
-        `🎯 Team ${activeTeamName} finished! Next: Team ${queue[nextTeamIndex]}`
+        `🎯 Team ${activeTeamName} finished! Next: Team ${queue[nextTeamIndex]?.name}`
       );
     } else {
       showToast("🏁 All teams finished the quiz!");

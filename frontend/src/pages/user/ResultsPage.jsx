@@ -69,6 +69,9 @@ const ResultsPage = () => {
                         isWinner ? "winner-card" : ""
                       }`}
                     >
+                      {isWinner && (
+                        <div className="winner-badge">👑 Winner!</div>
+                      )}
                       <div className="team-title">
                         <MdGroup className="team-icon" />
 
@@ -77,11 +80,11 @@ const ResultsPage = () => {
                       <div className="team-points">
                         {" "}
                         <div>
-                          {isWinner ? (
+                          {/* {isWinner ? (
                             <span className="crown-emoji">👑</span>
                           ) : (
                             ""
-                          )}
+                          )} */}
                         </div>
                         {team.points}
                       </div>

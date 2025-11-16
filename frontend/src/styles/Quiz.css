@@ -780,9 +780,7 @@
   overflow-y: auto;
   padding: 2rem;
   height: 310px;
-}
 
-.team-answer-summary {
   margin-top: 2rem;
   padding: 1.5rem;
   background: linear-gradient(135deg, #1b1b1b, #242424);
