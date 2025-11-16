@@ -225,9 +225,9 @@ export default function ManageQuestions() {
                     </td>
 
                     {/* Actions */}
-                    <td className="text-center">
+                    <td>
                       {editingId === q._id ? (
-                        <div className="btns-container">
+                        <div className="btns-container text-center">
                           <button
                             onClick={() => handleSave(q._id)}
                             className="action-btn save-btn"

@@ -24,17 +24,27 @@ export default function ManageQuizzes() {
         const data = res.data.quizzes || [];
 
         // ✅ Format quiz data for table
-        const formatted = data.map((quiz) => ({
+        const formattedQuiz = data.map((quiz) => ({
           _id: quiz._id,
           name: quiz.name || "Untitled Quiz",
           adminId: quiz.adminId || "Unknown",
-          rounds: quiz.rounds || [],
+          rounds: (quiz.rounds || []).map((r) => ({
+            _id: r._id,
+            name: r.name || "Unnamed Round",
+            category: r.category || "Unknown",
+            rules: {
+              ...r.rules,
+              points: r.rules?.points || 0, // ✅ Include points here
+            },
+            regulation: r.regulation || {},
+            questions: r.questions || [],
+          })),
           teams: quiz.teams || [],
           numTeams: quiz.numTeams || 0,
         }));
 
-        console.log("Fetched quizzes:", formatted);
-        setQuizzes(formatted);
+        console.log("Fetched quizzes:", formattedQuiz);
+        setQuizzes(formattedQuiz);
       } catch (error) {
         console.error("Fetch Error:", error);
         toast.error("Failed to fetch quizzes!");
@@ -60,6 +70,7 @@ export default function ManageQuizzes() {
     }
   };
 
+  console.log("Round points:", quizzes);
   return (
     <div className="page-container">
       <Toaster position="top-center" />
@@ -82,17 +93,19 @@ export default function ManageQuizzes() {
               <tbody>
                 {currentQuizzes.map((quiz) => (
                   <tr key={quiz._id}>
-                    <td>{quiz.name}</td>
+                    <td className="sub-list">{quiz.name}</td>
 
                     {/* Rounds Column */}
                     <td>
                       {quiz.rounds.length > 0 ? (
                         <ul className="sub-list">
                           {quiz.rounds.map((r, idx) => (
-                            <li key={idx}>
+                            <li key={idx} className="sub-list-items">
                               {r.name || `Round ${idx + 1}`} <br /> (
-                              {r.points && <span> {r.points} pts</span>} per
-                              question )
+                              {r?.rules?.points && (
+                                <span> {r?.rules?.points} pts</span>
+                              )}{" "}
+                              per question )
                             </li>
                           ))}
                         </ul>
@@ -114,13 +127,16 @@ export default function ManageQuizzes() {
                       )}
                     </td>
 
-                    <td className="text-center">
-                      <button
-                        onClick={() => handleDelete(quiz._id)}
-                        className="action-btn delete-btn"
-                      >
-                        <MdDelete className="btn-icon" />
-                      </button>
+                    <td>
+                      <div className="text-center">
+                        {" "}
+                        <button
+                          onClick={() => handleDelete(quiz._id)}
+                          className="action-btn delete-btn"
+                        >
+                          <MdDelete className="btn-icon" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

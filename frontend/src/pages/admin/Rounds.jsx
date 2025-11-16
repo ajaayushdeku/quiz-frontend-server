@@ -688,12 +688,25 @@ export default function CreateQuiz() {
                               className="quiz-input-d select"
                             >
                               <option value="noPass">No Pass</option>
-                              <option value="onceToNextTeam">
-                                Once To Next Team
-                              </option>
-                              <option value="wrongIfPassed">
+                              {/* SHOW BASED ON CATEGORY */}
+                              {["general round", "subject round"].includes(
+                                round.category.toLowerCase()
+                              ) && (
+                                <option value="onceToNextTeam">
+                                  Once To Next Team
+                                </option>
+                              )}
+
+                              {round.category.toLowerCase() ===
+                                "rapid fire round" && (
+                                <option value="passQuestion">
+                                  Pass Question
+                                </option>
+                              )}
+
+                              {/* <option value="wrongIfPassed">
                                 Wrong If Passed
-                              </option>
+                              </option> */}
                             </select>
                           </label>
 

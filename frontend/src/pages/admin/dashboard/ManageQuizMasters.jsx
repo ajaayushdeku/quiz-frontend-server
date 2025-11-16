@@ -137,7 +137,7 @@ export default function ManageQuizMasters() {
 
       {/* Quiz Masters Table */}
       <div className="table-card">
-        <h2 className="table-title">Existing Quiz Masters</h2>
+        <h2 className="table-title">Quiz Masters List</h2>
 
         {loading ? (
           <p className="table-message">Loading...</p>
@@ -161,12 +161,15 @@ export default function ManageQuizMasters() {
                     <td>{master.email}</td>
                     <td>{master.role}</td>
                     <td>
-                      <button
-                        onClick={() => deleteQuizMaster(master._id)}
-                        className="btn-danger"
-                      >
-                        Delete <MdDelete className="btn-icon" />
-                      </button>
+                      <div className="text-center">
+                        {" "}
+                        <button
+                          onClick={() => deleteQuizMaster(master._id)}
+                          className="btn-danger"
+                        >
+                          Remove <MdDelete className="btn-icon" />
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))}

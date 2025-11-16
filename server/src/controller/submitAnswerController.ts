@@ -51,7 +51,7 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
     const rules = round.rules;
     const roundNumber = round.roundNumber || 1;
 
-    // =========== ESTIMATION ROUND ===========
+    // ESTIMATION ROUND
     if (round.category === "estimation round") {
       if (!answers || !Array.isArray(answers) || answers.length === 0) {
         return res
@@ -136,11 +136,21 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
 
         const pointsToAward = Number(rules.points || 0);
 
+        console.log("=== ESTIMATION ROUND SCORING ===");
+        console.log("Correct Answer:", correctAnswerNum);
+        console.log("Winner Team ID:", closestTeamId);
+        console.log("Winner Answer:", closestAnswer);
+        console.log("Points to Award:", pointsToAward);
+
         // Save all submissions with correct points (update if exists)
         for (const t of submittedTeams) {
           const isWinner = t.teamId === closestTeamId;
           const points = isWinner ? pointsToAward : 0;
           const correct = isWinner;
+
+          console.log(`\n--- Processing Team: ${t.teamId} ---`);
+          console.log("Is Winner:", isWinner);
+          console.log("Points:", points);
 
           // Check if submission already exists for this team and question
           const existingSubmit = await Submit.findOne({
@@ -150,21 +160,37 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
             questionId: question._id as any,
           });
 
+          console.log("Existing Submit:", existingSubmit ? "YES" : "NO");
+
+          // Get team for points update
+          const team = await Team.findById(t.teamId);
+          if (!team) {
+            console.log("Team not found, skipping");
+            continue;
+          }
+
+          console.log("Team points BEFORE:", team.points);
+
           if (existingSubmit) {
             // Update existing Submit document
             const oldPoints = existingSubmit.pointsEarned;
+            console.log("Old Points in Submit:", oldPoints);
+
             existingSubmit.givenAnswer = t.numericAnswer;
             existingSubmit.pointsEarned = points;
             existingSubmit.isCorrect = correct;
             await existingSubmit.save();
 
-            // Adjust team points if points changed
-            if (points > 0) {
-              const team = await Team.findById(t.teamId);
-              if (team) {
-                team.points = (team.points || 0) + points; // add winner points
-                await team.save();
-              }
+            // Always adjust team points based on point difference
+            const pointDifference = points - oldPoints;
+            console.log("Point Difference:", pointDifference);
+
+            if (pointDifference !== 0) {
+              team.points = (team.points || 0) + pointDifference;
+              await team.save();
+              console.log("Team points AFTER update:", team.points);
+            } else {
+              console.log("No point change needed");
             }
           } else {
             // Create new Submit document
@@ -178,6 +204,16 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
               pointsEarned: points,
               isCorrect: correct,
             });
+            console.log("Created new Submit document");
+
+            // Add points to team for first-time submission
+            if (points > 0) {
+              team.points = (team.points || 0) + points;
+              await team.save();
+              console.log("Team points AFTER adding:", team.points);
+            } else {
+              console.log("No points to add (loser team)");
+            }
           }
 
           // Update QuizHistory
@@ -254,7 +290,7 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
       });
     }
 
-    // =========== NORMAL ROUNDS ===========
+    //NORMAL ROUNDS
     if (!teamId || givenAnswer === undefined)
       return res
         .status(400)

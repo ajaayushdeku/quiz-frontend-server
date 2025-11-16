@@ -190,6 +190,8 @@ const SubjectRound = ({ onFinish }) => {
   };
 
   // ---------------- Get current question based on category ----------------
+  const [lockedQuestion, setLockedQuestion] = useState(null);
+
   const getCurrentQuestion = () => {
     if (!selectedCategory) return null;
 
@@ -204,7 +206,7 @@ const SubjectRound = ({ onFinish }) => {
     return availableQuestions[0];
   };
 
-  const currentQuestion = getCurrentQuestion();
+  const currentQuestion = lockedQuestion || getCurrentQuestion();
 
   // ---------------- Team Queue Hook ----------------
   const {
@@ -232,6 +234,18 @@ const SubjectRound = ({ onFinish }) => {
       resetTimer(roundTime);
     }
   }, [roundTime, activeRound]);
+
+  // Lock the current question when it's displayed to prevent flickering
+  useEffect(() => {
+    if (questionDisplay && selectedCategory) {
+      const question = getCurrentQuestion();
+      if (question) {
+        setLockedQuestion(question);
+      }
+    } else {
+      setLockedQuestion(null);
+    }
+  }, [questionDisplay, selectedCategory]);
 
   const { selectedAnswer, selectAnswer, resetAnswer } = useAnswerHandler(
     currentQuestion?.correctOptionId
@@ -354,12 +368,14 @@ const SubjectRound = ({ onFinish }) => {
         goToNextTeam();
         // Reset category for next team's first-hand
         setSelectedCategory(null);
+        setLockedQuestion(null);
       } else {
         // Second-hand completed, reset to first-hand and move to next team
         setSecondHand(false);
         goToNextTeam();
         // Reset category for next team's first-hand
         setSelectedCategory(null);
+        setLockedQuestion(null);
       }
 
       // Check if quiz is completed
@@ -476,6 +492,7 @@ const SubjectRound = ({ onFinish }) => {
         } else {
           // Reset category for next team
           setSelectedCategory(null);
+          setLockedQuestion(null);
           resetTimer(roundTime);
           startTimer();
         }

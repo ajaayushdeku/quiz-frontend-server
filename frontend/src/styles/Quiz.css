@@ -811,13 +811,21 @@
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
 }
 
-/* Cards */
+/* ------------------ Cards ------------------ */
 .team-answer-card {
-  background: #171717;
+  background-color: #171717;
   border-radius: 12px;
   padding: 1rem;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
 }
 
 .team-answer-card:hover {
@@ -825,38 +833,86 @@
   box-shadow: 0 4px 12px rgba(178, 178, 178, 0.15);
 }
 
-/* Questions */
+/* ---------------- Questions ---------------- */
 .team-answer-question {
   font-size: 1.2rem;
   font-weight: 600;
   color: #e5e5e5;
   margin-bottom: 0.5rem;
-  height: 40px;
+  line-height: 1.4;
+  min-height: 3rem; /* ensures symmetry for multiple cards */
+  width: 100%;
+  overflow-wrap: break-word;
 }
 
-/* Answers & Status */
+/* ---------------- Answers & Status ---------------- */
 .team-answer-status,
 .team-summary-answer {
-  border-radius: 8px;
-  padding: 0.4rem 0.6rem;
   display: inline-block;
+  padding: 0.4rem 0.8rem;
+  border-radius: 8px;
   font-weight: 700;
   font-size: 1.2rem;
+  transition: background 0.3s, color 0.3s;
+  text-align: center;
+  width: 16rem;
+  /* min-width: 100px; */
+  margin: 0.2rem 0.2rem 0 0; /* spacing between multiple statuses */
+  box-sizing: border-box;
 }
 
+/* Status for individual answers */
 .team-answer-status.correct {
-  background: rgba(72, 255, 145, 0.1);
-  color: #4ade80;
+  background-color: rgba(72, 255, 145, 0.1);
+  color: #86efac;
 }
 
 .team-answer-status.wrong {
-  background: rgba(255, 75, 75, 0.1);
+  background-color: rgba(255, 75, 75, 0.1);
   color: #f87171;
 }
 
+/* Summary styling for team answers */
 .team-summary-answer {
+  background-color: rgba(72, 255, 145, 0.08);
   color: #86efac;
-  background: rgba(72, 255, 145, 0.08);
+}
+
+/* ---------------- Responsive Layout ---------------- */
+@media (max-width: 768px) {
+  .team-answer-card {
+    padding: 0.8rem;
+  }
+
+  .team-answer-question {
+    font-size: 1rem;
+    min-height: 2.5rem;
+  }
+
+  .team-answer-status,
+  .team-summary-answer {
+    font-size: 1rem;
+    min-width: 80px;
+    padding: 0.3rem 0.6rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .team-answer-card {
+    padding: 0.6rem;
+  }
+
+  .team-answer-question {
+    font-size: 0.95rem;
+    min-height: 2rem;
+  }
+
+  .team-answer-status,
+  .team-summary-answer {
+    font-size: 0.9rem;
+    min-width: 70px;
+    padding: 0.25rem 0.5rem;
+  }
 }
 
 /* Winner List Container */

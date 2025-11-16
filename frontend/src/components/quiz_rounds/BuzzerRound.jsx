@@ -460,32 +460,36 @@ const BuzzerRound = ({ onFinish }) => {
             {showCorrectAnswer ? (
               <>
                 <div className="correct-answer-display">
-                  🎯 Correct Answer:{" "}
-                  <strong style={{ color: "#32be76ff" }}>
-                    {correctAnswerValue}
-                  </strong>
+                  <p>
+                    🎯 Correct Answer:{" "}
+                    <strong style={{ color: "#32be76ff" }}>
+                      {correctAnswerValue}
+                    </strong>
+                  </p>
                 </div>
-                <Button
-                  className="next-question-btn"
-                  onClick={() => {
-                    if (!isLastQuestion) {
-                      nextQuestion();
-                      setShowCorrectAnswer(false);
-                      setCorrectAnswerValue("");
-                      setQuestionDisplay(false);
-                      setActiveTeam(null);
-                      setBuzzerPressed(null);
-                      setTeamQueue([]);
-                      setPreBuzzTime(PreBuzzedTimer);
-                      setPreBuzzActive(false);
-                      setTeamsAttempted([]);
-                      resetTimer(roundTime);
-                      setScoreMessage([]);
-                    } else setQuizCompleted(true);
-                  }}
-                >
-                  <h3>NEXT QUESTION</h3> <FaArrowRight />
-                </Button>
+                <div>
+                  <Button
+                    className="next-question-btn"
+                    onClick={() => {
+                      if (!isLastQuestion) {
+                        nextQuestion();
+                        setShowCorrectAnswer(false);
+                        setCorrectAnswerValue("");
+                        setQuestionDisplay(false);
+                        setActiveTeam(null);
+                        setBuzzerPressed(null);
+                        setTeamQueue([]);
+                        setPreBuzzTime(PreBuzzedTimer);
+                        setPreBuzzActive(false);
+                        setTeamsAttempted([]);
+                        resetTimer(roundTime);
+                        setScoreMessage([]);
+                      } else setQuizCompleted(true);
+                    }}
+                  >
+                    <h3>NEXT QUESTION</h3> <FaArrowRight />
+                  </Button>
+                </div>
               </>
             ) : activeTeam ? (
               <AnswerTextBox

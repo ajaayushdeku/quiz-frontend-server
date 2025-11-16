@@ -1231,3 +1231,20 @@ button:hover {
   gap: 10px;
   margin-top: 2rem;
 }
+
+.sub-list {
+  font-size: 1rem;
+}
+
+.sub-list-items {
+  font-size: 1rem;
+  margin-bottom: 20px;
+}
+
+.text-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* background-color: #0056b3; */
+}

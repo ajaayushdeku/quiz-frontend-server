@@ -293,3 +293,27 @@ export const deleteQuiz = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
+export const resetTeamScores = async (req: Request, res: Response) => {
+  try {
+    const { quizId } = req.params;
+
+    if (!quizId) {
+      return res.status(400).json({ message: "Quiz ID is required" });
+    }
+
+    // Reset score fields
+    await Team.updateMany(
+      { quizId },
+      {
+        $set: {
+          points: 0,
+        },
+      }
+    );
+
+    return res.json({ message: "Team scores reset successfully" });
+  } catch (error: any) {
+    return res.status(500).json({ message: error.message });
+  }
+};

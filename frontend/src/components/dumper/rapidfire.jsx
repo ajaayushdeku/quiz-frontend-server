@@ -28,7 +28,7 @@ const { settings } = rulesConfig.rapid_fire_round;
 const INITIAL_TIMER = settings.roundTime;
 
 const COLORS = [
-  "#8d1734ff",
+  "#d61344ff",
   "#0ab9d4ff",
   "#32be76ff",
   "#e5d51eff",
@@ -142,20 +142,25 @@ const RapidFireRound = ({ onFinish }) => {
             originalId: opt._id || null,
           }));
 
+          // Find correct option
           const correctIndex = mappedOptions.findIndex(
             (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
           );
+
+          // If correctOption not in options, maybe shortAnswer
+          const correctOptionId =
+            correctIndex >= 0
+              ? mappedOptions[correctIndex].id
+              : mappedOptions[0]?.id || null;
 
           return {
             id: q._id,
             question: q.text,
             options: mappedOptions,
-            correctOptionId:
-              correctIndex >= 0
-                ? mappedOptions[correctIndex].id
-                : mappedOptions[0].id,
-            mediaType: q.mediaType || q.media?.type || "none",
-            mediaUrl: q.mediaUrl || q.media?.url || "",
+            correctOptionId,
+            mediaType: q.media?.type || "none",
+            mediaUrl: q.media?.url || "",
+            shortAnswer: q.shortAnswer || null,
           };
         });
 
@@ -227,15 +232,16 @@ const RapidFireRound = ({ onFinish }) => {
   });
 
   // ---------------- Timer ----------------
-  // const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
-  //   activeRound?.rules?.enableTimer ? roundTime : 0,
-  //   false
-  // );
-
   const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
     roundTime,
     true
   );
+
+  useEffect(() => {
+    if (activeRound?.rules?.enableTimer && roundTime) {
+      resetTimer(roundTime);
+    }
+  }, [roundTime, activeRound]);
 
   const activeTeamName =
     typeof activeTeam === "string" ? activeTeam : activeTeam?.name || ""; //Ensure activeTeam is a string (team name) or get its name if it's an object
@@ -262,126 +268,37 @@ const RapidFireRound = ({ onFinish }) => {
       .trim()
       .toLowerCase();
 
-  // ---------------- Handle Scoring ----------------
-  // const handleScoring = async (isCorrect, isPassed) => {
-  //   if (isPassed) {
-  //     showToast(`⏩ Question passed! No points for ${activeTeam?.name}`);
-  //     return;
-  //   }
+  // ---------------- Submit To DB ----------------
+  const submitAnswerToBackend = async ({
+    teamId,
+    questionId,
+    givenAnswer = null,
+    isPassed = false,
+  }) => {
+    if (!teamId || !questionId) return null;
 
-  //   const endpoint = isCorrect
-  //     ? `http://localhost:4000/api/team/teams/${activeTeam.id}/add`
-  //     : reduceBool
-  //     ? `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`
-  //     : null;
+    const payload = {
+      quizId: quizId,
+      roundId,
+      teamId,
+      questionId,
+      givenAnswer,
+      isPassed,
+    };
 
-  //   if (!endpoint) {
-  //     showToast(`❌ Wrong answer! No deduction for ${activeTeam?.name}`);
-  //     return;
-  //   }
-
-  //   try {
-  //     await axios.patch(
-  //       endpoint,
-  //       { points: Number(roundPoints) || 0 },
-  //       { withCredentials: true }
-  //     );
-
-  //     const msg = isCorrect
-  //       ? `✅ +${roundPoints} points to ${activeTeam?.name}!`
-  //       : `❌ -${roundPoints} points from ${activeTeam?.name}!`;
-
-  //     setScoreMessage((prev) => [...prev, msg]);
-  //     showToast(msg);
-  //   } catch (err) {
-  //     console.error("⚠️ Scoring update failed:", err);
-  //     showToast("Error updating score!");
-  //   }
-  // };
-  const handleScoring = async (isCorrect, isPassed = false) => {
-    if (!activeTeam?.id || !activeRound?.rules) return;
-    const rules = activeRound.rules;
-
+    console.log("Payload", payload);
     try {
-      // =======================
-      // ⏩ PASS HANDLING
-      // =======================
-      if (isPassed) {
-        if (rules.passCondition === "noPass" || !rules.enablePass) {
-          showToast("⛔ Passing is disabled in this round!");
-          return;
-        }
+      const res = await axios.post(
+        "http://localhost:4000/api/history/submit-ans",
+        payload,
+        { withCredentials: true }
+      );
 
-        // if (rules.passCondition === "wrongIfPassed") {
-        //   // deduct pass points (passedPoints)
-        //   const passPts = Number(rules.passedPoints) || 0;
-
-        //   if (passPts > 0) {
-        //     await axios.patch(
-        //       `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
-        //       { points: passPts },
-        //       { withCredentials: true }
-        //     );
-        //     const msg = `⏩ Passed (wrongIfPassed). -${passPts} points from ${activeTeam.name}`;
-        //     setScoreMessage((prev) => [...prev, msg]);
-        //     showToast(msg);
-        //   } else {
-        //     showToast(`⏩ Question passed. No points deducted.`);
-        //   }
-        return; // stop further logic
-      }
-
-      // =======================
-      // 🟢 CORRECT ANSWER
-      // =======================
-      if (isCorrect) {
-        const points = !passIt
-          ? Number(rules.points) || 0
-          : Number(rules.passedPoints) || 0;
-
-        await axios.patch(
-          `http://localhost:4000/api/team/teams/${activeTeam.id}/add`,
-          { points },
-          { withCredentials: true }
-        );
-
-        const msg = `✅ Correct! +${points} points for ${activeTeam.name}`;
-        setScoreMessage((prev) => [...prev, msg]);
-        showToast(msg);
-        return;
-      }
-
-      // =======================
-      // 🔴 WRONG ANSWER
-      // =======================
-      if (!isCorrect) {
-        if (
-          (rules.passCondition === "noPass" &&
-            rules.enableNegative &&
-            rules.negativePoints > 0) ||
-          (rules.passCondition === "wrongIfPassed" &&
-            rules.enableNegative &&
-            rules.negativePoints > 0)
-        ) {
-          const penalty = Number(rules.negativePoints);
-          await axios.patch(
-            `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
-            { points: penalty },
-            { withCredentials: true }
-          );
-
-          const msg = `❌ Wrong! -${penalty} points for ${activeTeam.name}`;
-          setScoreMessage((prev) => [...prev, msg]);
-          showToast(msg);
-        } else {
-          const msg = `❌ Wrong answer! No points deducted for ${activeTeam.name}`;
-          setScoreMessage((prev) => [...prev, msg]);
-          showToast(msg);
-        }
-      }
+      return res.data; // contains pointsEarned, isCorrect, teamPoints
     } catch (err) {
-      console.error("⚠️ Scoring update failed:", err);
-      showToast("Error updating score!");
+      console.error("Submission Error:", err);
+      showToast("Failed to submit answer!");
+      return null;
     }
   };
 
@@ -417,6 +334,38 @@ const RapidFireRound = ({ onFinish }) => {
       answerId = wrongOption ? wrongOption.originalId : -1;
     }
 
+    // Use originalId for submission
+    const givenAnswer = answerId;
+    if (!givenAnswer) {
+      console.warn("Option has no originalId, cannot submit", selectedOption);
+      return;
+    }
+
+    try {
+      const result = await submitAnswerToBackend({
+        teamId: activeTeam.id,
+        questionId: currentQuestion.id,
+        givenAnswer,
+        isPassed: false,
+      });
+
+      if (result) {
+        const { pointsEarned, isCorrect, teamPoints } = result;
+
+        const msg = isCorrect
+          ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
+          : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
+              activeTeam.name
+            }`;
+
+        setScoreMessage((prev) => [...prev, msg]);
+        showToast(msg);
+      }
+    } catch (err) {
+      console.error("Submission Error:", err?.response?.data || err);
+      showToast("Failed to submit answer!");
+    }
+
     // Local tracking for UI
     setAnsweredQuestions((prev) => [
       ...prev,
@@ -429,7 +378,7 @@ const RapidFireRound = ({ onFinish }) => {
       },
     ]);
 
-    await handleScoring(isCorrect, false);
+    // await handleScoring(isCorrect, false);
 
     if (isLastQuestion) {
       setFinishQus(true);
@@ -441,6 +390,11 @@ const RapidFireRound = ({ onFinish }) => {
     }
 
     if (submitted) resetAnswer();
+
+    console.log("Active Team:", activeTeam);
+    console.log("Active Index:", activeIndex);
+    console.log("Current Question:", currentQuestion);
+    console.log("Selected Option:", answerId);
   };
 
   // ---------------- Handle Passing ----------------
@@ -448,101 +402,190 @@ const RapidFireRound = ({ onFinish }) => {
     if (!currentQuestion || !activeTeam?.id) return;
     const rules = activeRound?.rules || {};
 
-    // ❌ noPass condition → disallow
-    if (rules.passCondition === "noPass" || !rules.enablePass) {
+    // ❌ Passing disabled
+    if (!rules.enablePass || rules.passCondition === "noPass") {
       showToast("⛔ Passing is disabled for this round!");
       return;
     }
 
-    if (
-      rules.enablePass &&
-      rules.passLimit &&
-      teams[activeIndex]?.passesUsed >= rules.passLimit
-    ) {
-      setPassIt(false);
-      showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
+    // ⚠️ Check pass limit
+    if (rules.passLimit && teams[activeIndex].passesUsed >= rules.passLimit) {
+      showToast(`⚠️ Team ${activeTeam.name} has reached the pass limit!`);
       return;
     }
 
-    // ✅ wrongIfPassed condition
-    if (rules.passCondition === "wrongIfPassed") {
-      // check pass limit
-      if (rules.passLimit && activeTeam.passesUsed >= rules.passLimit) {
-        showToast(`⚠️ Team ${activeTeam.name} has reached the pass limit!`);
-        return;
-      }
+    // Add locally for UI tracking
+    setAnsweredQuestions((prev) => [
+      ...prev,
+      {
+        id: currentQuestion.id,
+        question: currentQuestion.question,
+        correctAnswer:
+          currentQuestion.options.find(
+            (opt) => opt.id === currentQuestion.correctOptionId
+          )?.text || "",
+        isCorrect: false,
+        isPassed: true,
+      },
+    ]);
 
-      // record pass
-      setAnsweredQuestions((prev) => [
-        ...prev,
-        {
-          id: currentQuestion.id,
-          question: currentQuestion.question,
-          correctAnswer:
-            currentQuestion.options.find(
-              (opt) => opt.id === currentQuestion.correctOptionId
-            )?.text || "",
-          isCorrect: false,
-          isPassed: true,
-        },
-      ]);
+    const correctOption = currentQuestion.options.find(
+      (opt) => opt.id === currentQuestion.correctOptionId
+    );
 
-      // -------------------------------
-      // Deduct pass points if wrongIfPassed
-      // -------------------------------
+    // Find selected option (by text match)
+    const selectedOption = currentQuestion.options.find(
+      (opt) => normalize(opt.text) === normalize(answerInput)
+    );
 
-      const penalty = Number(activeRound?.rules?.negativePoints);
-      if (penalty > 0) {
-        try {
-          await axios.patch(
-            `http://localhost:4000/api/team/teams/${activeTeam.id}/reduce`,
-            { points: penalty },
-            { withCredentials: true }
-          );
-          const msg = `⏩ Passed (wrongIfPassed). -${penalty} points from ${activeTeam.name}`;
-          setScoreMessage((prev) => [...prev, msg]);
-          showToast(msg);
-        } catch (err) {
-          console.error("⚠️ Failed to deduct pass points:", err);
-          showToast("Error updating score!");
-        }
-      }
+    const wrongOption = currentQuestion.options.find(
+      (opt) => opt.originalId !== correctOption.originalId
+    );
+    let answerId = wrongOption ? wrongOption.originalId : -1;
 
-      // // score handling (deduct pass points)
-      // await handleScoring(false, true);
-
-      // increment passesUsed
-      setTeams((prevTeams) =>
-        prevTeams.map((team) =>
-          team.id === activeTeam.id
-            ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
-            : team
-        )
-      );
-
-      // move to next
-      if (isLastQuestion) {
-        setFinishQus(true);
-        pauseTimer();
-      } else {
-        nextQuestion();
-        setPassCount((prev) => prev + 1);
-        setAnswerInput("");
-      }
+    // Use originalId for submission
+    const givenAnswer = answerId;
+    if (!givenAnswer) {
+      console.warn("Option has no originalId, cannot submit", selectedOption);
+      return;
     }
+
+    // Submit pass to backend
+    try {
+      const result = await submitAnswerToBackend({
+        teamId: activeTeam.id,
+        questionId: currentQuestion.id,
+        givenAnswer: -1,
+        isPassed: true,
+      });
+
+      if (result) {
+        const { pointsEarned } = result;
+        const msg = `⏩ Question passed! ${
+          pointsEarned ? `Points: ${pointsEarned}` : ""
+        }`;
+        setScoreMessage((prev) => [...prev, msg]);
+        showToast(msg);
+      }
+    } catch (err) {
+      console.error("Submission Error:", err?.response?.data || err);
+      showToast("Failed to submit answer!");
+    }
+
+    // Move to next question
+    if (isLastQuestion) {
+      setFinishQus(true);
+      pauseTimer();
+    } else {
+      nextQuestion();
+      setPassCount((prev) => prev + 1);
+      setAnswerInput("");
+    }
+
+    // Increment passesUsed locally
+
+    setTeams((prevTeams) =>
+      prevTeams.map((team) =>
+        team.id === activeTeam.id
+          ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
+          : team
+      )
+    );
 
     if (submitted) resetAnswer();
   };
 
-  console.log("current question:", currentQuestion);
+  console.log("Passed:", teams);
 
-  // ---------------- Handle Timer End ----------------
+  // ---------------- Handle Timer End with Negative Points ----------------
+  const [timeoutApplied, setTimeoutApplied] = useState(false);
+
   useEffect(() => {
-    if (timeRemaining === 0 && !finishQus && !finalFinished && roundStarted) {
+    const handleTimeout = async () => {
+      if (!activeTeam || !activeRound) return;
+
+      const currentTeamName =
+        typeof activeTeam === "string" ? activeTeam : activeTeam?.name || "";
+      const teamQs = teamQuestions[currentTeamName] || [];
+      const unansweredQs = teamQs.filter(
+        (q) => !answeredQuestions.some((aq) => aq.id === q.id)
+      );
+
+      if (unansweredQs.length === 0) return;
+
+      if (reduceBool && activeRound.rules.enableNegative) {
+        const penaltyPerQuestion = Number(
+          activeRound.rules.negativePoints || 0
+        );
+
+        for (const q of unansweredQs) {
+          try {
+            await submitAnswerToBackend({
+              teamId: activeTeam.id,
+              questionId: q.id,
+              givenAnswer: -1, // indicate timeout/unanswered
+              isPassed: false,
+            });
+
+            const msg = `⏰ Time's up! -${penaltyPerQuestion} points for unanswered question: "${q.question}"`;
+            setScoreMessage((prev) => [...prev, msg]);
+            showToast(msg);
+          } catch (err) {
+            console.error("Timeout penalty error:", err);
+            showToast("Failed to deduct points for timeout!");
+          }
+        }
+
+        for (const q of unansweredQs) {
+          // Add locally for UI tracking
+          setAnsweredQuestions((prev) => [
+            ...prev,
+            {
+              id: q.id,
+              question: q.question,
+              correctAnswer:
+                q.options.find((opt) => opt.id === q.correctOptionId)?.text ||
+                "",
+              isCorrect: false,
+              isPassed: false,
+            },
+          ]);
+        }
+      }
+
       setFinishQus(true);
       pauseTimer();
+      setTimeoutApplied(true); // ✅ mark as applied
+    };
+
+    if (
+      timeRemaining === 0 &&
+      !finishQus &&
+      !finalFinished &&
+      roundStarted &&
+      !timeoutApplied
+    ) {
+      handleTimeout();
     }
-  }, [timeRemaining, finishQus, finalFinished, roundStarted]);
+  }, [
+    timeRemaining,
+    finishQus,
+    finalFinished,
+    roundStarted,
+    activeTeam,
+    activeRound,
+    teamQuestions,
+    answeredQuestions,
+    timeoutApplied,
+  ]);
+
+  // ---------------- Handle Timer End ----------------
+  // useEffect(() => {
+  //   if (timeRemaining === 0 && !finishQus && !finalFinished && roundStarted) {
+  //     setFinishQus(true);
+  //     pauseTimer();
+  //   }
+  // }, [timeRemaining, finishQus, finalFinished, roundStarted]);
 
   // ---------------- Handle Next Team ----------------
   const handleNextTeam = () => {
@@ -571,12 +614,18 @@ const RapidFireRound = ({ onFinish }) => {
     setAnswerInput("");
     setAnsweredQuestions([]);
     setScoreMessage([]);
+    setTimeoutApplied(false); // ✅ Reset for next team
   };
 
   // ---------------- Keyboard Shortcuts ----------------
   // Ctrl - Pass to Next Question
   useCtrlKeyPass(() => {
-    if (!finishQus && !finalFinished && roundStarted) {
+    if (
+      !finishQus &&
+      !finalFinished &&
+      roundStarted &&
+      activeRound?.rules?.enablePass
+    ) {
       passQuestion();
     }
   }, [currentQuestion, finishQus, finalFinished, roundStarted]);
@@ -624,7 +673,7 @@ const RapidFireRound = ({ onFinish }) => {
         TEAM_COLORS={TEAM_COLORS}
         formatTime={formatTime}
         toastMessage="Press 'P' to Pass to the Next Question"
-        headMessage="Answer All the Questions under the time limit (2 mins)!"
+        headMessage="Answer All the Questions under the time limit!"
         lowTimer={roundTime / 3}
         midTimer={roundTime / 2}
         highTimer={roundTime}
@@ -692,7 +741,7 @@ const RapidFireRound = ({ onFinish }) => {
                       Your Answer is {q.isCorrect ? "✅ Correct" : "❌ Wrong"}
                     </p>
                     <p className="team-summary-answer">
-                      <span> ✅ Correct Answer:</span> <br />
+                      <span> 🎯 Correct Answer:</span> <br />
                       {q.correctAnswer}
                     </p>
                   </div>
