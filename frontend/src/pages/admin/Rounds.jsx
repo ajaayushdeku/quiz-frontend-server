@@ -6,6 +6,8 @@ import { MdAddBox, MdQuiz } from "react-icons/md";
 import { BiAddToQueue, BiImageAdd } from "react-icons/bi";
 import { Footprints, FootprintsIcon, StepBackIcon } from "lucide-react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
+import rulesConfig from "../../config/rulesConfig";
+import { FaInfoCircle } from "react-icons/fa";
 
 export default function CreateQuiz() {
   const [step, setStep] = useState(1);
@@ -356,6 +358,14 @@ export default function CreateQuiz() {
     }
   };
 
+  const categoryMap = {
+    "general round": "general_round",
+    "subject round": "subject_round",
+    "estimation round": "estimation_round",
+    "rapid fire round": "rapid_fire_round",
+    "buzzer round": "buzzer_round",
+  };
+
   return (
     <section className="dashboard-container">
       <Toaster position="top-center" />
@@ -501,6 +511,21 @@ export default function CreateQuiz() {
                     <option value="rapid fire round">Rapid Fire Round</option>
                     <option value="buzzer round">Buzzer Round</option>
                   </select>
+                </label>
+
+                <label className="quiz-label input-title">
+                  <div className=".info-cont">
+                    Round Information <FaInfoCircle className="info-icon" /> :
+                  </div>
+                  <textarea
+                    value={
+                      rulesConfig[categoryMap[round.category]]?.info.join(
+                        "\n\n"
+                      ) || ""
+                    }
+                    readOnly
+                    className="quiz-input-info select"
+                  ></textarea>
                 </label>
 
                 {/* Rules */}
@@ -888,7 +913,10 @@ export default function CreateQuiz() {
                           style={{ display: "none" }}
                         />
                         <Checkbox checked={checked} />
-                        {q.text} ({q.category.toUpperCase()})
+                        {q.text}{" "}
+                        <div className="qn-category">
+                          {q.category.toUpperCase()}
+                        </div>
                       </label>
                     );
                   })}

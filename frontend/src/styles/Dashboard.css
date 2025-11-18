@@ -1,6 +1,6 @@
-/* ============================= */
-/* Global Styles & Dashboard Layout */
-/* ============================= */
+/* ========================================
+   GLOBAL STYLES & DASHBOARD LAYOUT
+======================================== */
 body {
   margin: 0;
   font-family: Arial, sans-serif;
@@ -13,9 +13,10 @@ h3,
 h4 {
   margin: 0;
 }
-/* ============================= */
-/* Admin Layout / Sidebar Collapsible */
-/* ============================= */
+
+/* ========================================
+   ADMIN LAYOUT / SIDEBAR
+======================================== */
 .main-dash-container {
   display: flex;
   height: 100vh;
@@ -46,9 +47,7 @@ h4 {
 .side-menu-header {
   display: flex;
   align-items: center;
-  /* padding: 0 15px 10px 15px; */
-  position: relative; /* allows absolute positioning of hamburger */
-  /* background-color: #007bff; */
+  position: relative;
   height: 5rem;
   border-bottom: 1px solid #333;
   cursor: pointer;
@@ -58,7 +57,7 @@ h4 {
   opacity: 0;
 }
 
-/* Sidebar */
+/* Sidebar Base Styles */
 .side-menu {
   width: 220px;
   background-color: #1a1a1a;
@@ -84,11 +83,7 @@ h4 {
   transition: opacity 0.3s ease;
 }
 
-.side-menu.collapsed .heading {
-  opacity: 0;
-}
-
-/* Hamburger stays fixed in header */
+/* Hamburger Menu */
 .hamburger {
   width: 30px;
   height: 30px;
@@ -100,21 +95,17 @@ h4 {
   justify-content: center;
   color: #fff;
   font-size: 18px;
-  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3); */
-
-  /* Keep hamburger aligned */
   position: absolute;
   right: 10px;
   top: 50%;
-  transform: translateY(-50%);
-  transform: translateX(-15%);
+  transform: translateY(-50%) translateX(-15%);
 }
 
+/* Menu Items & Links */
 .menu-items {
   overflow: hidden;
 }
 
-/* Menu links */
 .menu-link {
   display: flex;
   align-items: center;
@@ -158,7 +149,7 @@ h4 {
   align-items: center;
 }
 
-/* Main content */
+/* Main Content Area */
 .side-menu-content {
   flex: 1;
   padding: 1.5rem;
@@ -181,9 +172,9 @@ h4 {
   box-shadow: 0 0 12px rgba(0, 0, 0, 0.1);
 }
 
-/* ============================= */
-/* Buttons */
-/* ============================= */
+/* ========================================
+   BUTTONS
+======================================== */
 button {
   padding: 12px 16px;
   border: none;
@@ -210,9 +201,46 @@ button:hover {
   font-weight: 600;
 }
 
-/* ============================= */
-/* Forms / Inputs / Sections */
-/* ============================= */
+.btn-primary {
+  background-color: #4f46e5;
+  color: #fff;
+  padding: 10px 14px;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.btn-primary:hover {
+  background-color: #4338ca;
+}
+
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+  display: flex;
+  flex-direction: row;
+  gap: 0.4rem;
+  font-weight: 700;
+}
+
+.btn-danger:hover {
+  background-color: #dc2626;
+}
+
+/* ========================================
+   FORMS / INPUTS / SECTIONS
+======================================== */
 .section-box,
 .roles-container,
 .team-container,
@@ -247,13 +275,26 @@ button:hover {
   padding: 1rem 2rem;
   border-radius: 6px;
   border: none;
-  /* background: #ffffff; */
   font-size: 14px;
   width: 100%;
 }
 
 .form-textarea {
   resize: vertical;
+}
+
+.form-input {
+  border: 1px solid #d1d5db;
+  border-radius: 8px;
+  padding: 10px;
+  font-size: 15px;
+  transition: border-color 0.2s ease;
+}
+
+.form-input:focus {
+  outline: none;
+  border-color: #6366f1;
+  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
 }
 
 /* Section Headings */
@@ -271,8 +312,9 @@ button:hover {
   margin-bottom: 2rem;
 }
 
-/* ============================= */
-/* Teams Section */
+/* ========================================
+   TEAMS SECTION
+======================================== */
 .team-form {
   display: flex;
   gap: 12px;
@@ -319,8 +361,54 @@ button:hover {
   background: #dc2626;
 }
 
-/* ============================= */
-/* Table / Data Card */
+.team-input-wrapper {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.team-input {
+  padding: 0.6rem 1rem;
+  border-radius: 0.6rem;
+  border: 1px solid #ccc;
+  color: #7a7a7a;
+  font-size: 1rem;
+  margin-right: 1rem;
+  outline: none;
+  transition: all 0.3s ease;
+}
+
+.remove-team-btn {
+  background-color: rgb(182, 8, 8);
+  color: wheat;
+  font-weight: 800;
+  padding: 0.5rem 1rem;
+}
+
+.add-team-btn {
+  background-color: transparent;
+  color: rgb(0, 170, 255);
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  justify-content: center;
+  margin: auto;
+  width: 100%;
+  padding: 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+
+.add-team-btn:hover {
+  transform: scale(1.1);
+}
+
+/* ========================================
+   TABLE / DATA CARD
+======================================== */
 .table-wrapper {
   display: flex;
   flex-direction: column;
@@ -349,36 +437,13 @@ button:hover {
   padding: 20px 0;
 }
 
-/* ============================= */
-/* Responsive */
-/* ============================= */
-@media (max-width: 768px) {
-  .side-menu {
-    width: 180px;
-  }
-
-  .menu-link {
-    padding: 12px 16px;
-    font-size: 14px;
-  }
-
-  .content-box {
-    padding: 20px;
-  }
-
-  .team-form {
-    flex-direction: column;
-  }
-}
-
-/* ======================= */
-/* Quiz Form Styling */
-/* ======================= */
+/* ========================================
+   QUIZ FORM STYLING
+======================================== */
 .form-heading {
   display: flex;
   flex-direction: row;
   gap: 1rem;
-  /* justify-content: center; */
   align-items: center;
   font-size: 1.8rem;
 }
@@ -447,20 +512,10 @@ button:hover {
 }
 
 .multi-option-container {
-  /* display: grid;
-  grid-template-columns: 1fr 1fr; */
-
   display: flex;
-
   margin-top: 8px;
   margin: 0 1.5rem;
   width: 95%;
-}
-
-@media (max-width: 1200px) {
-  .mutli-input-container {
-    grid-template-columns: 1fr; /* single column on small screens */
-  }
 }
 
 .quiz-input,
@@ -484,22 +539,22 @@ button:hover {
   width: 90%;
 }
 
-.team-input-wrapper {
-  display: flex;
-  align-items: center;
-  margin-bottom: 1rem;
+.quiz-input-info {
+  margin: 1rem 0 0 0;
+  height: 20vh;
+  padding: 1rem 1.7rem;
+  border-radius: 0.6rem;
+  background-color: rgba(255, 255, 255, 0.092);
+  color: #000000;
+  font-size: 1rem;
+  outline: none;
+  border: 1px solid #ccc;
+  transition: all 0.3s ease;
 }
 
-.team-input {
-  padding: 0.6rem 1rem;
-  border-radius: 0.6rem;
-  border: 1px solid #ccc;
-  /* background-color: rgba(136, 136, 136, 0.05); */
-  color: #7a7a7a;
-  font-size: 1rem;
-  margin-right: 1rem;
-  outline: none;
-  transition: all 0.3s ease;
+.info-icon {
+  width: 1rem;
+  vertical-align: middle;
 }
 
 .quiz-input:hover,
@@ -507,13 +562,6 @@ button:hover {
   border-color: #9d9d9d;
   box-shadow: 0 0 10px rgba(116, 116, 116, 0.5);
   background-color: rgba(230, 224, 224, 0.1);
-}
-
-.remove-team-btn {
-  background-color: rgb(182, 8, 8);
-  color: wheat;
-  font-weight: 800;
-  padding: 0.5rem 1rem;
 }
 
 /* File & Media */
@@ -570,30 +618,8 @@ button:hover {
   transform: scale(1.2);
 }
 
-.add-team-btn {
-  background-color: transparent;
-  color: rgb(0, 170, 255);
-  display: flex;
-  gap: 0.5rem;
-  align-items: center;
-  justify-content: center;
-  margin: auto;
-  width: 100%;
-  padding: 10px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-  font-size: 1.1rem;
-  font-weight: 600;
-}
-
-.add-team-btn:hover {
-  transform: scale(1.1);
-}
-
 /* Add Question Button */
 .add-question-btn {
-  /* margin-top: 1.5rem; */
   width: 100%;
   display: flex;
   justify-content: center;
@@ -652,9 +678,9 @@ button:hover {
   flex-direction: row;
 }
 
-/* ============================= */
-/* Manage Questions Table */
-/* ============================= */
+/* ========================================
+   MANAGE QUESTIONS TABLE
+======================================== */
 .manage-table {
   width: 100%;
   border-collapse: separate;
@@ -692,7 +718,6 @@ button:hover {
 }
 
 .manage-table tr:hover {
-  /* background-color: #f9fafb; */
   box-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
 }
 
@@ -701,16 +726,9 @@ button:hover {
   font-weight: 600;
 }
 
-.no-data {
-  text-align: center;
-  color: #ccc;
-  font-style: italic;
-  margin-top: 20px;
-}
-
-/* ============================= */
-/* Button Styling (Consistent) */
-/* ============================= */
+/* ========================================
+   ACTION BUTTONS
+======================================== */
 .actions {
   display: flex;
   justify-content: center;
@@ -739,7 +757,6 @@ button:hover {
   gap: 1rem;
 }
 
-/* Color Variants */
 .btn-icon {
   font-size: 1.2rem;
   display: flex;
@@ -783,65 +800,15 @@ button:hover {
   background: #df6d1b;
 }
 
+/* ========================================
+   DASHBOARD PAGE LAYOUT
+======================================== */
 .main-content {
   width: 100%;
   max-width: 900px;
   margin: 0 auto;
 }
 
-.card-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 30px;
-}
-
-.option-card {
-  background-color: #ffffff;
-  border: 2px solid #cccccc;
-  border-radius: 16px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
-  padding: 40px;
-  text-align: center;
-  cursor: pointer;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.option-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
-}
-
-.card-icon {
-  width: 48px;
-  height: 48px;
-  margin-bottom: 15px;
-  color: rgb(40, 134, 166);
-}
-
-.card-title {
-  font-size: 22px;
-  font-weight: 600;
-  margin-bottom: 8px;
-}
-
-.card-description {
-  color: #666;
-  font-size: 15px;
-}
-
-.section-content {
-  margin-top: 40px;
-}
-
-/* Responsive */
-@media (max-width: 768px) {
-  .card-grid {
-    grid-template-columns: 1fr;
-    margin: 0;
-  }
-}
-
-/* ====== Dashboard Page Layout ====== */
 .dashboard-container {
   padding: 2rem;
   display: flex;
@@ -859,7 +826,6 @@ button:hover {
 }
 
 .dashboard-header-icon {
-  /* color: rgb(1, 193, 59); */
   color: rgb(0, 0, 0);
   width: 36px;
   height: 36px;
@@ -867,8 +833,24 @@ button:hover {
 
 .card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 30px;
+}
+
+.option-card {
+  background-color: #ffffff;
+  border: 2px solid #cccccc;
+  border-radius: 16px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  text-align: center;
+  cursor: pointer;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.option-card:hover {
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
 }
 
 .dashboard-card {
@@ -918,16 +900,21 @@ button:hover {
   color: #6b7280;
 }
 
+.section-content {
+  margin-top: 40px;
+}
+
 .dashboard-outlet {
   margin-top: 2rem;
 }
 
-/* ====== Page Layout ====== */
+/* ========================================
+   PAGE LAYOUT
+======================================== */
 .page-container {
   background-color: #ffffff;
   min-height: 80vh;
   padding: 30px;
-  /* border: 2px solid #cccccc; */
   border-radius: 16px;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
@@ -940,7 +927,9 @@ button:hover {
   margin-bottom: 25px;
 }
 
-/* ====== Form Section ====== */
+/* ========================================
+   FORM SECTION
+======================================== */
 .form-card {
   background-color: #fff;
   border: 1px solid #e5e7eb;
@@ -964,68 +953,16 @@ button:hover {
   gap: 15px;
 }
 
-.form-input {
-  border: 1px solid #d1d5db;
-  border-radius: 8px;
-  padding: 10px;
-  font-size: 15px;
-  transition: border-color 0.2s ease;
-}
-
-.form-input:focus {
-  outline: none;
-  border-color: #6366f1;
-  box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
-}
-
-/* ====== Buttons ====== */
-.btn-primary {
-  background-color: #4f46e5;
-  color: #fff;
-  padding: 10px 14px;
-  border: none;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-}
-
-.btn-primary:hover {
-  background-color: #4338ca;
-}
-
-.btn-primary:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-
-.btn-danger {
-  background-color: #ef4444;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  display: flex;
-  flex-direction: row;
-  gap: 0.4rem;
-  font-weight: 700;
-}
-
-.btn-danger:hover {
-  background-color: #dc2626;
-}
-
-/* ====== Table Section ====== */
+/* ========================================
+   TABLE SECTION
+======================================== */
 .table-card {
   background-color: #fff;
   padding: 50px;
   border-radius: 12px;
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); */
   overflow-x: auto;
 }
 
-/* Headings and messages */
 .table-title {
   font-size: 20px;
   font-weight: 600;
@@ -1040,13 +977,11 @@ button:hover {
   margin-bottom: 10px;
 }
 
-/* Table container */
 .table-scroll {
   overflow-x: auto;
   width: 100%;
 }
 
-/* Base table style */
 .data-table,
 .quiz-data-table {
   width: 100%;
@@ -1081,18 +1016,111 @@ button:hover {
   transition: background-color 0.2s ease;
 }
 
-/* Limit question cell height */
 .data-table td:nth-child(1),
 .quiz-data-table td:nth-child(1) {
   max-height: 60px;
   overflow-y: auto;
 }
 
-/* ============================
-   RESPONSIVE DESIGN
-============================ */
+/* ========================================
+   PAGINATION
+======================================== */
+.pagination-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: center;
+  margin-top: 1rem;
+  gap: 0.75rem;
+}
 
-/* Medium screens (tablets) */
+.pagination-btn {
+  background-color: #0bc4ae;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  border: none;
+  cursor: pointer;
+  transition: background 0.3s ease;
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.pagination-btn:hover {
+  background-color: #09798f;
+}
+
+.pagination-btn:disabled {
+  background-color: #a5b4fc;
+  cursor: not-allowed;
+}
+
+.pagination-info {
+  font-weight: 500;
+  color: #374151;
+  font-size: 1rem;
+}
+
+/* ========================================
+   STEP NAVIGATION
+======================================== */
+.step-navigation {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.step-item {
+  flex: 1;
+  text-align: center;
+  padding: 10px;
+  background-color: transparent;
+  font-size: 1.5rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.step-nav-buttons {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-top: 2rem;
+}
+
+/* ========================================
+   MISCELLANEOUS
+======================================== */
+.sub-list {
+  font-size: 1rem;
+}
+
+.sub-list-items {
+  font-size: 1rem;
+  margin-bottom: 3px;
+}
+
+.text-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.qn-category {
+  background-color: rgb(40, 134, 166);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: 10px;
+  padding: 0.3rem 1rem;
+  border-radius: 10rem;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+======================================== */
+
+/* Tablets & Medium Screens */
 @media (max-width: 992px) {
   .table-card {
     padding: 30px;
@@ -1117,7 +1145,136 @@ button:hover {
   }
 }
 
-/* Small screens (mobile) */
+@media (max-width: 768px) {
+  .side-menu {
+    width: 180px;
+  }
+
+  .menu-link {
+    padding: 12px 16px;
+    font-size: 14px;
+  }
+
+  .content-box {
+    padding: 20px;
+  }
+
+  .team-form {
+    flex-direction: column;
+  }
+
+  .section-box h3,
+  .section-heading,
+  .team-heading,
+  .roles-title,
+  .settings-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #444;
+    text-align: center;
+  }
+
+  .card-grid {
+    grid-template-columns: 1fr;
+    margin: 0;
+  }
+
+  .card-icon-wrapper {
+    width: 2rem;
+    height: 2rem;
+    margin-bottom: 0.5rem;
+  }
+
+  .card-icon {
+    width: 3rem;
+    height: 1.5rem;
+    margin-top: -0.25rem;
+    color: rgb(40, 134, 166);
+  }
+
+  .card-title {
+    font-size: 1rem;
+    font-weight: 600;
+    color: #111827;
+  }
+
+  .card-description {
+    font-size: 0.7rem;
+    color: #6b7280;
+  }
+}
+
+/* Mobile & Small Screens */
+@media (max-width: 720px) {
+  .form-heading {
+    font-size: 1.3rem;
+  }
+
+  .step-item {
+    flex: 1;
+    text-align: center;
+    padding: 10px;
+    background-color: transparent;
+    font-size: 1.1rem;
+    font-weight: 700;
+    cursor: pointer;
+  }
+
+  .multi-option-container {
+    display: flex;
+    flex-direction: column;
+    margin-top: 8px;
+    margin: 0 1.5rem;
+    width: 95%;
+  }
+
+  .dashboard-card {
+    padding: 1.5rem;
+    gap: 0.1rem;
+    width: 100%;
+  }
+
+  .sub-list-items {
+    font-size: 0.8rem;
+    margin-bottom: 2px;
+  }
+
+  .action-btn {
+    padding: 8px 18px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    max-width: 20px;
+    text-align: center;
+  }
+
+  .pagination-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-top: 1rem;
+    gap: 0.5rem;
+  }
+
+  .pagination-btn {
+    background-color: #0bc4ae;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: none;
+    cursor: pointer;
+    transition: background 0.3s ease;
+    font-size: 0.8rem;
+    font-weight: 700;
+  }
+
+  .pagination-info {
+    font-weight: 500;
+    color: #374151;
+    font-size: 0.8rem;
+  }
+}
+
 @media (max-width: 600px) {
   .table-card {
     padding: 20px;
@@ -1139,6 +1296,7 @@ button:hover {
   .quiz-data-table td {
     padding: 6px 8px;
     height: 45px;
+    font-size: 0.8rem;
   }
 
   .table-scroll {
@@ -1155,7 +1313,6 @@ button:hover {
   }
 }
 
-/* Very small screens */
 @media (max-width: 400px) {
   .data-table,
   .quiz-data-table {
@@ -1168,112 +1325,8 @@ button:hover {
   }
 }
 
-/* ===== Pagination ===== */
-.pagination-container {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  align-items: center;
-  margin-top: 1rem;
-  gap: 0.75rem;
-}
-
-.pagination-btn {
-  background-color: #0bc4ae;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: none;
-  cursor: pointer;
-  transition: background 0.3s ease;
-  font-size: 14px;
-}
-
-.pagination-btn:hover {
-  background-color: #09798f;
-}
-
-.pagination-btn:disabled {
-  background-color: #a5b4fc;
-  cursor: not-allowed;
-}
-
-.pagination-info {
-  font-weight: 500;
-  color: #374151;
-  font-size: 14px;
-}
-
-/* ===== Step Navigation ===== */
-.step-navigation {
-  display: flex;
-  justify-content: space-between;
-  flex-wrap: wrap;
-  gap: 10px;
-  /* margin-bottom: 20px; */
-}
-
-.step-item {
-  flex: 1;
-  text-align: center;
-  padding: 10px;
-  /* border-radius: 8px; */
-  background-color: transparent;
-  font-size: 1.5rem;
-  font-weight: 700;
-  cursor: pointer;
-  /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); */
-}
-
-.step-nav-buttons {
-  display: flex;
-  justify-content: space-between;
-  gap: 10px;
-  margin-top: 2rem;
-}
-
-.sub-list {
-  font-size: 1rem;
-}
-
-.sub-list-items {
-  font-size: 1rem;
-  margin-bottom: 20px;
-}
-
-.text-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-
-  /* background-color: #0056b3; */
-}
-
-@media (max-width: 720px) {
-  .form-heading {
-    font-size: 1.3rem;
-  }
-
-  .step-item {
-    flex: 1;
-    text-align: center;
-    padding: 10px;
-    /* border-radius: 8px; */
-    background-color: transparent;
-    font-size: 1.1rem;
-    font-weight: 700;
-    cursor: pointer;
-    /* box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05); */
-  }
-
-  .multi-option-container {
-    /* display: grid;
-  grid-template-columns: 1fr 1fr; */
-
-    display: flex;
-    flex-direction: column;
-    margin-top: 8px;
-    margin: 0 1.5rem;
-    width: 95%;
+@media (max-width: 1200px) {
+  .mutli-input-container {
+    grid-template-columns: 1fr;
   }
 }

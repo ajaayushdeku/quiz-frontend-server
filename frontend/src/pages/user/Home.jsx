@@ -68,7 +68,7 @@ const Home = () => {
   }, [quizId, adminId]);
 
   useEffect(() => {
-    const timer = setTimeout(() => setSplashScreen(false), 3000);
+    const timer = setTimeout(() => setSplashScreen(false), 3500);
     return () => clearTimeout(timer);
   }, []);
 
@@ -108,7 +108,10 @@ const Home = () => {
         <section className="main-container">
           <div className="splash-content">
             <p className="splash-text">{quizData.name}</p>
-            <img src={logo} alt="quiz" className="splash-logo" />
+            <div>
+              <div className="splash-logo-cont"> </div>
+              <img src={logo} alt="quiz" className="splash-logo" />
+            </div>
           </div>
         </section>
       ) : (

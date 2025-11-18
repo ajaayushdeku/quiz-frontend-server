@@ -43,10 +43,9 @@ const TeamDisplay = ({
                   color:
                     timeRemaining <= lowTimer
                       ? "#ff4d6d"
-                      : timeRemaining <= midTimer &&
-                        timeRemaining >= lowTimer + 1
+                      : timeRemaining <= midTimer && timeRemaining > lowTimer
                       ? "#ffd34dff"
-                      : timeRemaining <= highTimer
+                      : timeRemaining <= highTimer || timeRemaining >= highTimer
                       ? "#4d97ffff"
                       : "white",
 
@@ -55,10 +54,9 @@ const TeamDisplay = ({
                   border:
                     timeRemaining <= lowTimer
                       ? "5px dashed #ff4d6d"
-                      : timeRemaining <= midTimer &&
-                        timeRemaining >= lowTimer + 1
+                      : timeRemaining <= midTimer && timeRemaining > lowTimer
                       ? "5px dashed #ffd34dff"
-                      : timeRemaining <= highTimer
+                      : timeRemaining <= highTimer || timeRemaining >= highTimer
                       ? "5px dashed #4d97ffff"
                       : "5px dashed #cbcbcbff",
                 }}
@@ -91,7 +89,7 @@ const TeamDisplay = ({
             <h2
               className="team-name detail-info"
               style={{
-                color: TEAM_COLORS?.[activeTeam],
+                color: "white",
                 textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
               }}
             >

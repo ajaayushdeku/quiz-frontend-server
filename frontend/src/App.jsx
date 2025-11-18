@@ -34,7 +34,6 @@ import EstimationRound from "./components/quiz_rounds/EstimationRound";
 import ManageQuizMasters from "./pages/admin/dashboard/ManageQuizMasters";
 import ManageQuizzes from "./pages/admin/dashboard/ManageQuizzes";
 import History from "./pages/admin/History";
-import QuizHistory from "./pages/admin/dashboard/QuizHistory";
 import TeamStats from "./pages/admin/dashboard/TeamStats";
 
 function App() {
@@ -75,7 +74,7 @@ function App() {
 
         <Route path="/home/:quizId" element={<Home />} />
         <Route path="/roundselect/:quizId" element={<RoundSelect />} />
-        <Route path="/error" element={<ErrorPage />} />
+        <Route path="*" element={<ErrorPage />} />
         {/* <Route path="/round/:quizType" element={<RoundIntro />} /> */}
 
         <Route path="/quizselect" element={<QuizSelector />} />
@@ -138,7 +137,6 @@ function App() {
           <Route path="rounds" element={<Rounds />} />
           <Route path="create" element={<Create />} />
           <Route path="history" element={<History />}>
-            <Route path="quiz-history" element={<QuizHistory />} />
             <Route path="team-stats" element={<TeamStats />} />
           </Route>
         </Route>

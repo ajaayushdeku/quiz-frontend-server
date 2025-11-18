@@ -23,6 +23,7 @@ import FinishDisplay from "../common/FinishDisplay";
 import AnswerTextBox from "../common/AnswerTextBox";
 import TeamDisplay from "../quiz_components/TeamDisplay";
 import QuestionCard from "../quiz_components/QuestionCard";
+import { BiShow } from "react-icons/bi";
 
 const { settings } = rulesConfig.rapid_fire_round;
 const INITIAL_TIMER = settings.roundTime;
@@ -684,7 +685,8 @@ const RapidFireRound = ({ onFinish }) => {
       {!roundStarted && !finalFinished ? (
         <div className="centered-control">
           <Button className="start-question-btn" onClick={startRound}>
-            Start Round 🏁
+            {/* Start Round 🏁 */}
+            Show Questions <BiShow className="icon" />
           </Button>
         </div>
       ) : !finishQus && !finalFinished ? (

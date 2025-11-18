@@ -482,7 +482,7 @@ const SubjectRound = ({ onFinish }) => {
         setSecondHand(true);
         // Keep the same category for second-hand
         resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-        startTimer();
+        pauseTimer();
         setPassIt(true);
         showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
       } else {
@@ -500,13 +500,13 @@ const SubjectRound = ({ onFinish }) => {
           setSelectedCategory(null);
           setLockedQuestion(null);
           resetTimer(roundTime);
-          startTimer();
+          pauseTimer();
         }
       }
     } else {
       const nextTeam = passToNextTeam();
       resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-      startTimer();
+      pauseTimer();
       showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
     }
 
@@ -583,6 +583,7 @@ const SubjectRound = ({ onFinish }) => {
         setLockedQuestion(null); // Reset locked question
         setQuestionDisplay(false);
         resetTimer(roundTime);
+        pauseTimer();
         resetAnswer();
         setScoreMessage("");
         console.log("Timeout: moved to next team/question (no pass enabled)");
@@ -697,7 +698,12 @@ const SubjectRound = ({ onFinish }) => {
                       onClick={() => !isDisabled && setSelectedCategory(cat)}
                       disabled={isDisabled}
                     >
-                      {cat} {isDisabled && "(Empty)"}
+                      {cat}{" "}
+                      <div className="category-num-qn">
+                        {isDisabled
+                          ? "( 0 )"
+                          : `( ${availableInCategory.length} )`}
+                      </div>
                     </Button>
                   );
                 })}
@@ -777,7 +783,7 @@ const SubjectRound = ({ onFinish }) => {
           pauseTimer={pauseTimer}
           resetTimer={resetTimer}
           secondHand={secondHand}
-          TEAM_TIME_LIMIT={TEAM_TIME_LIMIT}
+          TEAM_TIME_LIMIT={roundTime}
           PASS_TIME_LIMIT={PASS_TIME_LIMIT}
         />
       )}

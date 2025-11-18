@@ -6,6 +6,7 @@ import { MdEdit, MdDelete, MdSave, MdCancel } from "react-icons/md";
 export default function ManageQuestions() {
   const [questions, setQuestions] = useState([]);
   const [editingId, setEditingId] = useState(null);
+  const [loading, setLoading] = useState(true);
   const [editedQuestion, setEditedQuestion] = useState({
     text: "",
     category: "",
@@ -30,6 +31,7 @@ export default function ManageQuestions() {
 
   const fetchQuestions = async () => {
     try {
+      setLoading(true);
       const res = await axios.get(
         "http://localhost:4000/api/question/get-questions",
         { withCredentials: true }
@@ -38,6 +40,8 @@ export default function ManageQuestions() {
     } catch (err) {
       console.error(err);
       toast.error("Failed to fetch questions");
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -120,10 +124,12 @@ export default function ManageQuestions() {
 
       <h2 className="section-heading">Manage Questions</h2>
 
-      {currentQuestions.length === 0 ? (
-        <p className="table-message">No questions found.</p>
-      ) : (
-        <div className="table-card">
+      <div className="table-card">
+        {loading ? (
+          <p className="table-message">Loading...</p>
+        ) : currentQuestions.length === 0 ? (
+          <p className="table-message">No questions found.</p>
+        ) : (
           <div className="table-scroll">
             <table className="data-table">
               <thead>
@@ -187,7 +193,7 @@ export default function ManageQuestions() {
                               onChange={(e) =>
                                 handleOptionChange(idx, e.target.value)
                               }
-                              className="form-input option-input"
+                              className="form-input"
                             />
                           ))
                         : q.options.map((opt, i) => (
@@ -286,8 +292,8 @@ export default function ManageQuestions() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

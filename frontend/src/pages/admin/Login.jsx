@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import "../../styles/Quiz.css";
+import { BiShow, BiHide } from "react-icons/bi";
 
 export default function AuthForm() {
   const [isRegister, setIsRegister] = useState(false);
@@ -12,6 +13,7 @@ export default function AuthForm() {
     role: "user",
   });
   const [message, setMessage] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const navigate = useNavigate();
 
@@ -112,16 +114,30 @@ export default function AuthForm() {
             />
           </div>
 
-          <div className="form-group">
+          <div className="form-group" style={{ position: "relative" }}>
             <label>Password:</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               placeholder="Password"
               name="password"
               value={formData.password}
               onChange={handleChange}
               required
+              style={{ paddingRight: "40px" }}
             />
+            <span
+              onClick={() => setShowPassword((prev) => !prev)}
+              style={{
+                position: "absolute",
+                right: "10px",
+                top: "38px",
+                cursor: "pointer",
+                fontSize: "20px",
+                color: "#555",
+              }}
+            >
+              {showPassword ? <BiHide /> : <BiShow />}
+            </span>
           </div>
 
           <button type="submit" className="admin-login-btn">

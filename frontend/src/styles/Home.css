@@ -35,6 +35,7 @@
   justify-content: center;
   gap: 1.2rem;
   animation: fadeInUp 1.5s ease-in-out;
+  position: relative;
 }
 
 .splash-text {
@@ -45,10 +46,21 @@
   text-shadow: 0 0 15px rgba(121, 123, 123, 0.4);
 }
 
+.splash-logo-cont {
+  position: absolute;
+  margin-left: -2.75rem;
+  margin-top: -2.5rem;
+  width: 15rem;
+  height: 15rem;
+  animation: spinLogo 10s linear infinite;
+  border: 10px dashed rgb(0, 158, 129);
+  border-radius: 50%;
+  padding: 2rem;
+}
 .splash-logo {
   width: 150px;
   height: auto;
-  animation: spinLogo 10s linear infinite;
+  filter: drop-shadow(0 0 15px rgba(121, 123, 123, 0.4));
 }
 
 /* ==========================
@@ -90,28 +102,25 @@
   display: flex;
   align-items: center;
   gap: 1.3rem;
-  background-color: #c9c9c9;
-  text-shadow: 0 0 15px rgba(121, 123, 123, 0.4);
+  background: linear-gradient(135deg, #ffffff, #e3e3e3);
+  border: 2px dashed #ffffff;
+  /* text-shadow: 0 0 15px rgba(121, 123, 123, 0.4); */
   color: rgb(52, 52, 52);
   font-size: 1.4rem;
   font-weight: 700;
-  padding: 0.6rem 1.8rem;
-  border: 2px solid #c9c9c9;
+  padding: 0.8rem 2.5rem;
   border-radius: 50px;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
-  box-shadow: 0 5px 15px rgba(255, 255, 255, 0.225);
   z-index: 200;
 }
 
 .start-btn:hover {
-  /* background: linear-gradient(90deg, #00a6ff, #1f6d8a); */
+  background: #55555522;
+  color: white;
   transform: scale(1.05);
-  background-color: transparent;
-  border: 2px solid white;
-  color: #ffffff;
-  /* box-shadow: 0 8px 25px rgba(0, 195, 255, 0.4); */
+  border: 2px dashed #696a6b;
 }
 
 /* ==========================
@@ -173,5 +182,17 @@
   .splash-logo,
   .home-logo {
     width: 100px;
+  }
+
+  .splash-logo-cont {
+    position: absolute;
+    margin-left: -1.2rem;
+    margin-top: -1rem;
+    width: 8.5rem;
+    height: 8.5rem;
+    animation: spinLogo 10s linear infinite;
+    border: 5px dashed rgb(0, 158, 129);
+    border-radius: 50%;
+    padding: 2rem;
   }
 }

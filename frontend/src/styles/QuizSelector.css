@@ -1,5 +1,5 @@
 .quiz-selector-header {
-  font-size: 2.8rem;
+  font-size: 4rem;
   font-weight: 800;
   margin: 2rem 0;
   text-align: center;
@@ -18,8 +18,8 @@
   flex-wrap: wrap;
   gap: 1.5rem;
   justify-content: center;
-  margin: auto;
-  width: 60%;
+  margin-top: 4rem;
+  width: 70%;
 }
 
 .quiz-card {

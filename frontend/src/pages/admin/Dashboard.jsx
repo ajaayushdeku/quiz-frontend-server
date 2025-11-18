@@ -8,10 +8,10 @@ export default function Dashboard() {
 
   const cards = [
     {
-      icon: <Users className="card-icon" />,
-      title: "Manage Quiz Masters",
-      description: "Add or remove quiz masters and manage permissions.",
-      path: "manage-quizmasters",
+      icon: <HelpCircle className="card-icon" />,
+      title: "Manage Questions",
+      description: "View, add, and edit questions in the quiz database.",
+      path: "manage-questions",
     },
     {
       icon: <BiCollection className="card-icon" />,
@@ -20,10 +20,10 @@ export default function Dashboard() {
       path: "manage-quizzes",
     },
     {
-      icon: <HelpCircle className="card-icon" />,
-      title: "Manage Questions",
-      description: "View, add, and edit questions in the quiz database.",
-      path: "manage-questions",
+      icon: <Users className="card-icon" />,
+      title: "Manage Quiz Masters",
+      description: "Add or remove quiz masters and manage permissions.",
+      path: "manage-quizmasters",
     },
   ];
 
@@ -43,7 +43,9 @@ export default function Dashboard() {
             className="dashboard-card"
             onClick={() => navigate(card.path)}
           >
-            <div className="card-icon-wrapper">{card.icon}</div>
+            <div className="card-icon-wrapper">
+              <div className="card-icon">{card.icon}</div>
+            </div>
             <h3 className="card-title">{card.title}</h3>
             <p className="card-description">{card.description}</p>
           </div>

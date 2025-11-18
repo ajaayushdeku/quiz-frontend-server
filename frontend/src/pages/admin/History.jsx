@@ -35,7 +35,9 @@ const History = () => {
             className="dashboard-card"
             onClick={() => navigate(card.path)}
           >
-            <div className="card-icon-wrapper">{card.icon}</div>
+            <div className="card-icon-wrapper">
+              <div className="card-icon">{card.icon}</div>
+            </div>
             <h3 className="card-title">{card.title.toUpperCase()}</h3>
             <p className="card-description">{card.description}</p>
           </div>

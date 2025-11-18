@@ -427,7 +427,7 @@ const GeneralRound = ({ onFinish }) => {
         const nextTeam = passToNextTeam();
         setSecondHand(true);
         resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-        startTimer();
+        pauseTimer();
         setPassIt(true);
         showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
       } else {
@@ -439,7 +439,7 @@ const GeneralRound = ({ onFinish }) => {
           nextQuestion();
 
           resetTimer(roundTime);
-          startTimer();
+          pauseTimer();
         }
       }
     } else {
@@ -522,6 +522,7 @@ const GeneralRound = ({ onFinish }) => {
       nextQuestion();
       setQuestionDisplay(false);
       resetTimer(roundTime);
+      pauseTimer();
       resetAnswer();
       setScoreMessage("");
       console.log("Timeout: moved to next team/question (no pass enabled)");
@@ -545,9 +546,9 @@ const GeneralRound = ({ onFinish }) => {
     }
   }, [questionDisplay]);
 
-  useEffect(() => {
-    if (!questionDisplay && activeRound?.rules?.enableTimer) pauseTimer();
-  }, [questionDisplay, activeRound, pauseTimer]);
+  // useEffect(() => {
+  //   if (!questionDisplay && activeRound?.rules?.enableTimer) pauseTimer();
+  // }, [questionDisplay, activeRound, pauseTimer]);
 
   // ---------------- Fullscreen Media ----------------
   const handleMediaClick = (url) => setFullscreenMedia(url);
@@ -623,7 +624,7 @@ const GeneralRound = ({ onFinish }) => {
                   onClick={() => {
                     setQuestionDisplay(true);
                     if (activeRound?.rules?.enableTimer) {
-                      const timeLimit = isPassed
+                      const timeLimit = secondHand
                         ? PASS_TIME_LIMIT
                         : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
                       resetTimer(timeLimit);
@@ -678,7 +679,7 @@ const GeneralRound = ({ onFinish }) => {
           pauseTimer={pauseTimer}
           resetTimer={resetTimer}
           secondHand={secondHand}
-          TEAM_TIME_LIMIT={TEAM_TIME_LIMIT}
+          TEAM_TIME_LIMIT={roundTime}
           PASS_TIME_LIMIT={PASS_TIME_LIMIT}
         />
       )}

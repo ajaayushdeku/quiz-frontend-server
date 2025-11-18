@@ -96,7 +96,7 @@ const BuzzerRound = ({ onFinish }) => {
         setActiveRound(round);
 
         setRoundPoints(round?.rules?.points || 10);
-        setRoundTime(round?.rules?.timeLimitValue || TIMER);
+        setRoundTime(TIMER);
         if (round?.rules?.enableNegative) setReduceBool(true);
 
         const questionRes = await axios.get(
@@ -255,6 +255,7 @@ const BuzzerRound = ({ onFinish }) => {
       window.removeEventListener("keydown", handleKeyPress);
     };
   }, [teams, handleBuzzer]);
+  console.log("A keys:", teams);
 
   // -------------------- Submit to the DB --------------------
   const submitAnswerToBackend = async ({

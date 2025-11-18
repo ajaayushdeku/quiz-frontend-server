@@ -12,23 +12,33 @@ const BuzzerButton = ({
 }) => {
   return (
     <section className="buzzer-btn-container">
-      {Object.values(teams).map((team) => (
-        <button
-          key={team.id}
-          className="buzzer-btn"
-          onClick={() => handleBuzzer(team.name)}
-          disabled={
-            disabled ||
-            (buzzerPressed &&
-              buzzerPressed !== team.name &&
-              teamQueue.includes(team.name))
-          }
-          style={{ background: teamColors[team.name] || "#333" }}
-        >
-          Team {team.name}{" "}
-          <img src={buzzerIcon} alt="buzzer" className="buzzer-icon" />
-        </button>
-      ))}
+      {Object.values(teams).map((team, idx) => {
+        const buzzerKey = String.fromCharCode(65 + idx); // A, B, C, etc
+        return (
+          <div className="buzz-btn-data-cont">
+            {" "}
+            <button
+              key={team.id}
+              className="buzzer-btn"
+              onClick={() => handleBuzzer(team.name)}
+              disabled={
+                disabled ||
+                (buzzerPressed &&
+                  buzzerPressed !== team.name &&
+                  teamQueue.includes(team.name))
+              }
+              style={{ background: teamColors[team.name] || "#333" }}
+            >
+              Team {team.name}
+              <img src={buzzerIcon} alt="buzzer" className="buzzer-icon" />
+            </button>
+            <div style={{ color: teamColors[team.name], fontWeight: "700" }}>
+              {" "}
+              ( Press {buzzerKey} for Buzzer )
+            </div>
+          </div>
+        );
+      })}
     </section>
   );
 };

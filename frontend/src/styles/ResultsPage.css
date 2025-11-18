@@ -253,6 +253,7 @@
   color: #1f1f1f;
   border: none;
   border-radius: 40px;
+  border: 2px dashed #c2c2c2;
   padding: 0.9rem 2rem;
   font-size: 1.3rem;
   font-weight: 700;
@@ -262,8 +263,9 @@
 }
 
 .next-round-btn:hover {
-  background-color: #394049;
+  background-color: #3940492f;
   color: #ebebeb;
+  border: 2px dashed #696a6b;
   transform: scale(1.05);
 }
 
@@ -359,12 +361,13 @@
 /* Winner Badge */
 .winner-badge {
   position: absolute;
-  top: -10px;
+  top: -12px;
   right: -10px;
   font-size: 1rem;
   font-weight: bold;
-  color: #ffd700;
-  background: rgba(0, 0, 0, 0.5);
+  color: rgb(101, 101, 101);
+  background: linear-gradient(135deg, #ffdf70, #ffbb33, #ffdf70);
+  border: 1px solid rgb(65, 65, 65);
   padding: 0.2rem 0.5rem;
   border-radius: 50px;
 }
@@ -448,6 +451,13 @@
 
   .scoreboard-title {
     font-size: 2rem;
+  }
+
+  .show-result-btn {
+    padding: 0.9rem 2rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    gap: 1rem;
   }
 }
 

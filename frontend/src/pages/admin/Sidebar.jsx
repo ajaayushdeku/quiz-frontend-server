@@ -16,15 +16,19 @@ import { IoExtensionPuzzle } from "react-icons/io5";
 export default function AdminLayout() {
   const menuItems = [
     { name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard /> },
-    { name: "Questions", path: "/admin/questions", icon: <MdQuestionAnswer /> },
-    { name: "Create-Quiz", path: "/admin/rounds", icon: <IoExtensionPuzzle /> },
+    {
+      name: "Create Questions",
+      path: "/admin/questions",
+      icon: <MdQuestionAnswer />,
+    },
+    { name: "Create Quiz", path: "/admin/rounds", icon: <IoExtensionPuzzle /> },
+    { name: "History", path: "/admin/history", icon: <MdHistory /> },
+    { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
     {
       name: "Create Quiz-Master",
       path: "/admin/create",
       icon: <BsPersonFill />,
     },
-    { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
-    { name: "History", path: "/admin/history", icon: <MdHistory /> },
     { name: "Start Quiz", path: "/quizselect", icon: <MdPlayCircleOutline /> },
   ];
 

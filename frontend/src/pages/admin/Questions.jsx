@@ -179,7 +179,9 @@ export default function QuestionForm() {
               Multiple Choice ( For General, Subjective, Rapid Fire, Buzzer
               Rounds)
             </option>
-            <option value="short-answer">Short ( Estimation Round )</option>
+            <option value="short-answer">
+              Short / Numerical ( For Estimation Round )
+            </option>
           </select>
         </label>
 
@@ -231,13 +233,13 @@ export default function QuestionForm() {
         {/* Short Answer */}
         {formData.type === "short-answer" && (
           <label className="quiz-label">
-            Expected Answer:
+            Correct Answer:
             <input
               type="text"
               name="shortAnswer"
               value={formData.shortAnswer}
               onChange={handleChange}
-              placeholder="Enter expected short answer"
+              placeholder="Enter correct short answer ( numeric )"
               className="quiz-input"
               required
             />

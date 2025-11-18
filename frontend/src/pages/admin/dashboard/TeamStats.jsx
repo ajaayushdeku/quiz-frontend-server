@@ -52,7 +52,7 @@ const TeamStats = () => {
 
   return (
     <div className="page-container white-theme">
-      <h2 className="team-stats-heading">📊 All Quizzes Team Stats</h2>
+      <h2 className="section-heading">📊 All Quizzes Team Stats</h2>
 
       <div className="quizzes-list">
         {quizzes.map((quiz) => (

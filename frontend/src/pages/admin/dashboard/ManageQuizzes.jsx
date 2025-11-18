@@ -5,6 +5,7 @@ import { MdDelete } from "react-icons/md";
 
 export default function ManageQuizzes() {
   const [quizzes, setQuizzes] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
@@ -17,6 +18,7 @@ export default function ManageQuizzes() {
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
+        setLoading(true);
         const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
           withCredentials: true,
         });
@@ -48,6 +50,8 @@ export default function ManageQuizzes() {
       } catch (error) {
         console.error("Fetch Error:", error);
         toast.error("Failed to fetch quizzes!");
+      } finally {
+        setLoading(false);
       }
     };
 
@@ -76,10 +80,12 @@ export default function ManageQuizzes() {
       <Toaster position="top-center" />
       <h2 className="section-heading">Manage Quizzes</h2>
 
-      {quizzes.length === 0 ? (
-        <p className="table-message">No quizzes found.</p>
-      ) : (
-        <div className="table-card">
+      <div className="table-card">
+        {loading ? (
+          <p className="table-message">Loading...</p>
+        ) : quizzes.length === 0 ? (
+          <p className="table-message">No quizzes found.</p>
+        ) : (
           <div className="table-scroll">
             <table className="quiz-data-table">
               <thead>
@@ -101,7 +107,7 @@ export default function ManageQuizzes() {
                         <ul className="sub-list">
                           {quiz.rounds.map((r, idx) => (
                             <li key={idx} className="sub-list-items">
-                              {r.name || `Round ${idx + 1}`} <br /> (
+                              {r.name || `Round ${idx + 1}`} (
                               {r?.rules?.points && (
                                 <span> {r?.rules?.points} pts</span>
                               )}{" "}
@@ -119,7 +125,9 @@ export default function ManageQuizzes() {
                       {quiz.teams.length > 0 ? (
                         <ul className="sub-list">
                           {quiz.teams.map((t, idx) => (
-                            <li key={idx}>{t.name || `Team ${idx + 1}`}</li>
+                            <li key={idx} className="sub-list-items">
+                              {t.name || `Team ${idx + 1}`}
+                            </li>
                           ))}
                         </ul>
                       ) : (
@@ -164,8 +172,8 @@ export default function ManageQuizzes() {
               </button>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

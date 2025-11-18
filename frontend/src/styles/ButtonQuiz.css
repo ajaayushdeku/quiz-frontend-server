@@ -96,6 +96,13 @@
   margin: 2rem 0;
 }
 
+.buzz-btn-data-cont {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
 .buzzer-btn {
   position: relative;
   background-color: rgba(255, 255, 255, 0.1);
@@ -228,8 +235,8 @@
   font-size: 1.3rem;
   font-weight: 700;
   padding: 8px 20px;
-  border-radius: 10px;
-  border: none;
+  border-radius: 1rem;
+  border: 2px solid white;
   margin-top: 1rem;
 
   cursor: pointer;

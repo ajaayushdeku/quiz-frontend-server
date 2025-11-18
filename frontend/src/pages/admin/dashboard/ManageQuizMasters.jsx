@@ -137,15 +137,13 @@ export default function ManageQuizMasters() {
 
       {/* Quiz Masters Table */}
       <div className="table-card">
-        <h2 className="table-title">Quiz Masters List</h2>
-
         {loading ? (
           <p className="table-message">Loading...</p>
         ) : currentQuizMasters.length === 0 ? (
           <p className="table-message">No quiz masters found.</p>
         ) : (
           <div className="table-scroll">
-            <table className="data-table">
+            <table className="quiz-data-table">
               <thead>
                 <tr>
                   <th>Name</th>
@@ -165,7 +163,7 @@ export default function ManageQuizMasters() {
                         {" "}
                         <button
                           onClick={() => deleteQuizMaster(master._id)}
-                          className="btn-danger"
+                          className="btn-danger delete-btn"
                         >
                           Remove <MdDelete className="btn-icon" />
                         </button>
