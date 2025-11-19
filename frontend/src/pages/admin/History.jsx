@@ -28,7 +28,7 @@ const History = () => {
         <h4 className="form-heading">History</h4>
       </div>
 
-      <div className="card-grid">
+      <div className="history-card-grid">
         {cards.map((card) => (
           <div
             key={card.title}

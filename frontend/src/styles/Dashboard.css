@@ -837,6 +837,12 @@ button:hover {
   gap: 30px;
 }
 
+.history-card-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 30px;
+}
+
 .option-card {
   background-color: #ffffff;
   border: 2px solid #cccccc;

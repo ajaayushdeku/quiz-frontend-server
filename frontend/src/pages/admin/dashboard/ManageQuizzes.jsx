@@ -84,7 +84,7 @@ export default function ManageQuizzes() {
         {loading ? (
           <p className="table-message">Loading...</p>
         ) : quizzes.length === 0 ? (
-          <p className="table-message">No quizzes found.</p>
+          <p className="table-message center">No quizzes found.</p>
         ) : (
           <div className="table-scroll">
             <table className="quiz-data-table">

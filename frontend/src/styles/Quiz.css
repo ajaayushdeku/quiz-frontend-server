@@ -507,39 +507,52 @@
   min-height: 250px;
 }
 
-.start-question-btn {
+.start-question-btn,
+.pass-question-btn {
   display: flex;
   align-items: center;
   gap: 1rem;
   background: linear-gradient(135deg, #ffffff, #e3e3e3);
   border: 2px dashed #ffffff;
   color: rgb(80, 79, 79);
-  font-size: 1.6rem;
   font-weight: bold;
-  padding: 1.2rem 2.1rem;
-  border-radius: 1rem;
   cursor: pointer;
   transition: all 0.5s ease;
 }
 
-.start-question-btn:hover {
+.start-question-btn {
+  padding: 1.2rem 2.1rem;
+  font-size: 1.6rem;
+  border-radius: 1rem;
+}
+
+.pass-question-btn {
+  padding: 0.8rem 1.5rem;
+  font-size: 1.4rem;
+  border-radius: 5rem;
+}
+
+.start-question-btn:hover,
+.pass-question-btn:hover {
   background: #55555522;
   color: white;
   transform: scale(1.05);
   border: 2px dashed #696a6b;
 }
 
-.start-question-btn:active {
+.start-question-btn:active,
+.pass-question-btn:active {
   transform: scale(0.98);
 }
 
-.start-question-btn .icon {
+.start-question-btn .icon,
+.pass-question-btn .icon {
   font-size: 2rem;
   text-align: center;
 }
 
 .time-controls {
-  position: absolute;
+  position: fixed;
   bottom: 1.5rem;
   margin-top: 1rem;
 

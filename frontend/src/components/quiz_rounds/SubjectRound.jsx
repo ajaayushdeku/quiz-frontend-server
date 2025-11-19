@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { BiShow } from "react-icons/bi";
+import { IoHandLeftOutline, IoHandRightOutline } from "react-icons/io5";
 import axios from "axios";
 
 import "../../styles/Quiz.css";
@@ -56,6 +57,8 @@ const SubjectRound = ({ onFinish }) => {
   const [scoreMessage, setScoreMessage] = useState();
   const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
+
+  const [optionSelected, setOptionSelected] = useState(false);
 
   // Category selection state
   const [selectedCategory, setSelectedCategory] = useState(null);
@@ -257,7 +260,7 @@ const SubjectRound = ({ onFinish }) => {
 
   // ---------------- Check if all questions are used ----------------
   const areAllQuestionsUsed = () => {
-    return usedQuestions.size >= quesFetched.length;
+    return usedQuestions.size + 1 >= quesFetched.length;
   };
 
   // ---------------- Auto pass on timeout ----------------
@@ -369,6 +372,18 @@ const SubjectRound = ({ onFinish }) => {
     setTimeout(() => {
       const wasSecondHand = secondHand;
 
+      // Mark question as used FIRST
+      markQuestionAsUsed(currentQuestion.id);
+
+      // Check completion AFTER marking as used
+      const allUsed = usedQuestions.size + 1 >= quesFetched.length;
+
+      if (allUsed) {
+        setQuizCompleted(true);
+        setQuestionDisplay(false);
+        return; // Exit early if quiz is completed
+      }
+
       if (!secondHand) {
         // First-hand completed, move to next team
         goToNextTeam();
@@ -384,19 +399,16 @@ const SubjectRound = ({ onFinish }) => {
         setLockedQuestion(null);
       }
 
-      // Check if quiz is completed
-      if (areAllQuestionsUsed()) {
-        setQuizCompleted(true);
-      } else {
-        resetTimer(roundTime);
-        resetAnswer();
-        setScoreMessage("");
-        setPassIt(false);
-      }
+      resetTimer(roundTime);
+      resetAnswer();
+      setScoreMessage("");
+      setPassIt(false);
+      setQuizCompleted(false);
 
       setQuestionDisplay(false);
     }, 3000);
 
+    setOptionSelected(true);
     console.log("Active Team:", activeTeam);
     console.log("Active Index:", activeIndex);
     console.log("Current Question:", currentQuestion);
@@ -414,11 +426,11 @@ const SubjectRound = ({ onFinish }) => {
       return;
     }
 
-    if (rules.passLimit && teams[activeIndex]?.passesUsed >= rules.passLimit) {
-      setPassIt(false);
-      showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
-      return;
-    }
+    // if (rules.passLimit && teams[activeIndex]?.passesUsed >= rules.passLimit) {
+    //   setPassIt(false);
+    //   showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
+    //   return;
+    // }
 
     const correctOption = currentQuestion.options.find(
       (opt) => opt.id === currentQuestion.correctOptionId
@@ -493,15 +505,20 @@ const SubjectRound = ({ onFinish }) => {
         // Mark question as used after second-hand completion
         markQuestionAsUsed(currentQuestion.id);
 
-        if (areAllQuestionsUsed()) {
+        // Check if ALL questions are now used
+        const allUsed = usedQuestions.size + 1 >= quesFetched.length;
+
+        if (allUsed) {
           setQuizCompleted(true);
-        } else {
-          // Reset category for next team
-          setSelectedCategory(null);
-          setLockedQuestion(null);
-          resetTimer(roundTime);
-          pauseTimer();
+          setQuestionDisplay(false);
+          return; // Exit early
         }
+
+        // Reset category for next team
+        setSelectedCategory(null);
+        setLockedQuestion(null);
+        resetTimer(roundTime);
+        pauseTimer();
       }
     } else {
       const nextTeam = passToNextTeam();
@@ -518,6 +535,8 @@ const SubjectRound = ({ onFinish }) => {
     const handleTimeout = async () => {
       if (!activeTeam || !currentQuestion) return;
       if (!questionDisplay) return; // Only handle timeout if question is displayed
+
+      const rules = activeRound?.rules || {};
 
       const correctOption = currentQuestion.options.find(
         (opt) => opt.id === currentQuestion.correctOptionId
@@ -546,7 +565,7 @@ const SubjectRound = ({ onFinish }) => {
           const result = await submitAnswerToBackend({
             teamId: activeTeam.id,
             questionId: currentQuestion.id,
-            givenAnswer,
+            givenAnswer: "No Answer, Time Out",
             isPassed: false,
           });
 
@@ -575,18 +594,87 @@ const SubjectRound = ({ onFinish }) => {
           showToast("Failed to submit timeout penalty!");
         }
 
-        // Mark question as used
-        markQuestionAsUsed(currentQuestion.id);
+        // setTeams((prevTeams) =>
+        //   prevTeams.map((team) =>
+        //     team.id === activeTeam.id
+        //       ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
+        //       : team
+        //   )
+        // );
 
-        goToNextTeam();
-        setSelectedCategory(null); // Reset category for next team
-        setLockedQuestion(null); // Reset locked question
         setQuestionDisplay(false);
-        resetTimer(roundTime);
-        pauseTimer();
-        resetAnswer();
-        setScoreMessage("");
-        console.log("Timeout: moved to next team/question (no pass enabled)");
+
+        if (rules?.enableNegative) {
+          // Mark question as used
+          markQuestionAsUsed(currentQuestion.id);
+
+          // Check completion AFTER marking
+          const allUsed = usedQuestions.size + 1 >= quesFetched.length;
+
+          if (allUsed) {
+            setQuizCompleted(true);
+            setQuestionDisplay(false);
+            return;
+          }
+
+          goToNextTeam();
+          setSelectedCategory(null); // Reset category for next team
+          setLockedQuestion(null); // Reset locked question
+          setQuestionDisplay(false);
+          resetTimer(roundTime);
+          pauseTimer();
+          resetAnswer();
+          setScoreMessage("");
+          console.log("Timeout: moved to next team/question (no pass enabled)");
+        } else {
+          // Second-hand handling
+          if (
+            rules.passCondition === "onceToNextTeam" ||
+            rules.passCondition === "wrongIfPassed"
+          ) {
+            if (!secondHand) {
+              const nextTeam = passToNextTeam();
+              setSecondHand(true);
+              // Keep the same category for second-hand
+              resetTimer(rules.passedTime || PASS_TIME_LIMIT);
+              pauseTimer();
+              setPassIt(true);
+              showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
+            } else {
+              showToast(`( > O < ) Back to Team ${activeTeam?.name}!`);
+              setPassIt(false);
+              setSecondHand(false);
+
+              // Mark question as used after second-hand completion
+              markQuestionAsUsed(currentQuestion.id);
+
+              // Check if ALL questions are now used
+              const allUsed = usedQuestions.size + 1 >= quesFetched.length;
+
+              if (allUsed) {
+                setQuizCompleted(true);
+                setQuestionDisplay(false);
+                return; // Exit early
+              }
+
+              // Reset category for next team
+              setSelectedCategory(null);
+              setLockedQuestion(null);
+              resetTimer(roundTime);
+              pauseTimer();
+            }
+          } else {
+            const nextTeam = passToNextTeam();
+            resetTimer(rules.passedTime || PASS_TIME_LIMIT);
+            pauseTimer();
+            showToast(
+              `( O _ O ) Timeout: moved to next Team ${nextTeam?.name} 😐 (no pass enabled)`
+            );
+            console.log(
+              "Timeout: moved to next team/question (no pass enabled)"
+            );
+          }
+        }
       }
     };
 
@@ -722,6 +810,7 @@ const SubjectRound = ({ onFinish }) => {
                       : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
                     resetTimer(timeLimit);
                     startTimer();
+                    setOptionSelected(false);
                   }
                 }}
               >
@@ -752,6 +841,7 @@ const SubjectRound = ({ onFinish }) => {
                     category={currentQuestion.category}
                   />
                 </div>
+
                 <OptionList
                   options={currentQuestion.options}
                   selectedAnswer={selectedAnswer}
@@ -761,6 +851,27 @@ const SubjectRound = ({ onFinish }) => {
                     activeRound?.rules?.enableTimer ? isRunning : false
                   }
                 />
+
+                {!optionSelected && (
+                  <div className="centered-control">
+                    <Button
+                      className="pass-question-btn"
+                      onClick={() => {
+                        if (!activeRound?.rules?.enablePass) return;
+                        if (
+                          teams[activeIndex]?.passesUsed >=
+                          activeRound.rules.passLimit
+                        )
+                          return;
+                        handlePass();
+                        resetTimer(PASS_TIME_LIMIT);
+                      }}
+                    >
+                      <IoHandLeftOutline className="icon" /> Pass Question{" "}
+                      <IoHandRightOutline className="icon" />
+                    </Button>
+                  </div>
+                )}
               </>
             ) : (
               <p className="text-gray-400 mt-4">

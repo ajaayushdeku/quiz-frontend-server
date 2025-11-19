@@ -21,6 +21,23 @@
   justify-content: center;
 }
 
+.quiz-dropdown-search {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin: 30px;
+  justify-content: center;
+}
+
+.react-select-container {
+  width: 100%;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
 .quiz-tab {
   background: #f0f4ff;
   padding: 12px 20px;
@@ -45,6 +62,10 @@
   color: #fff;
 }
 
+.team-stats-cont {
+  padding: 1rem 2rem;
+}
+
 .teams-container {
   display: flex;
   flex-direction: column;
@@ -55,7 +76,7 @@
   background: #f0f4ff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  box-shadow: 0 4px 12px #063e8d;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 

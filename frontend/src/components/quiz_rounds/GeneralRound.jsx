@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { BiShow } from "react-icons/bi";
+import { IoHandLeftOutline, IoHandRightOutline } from "react-icons/io5";
 import axios from "axios";
 
 import "../../styles/Quiz.css";
@@ -56,6 +57,7 @@ const GeneralRound = ({ onFinish }) => {
   const [scoreMessage, setScoreMessage] = useState();
   const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
+  const [optionSelected, setOptionSelected] = useState(false);
 
   const location = useLocation();
 
@@ -335,6 +337,8 @@ const GeneralRound = ({ onFinish }) => {
       setQuestionDisplay(false);
     }, 3000);
 
+    setOptionSelected(true);
+
     console.log("Active Team:", activeTeam);
     console.log("Active Index:", activeIndex);
     console.log("Current Question:", currentQuestion);
@@ -352,11 +356,11 @@ const GeneralRound = ({ onFinish }) => {
       return;
     }
 
-    if (rules.passLimit && teams[activeIndex]?.passesUsed >= rules.passLimit) {
-      setPassIt(false);
-      showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
-      return;
-    }
+    // if (rules.passLimit && teams[activeIndex]?.passesUsed >= rules.passLimit) {
+    //   setPassIt(false);
+    //   showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
+    //   return;
+    // }
 
     // const passResult = await submitAnswerToBackend({
     //   teamId: activeTeam.id,
@@ -389,7 +393,7 @@ const GeneralRound = ({ onFinish }) => {
       });
 
       if (passResult) {
-        const { pointsEarned, isCorrect, teamPoints } = result;
+        const { pointsEarned, isCorrect } = passResult;
 
         const msg = isCorrect
           ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
@@ -437,7 +441,6 @@ const GeneralRound = ({ onFinish }) => {
         if (isLastQuestion) setQuizCompleted(true);
         else {
           nextQuestion();
-
           resetTimer(roundTime);
           pauseTimer();
         }
@@ -457,6 +460,9 @@ const GeneralRound = ({ onFinish }) => {
   useEffect(() => {
     const handleTimeout = async () => {
       if (!activeTeam || !currentQuestion) return;
+      if (!questionDisplay) return; // Only handle timeout if question is displayed
+
+      const rules = activeRound?.rules || {};
 
       const correctOption = currentQuestion.options.find(
         (opt) => opt.id === currentQuestion.correctOptionId
@@ -485,7 +491,7 @@ const GeneralRound = ({ onFinish }) => {
           const result = await submitAnswerToBackend({
             teamId: activeTeam.id,
             questionId: currentQuestion.id,
-            givenAnswer, // negative/timeout
+            givenAnswer: "No Answer, Time Out", // negative/timeout
             isPassed: false,
           });
 
@@ -518,14 +524,49 @@ const GeneralRound = ({ onFinish }) => {
         }
       }
 
-      goToNextTeam();
-      nextQuestion();
+      if (rules?.enableNegative) {
+        goToNextTeam();
+        nextQuestion();
+        setQuestionDisplay(false);
+        resetTimer(roundTime);
+        pauseTimer();
+        resetAnswer();
+        setScoreMessage("");
+        console.log("Timeout: moved to next team/question (no pass enabled)");
+      } else {
+        // Second-hand handling
+        if (
+          rules.passCondition === "onceToNextTeam" ||
+          rules.passCondition === "wrongIfPassed"
+        ) {
+          if (!secondHand) {
+            const nextTeam = passToNextTeam();
+            setSecondHand(true);
+            resetTimer(rules.passedTime || PASS_TIME_LIMIT);
+            pauseTimer();
+            setPassIt(true);
+            showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
+          } else {
+            showToast(`( > O < ) Back to Team ${activeTeam?.name}!`);
+            setPassIt(false);
+            setSecondHand(false);
+            if (isLastQuestion) setQuizCompleted(true);
+            else {
+              nextQuestion();
+              resetTimer(roundTime);
+              pauseTimer();
+            }
+          }
+        } else {
+          const nextTeam = passToNextTeam();
+          setRoundTime(PASS_TIME_LIMIT);
+          resetTimer(rules.passedTime || PASS_TIME_LIMIT);
+          startTimer();
+          showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
+        }
+      }
+
       setQuestionDisplay(false);
-      resetTimer(roundTime);
-      pauseTimer();
-      resetAnswer();
-      setScoreMessage("");
-      console.log("Timeout: moved to next team/question (no pass enabled)");
     };
 
     if (timeRemaining === 0 && !isRunning) handleTimeout();
@@ -629,6 +670,7 @@ const GeneralRound = ({ onFinish }) => {
                         : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
                       resetTimer(timeLimit);
                       startTimer();
+                      setOptionSelected(false);
                     }
                   }}
                 >
@@ -658,6 +700,26 @@ const GeneralRound = ({ onFinish }) => {
                       activeRound?.rules?.enableTimer ? isRunning : false
                     }
                   />
+                  {!optionSelected && (
+                    <div className="centered-control">
+                      <Button
+                        className="pass-question-btn"
+                        onClick={() => {
+                          if (!activeRound?.rules?.enablePass) return;
+                          if (
+                            teams[activeIndex]?.passesUsed >=
+                            activeRound.rules.passLimit
+                          )
+                            return;
+                          handlePass();
+                          resetTimer(PASS_TIME_LIMIT);
+                        }}
+                      >
+                        <IoHandLeftOutline className="icon" /> Pass Question{" "}
+                        <IoHandRightOutline className="icon" />
+                      </Button>
+                    </div>
+                  )}
                 </>
               ) : (
                 <p className="text-gray-400 mt-4">Loading questions...</p>

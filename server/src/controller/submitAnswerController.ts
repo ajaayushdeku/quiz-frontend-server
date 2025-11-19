@@ -319,7 +319,8 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
         : Number(rules.points || 0);
     } else {
       pointsEarned =
-        rules.enableNegative && !isPassed
+        (rules.enableNegative && !isPassed) ||
+        (rules.enableNegative && isPassed)
           ? -Number(rules.negativePoints || 0)
           : 0;
     }

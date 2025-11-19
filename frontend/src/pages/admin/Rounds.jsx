@@ -19,7 +19,7 @@ export default function CreateQuiz() {
       name: "",
       category: "general round",
       rules: {
-        enableTimer: false,
+        enableTimer: true,
         timerType: "perQuestion",
         timeLimitValue: 30,
         enableNegative: false,
@@ -70,6 +70,12 @@ export default function CreateQuiz() {
   // --- ROUND HANDLERS ---
   const handleNumRoundsChange = (e) => {
     const count = Math.max(1, parseInt(e.target.value) || 1);
+    const isTimerAlwaysOn = [
+      "general round",
+      "subject round",
+      "rapid fire round",
+    ].includes(value.toLowerCase());
+
     setNumRounds(count);
     setRounds((prev) => {
       const updated = [...prev];
@@ -78,7 +84,7 @@ export default function CreateQuiz() {
           name: "",
           category: "general round",
           rules: {
-            enableTimer: false,
+            enableTimer: isTimerAlwaysOn,
             timerType: "perQuestion",
             timeLimitValue: 30,
             enableNegative: false,
@@ -102,10 +108,19 @@ export default function CreateQuiz() {
 
   const handleRoundChange = (index, field, value) => {
     const updated = [...rounds];
+
+    const round = updated[index];
+
     updated[index][field] = value;
 
     // 🧹 RESET RULES WHEN CATEGORY CHANGES
     if (field === "category") {
+      const isTimerAlwaysOn = [
+        "general round",
+        "subject round",
+        "rapid fire round",
+      ].includes(value.toLowerCase());
+
       updated[index].rules = {
         enableNegative: false,
         negativePoints: 0,
@@ -114,7 +129,7 @@ export default function CreateQuiz() {
         passLimit: 0,
         passedPoints: 0,
         passedTime: 0,
-        enableTimer: false,
+        enableTimer: isTimerAlwaysOn, // ✅ force true for these rounds
         timerType:
           value === "general round" || value === "subjective round"
             ? "perQuestion"
@@ -126,8 +141,18 @@ export default function CreateQuiz() {
             ? "forAllTeams"
             : "forEachTeam",
       };
+
+      // --- CLEAR selected questions for this round ---
+      const removedQuestions = round.questions; // questions being unselected
+      round.questions = [];
+
+      // Update usedQuestions to remove only the ones from this round
+      setUsedQuestions((prev) =>
+        prev.filter((qId) => !removedQuestions.includes(qId))
+      );
     }
 
+    updated[index] = round;
     setRounds(updated);
   };
 
@@ -163,10 +188,24 @@ export default function CreateQuiz() {
     const updatedRounds = [...rounds];
     const round = updatedRounds[roundIndex];
 
+    // Determine max selectable questions
+    const isForEachTeam = round.rules.assignQuestionType === "forEachTeam";
+    const maxSelectable = isForEachTeam
+      ? teams.length * round.rules.numberOfQuestion
+      : round.rules.numberOfQuestion;
+
     if (round.questions.includes(questionId)) {
       round.questions = round.questions.filter((id) => id !== questionId);
     } else {
-      round.questions.push(questionId);
+      // Only add if limit not reached
+      if (round.questions.length < maxSelectable) {
+        round.questions.push(questionId);
+      } else {
+        toast.error(
+          `You can only select ${maxSelectable} questions for this round.`
+        );
+        return;
+      }
     }
 
     const allSelected = updatedRounds.flatMap((r) => r.questions);
@@ -547,14 +586,28 @@ export default function CreateQuiz() {
                         <input
                           type="checkbox"
                           checked={round.rules.enableTimer}
-                          onChange={(e) =>
-                            handleRuleChange(
-                              index,
-                              "enableTimer",
-                              e.target.checked
-                            )
-                          }
+                          onChange={(e) => {
+                            // Only allow toggle if category is NOT forced
+                            if (
+                              ![
+                                "general round",
+                                "subject round",
+                                "rapid fire round",
+                              ].includes(round.category.toLowerCase())
+                            ) {
+                              handleRuleChange(
+                                index,
+                                "enableTimer",
+                                e.target.checked
+                              );
+                            }
+                          }}
                           className="rules-checkbox"
+                          disabled={[
+                            "general round",
+                            "subject round",
+                            "rapid fire round",
+                          ].includes(round.category.toLowerCase())} // ✅ disable toggle
                         />
                         Enable Timer
                       </label>
@@ -735,7 +788,11 @@ export default function CreateQuiz() {
                             </select>
                           </label>
 
-                          <label className="quiz-label-d">
+                          {/* Only show these fields if passCondition is NOT "noPass" */}
+                          {round.rules.passCondition !== "noPass" && (
+                            <>
+                              {" "}
+                              {/* <label className="quiz-label-d">
                             Pass Limit:
                             <input
                               type="number"
@@ -751,43 +808,47 @@ export default function CreateQuiz() {
                               className="quiz-input-d"
                               disabled={round.rules.passCondition === "noPass"}
                             />
-                          </label>
-
-                          <label className="quiz-label-d">
-                            Passed Points:
-                            <input
-                              type="number"
-                              min="0"
-                              value={round.rules.passedPoints}
-                              onChange={(e) =>
-                                handleRuleChange(
-                                  index,
-                                  "passedPoints",
-                                  parseInt(e.target.value)
-                                )
-                              }
-                              className="quiz-input-d"
-                              disabled={round.rules.passCondition === "noPass"}
-                            />
-                          </label>
-
-                          <label className="quiz-label-d">
-                            Passed Time (sec):
-                            <input
-                              type="number"
-                              min="0"
-                              value={round.rules.passedTime}
-                              onChange={(e) =>
-                                handleRuleChange(
-                                  index,
-                                  "passedTime",
-                                  parseInt(e.target.value)
-                                )
-                              }
-                              className="quiz-input-d"
-                              disabled={round.rules.passCondition === "noPass"}
-                            />
-                          </label>
+                          </label> */}
+                              <label className="quiz-label-d">
+                                Passed Points:
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={round.rules.passedPoints}
+                                  onChange={(e) =>
+                                    handleRuleChange(
+                                      index,
+                                      "passedPoints",
+                                      parseInt(e.target.value)
+                                    )
+                                  }
+                                  className="quiz-input-d"
+                                  disabled={
+                                    round.rules.passCondition === "noPass"
+                                  }
+                                />
+                              </label>
+                              <label className="quiz-label-d">
+                                Passed Time (sec):
+                                <input
+                                  type="number"
+                                  min="0"
+                                  value={round.rules.passedTime}
+                                  onChange={(e) =>
+                                    handleRuleChange(
+                                      index,
+                                      "passedTime",
+                                      parseInt(e.target.value)
+                                    )
+                                  }
+                                  className="quiz-input-d"
+                                  disabled={
+                                    round.rules.passCondition === "noPass"
+                                  }
+                                />
+                              </label>
+                            </>
+                          )}
                         </div>
                       )}
                     </>
@@ -887,6 +948,16 @@ export default function CreateQuiz() {
                       !round.questions.includes(q._id);
 
                     const checked = round.questions.includes(q._id);
+
+                    // Determine if selection limit reached
+                    const isForEachTeam =
+                      round.rules.assignQuestionType === "forEachTeam";
+                    const maxSelectable = isForEachTeam
+                      ? teams.length * round.rules.numberOfQuestion
+                      : round.rules.numberOfQuestion;
+
+                    const limitReached =
+                      !checked && round.questions.length >= maxSelectable;
 
                     return (
                       <label

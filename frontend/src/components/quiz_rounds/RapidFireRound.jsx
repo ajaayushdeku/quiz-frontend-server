@@ -2,6 +2,7 @@ import axios from "axios";
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa6";
+import { IoHandLeftOutline, IoHandRightOutline } from "react-icons/io5";
 
 import "../../styles/Quiz.css";
 import "../../styles/ButtonQuiz.css";
@@ -24,6 +25,7 @@ import AnswerTextBox from "../common/AnswerTextBox";
 import TeamDisplay from "../quiz_components/TeamDisplay";
 import QuestionCard from "../quiz_components/QuestionCard";
 import { BiShow } from "react-icons/bi";
+import TimerControls from "../quiz_components/TimerControls";
 
 const { settings } = rulesConfig.rapid_fire_round;
 const INITIAL_TIMER = settings.roundTime;
@@ -223,10 +225,8 @@ const RapidFireRound = ({ onFinish }) => {
   });
 
   // ---------------- Timer ----------------
-  const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
-    roundTime,
-    true
-  );
+  const { timeRemaining, isRunning, startTimer, pauseTimer, resetTimer } =
+    useTimer(roundTime, true);
 
   useEffect(() => {
     if (activeRound?.rules?.enableTimer && roundTime) {
@@ -390,11 +390,11 @@ const RapidFireRound = ({ onFinish }) => {
       return;
     }
 
-    // ⚠️ Check pass limit
-    if (rules.passLimit && teams[activeIndex].passesUsed >= rules.passLimit) {
-      showToast(`⚠️ Team ${activeTeam.name} has reached the pass limit!`);
-      return;
-    }
+    // // ⚠️ Check pass limit
+    // if (rules.passLimit && teams[activeIndex].passesUsed >= rules.passLimit) {
+    //   showToast(`⚠️ Team ${activeTeam.name} has reached the pass limit!`);
+    //   return;
+    // }
 
     const correctOption = currentQuestion.options.find(
       (opt) => opt.id === currentQuestion.correctOptionId
@@ -493,7 +493,7 @@ const RapidFireRound = ({ onFinish }) => {
       if (unansweredQs.length === 0) return;
 
       // Apply negative points only if enableNegative is true
-      if (activeRound.rules?.enableNegative) {
+      if (timeRemaining === 0 && !isRunning) {
         const penaltyPerQuestion = Number(
           activeRound.rules.negativePoints || 0
         );
@@ -507,13 +507,19 @@ const RapidFireRound = ({ onFinish }) => {
             await submitAnswerToBackend({
               teamId: activeTeam.id,
               questionId: q.id,
-              givenAnswer: -1,
+              givenAnswer: "Incomplete Answers To The Question",
               isPassed: false,
             });
 
-            const msg = `⏰ Time's up! -${penaltyPerQuestion} points for unanswered question: ${q.question}`;
-            setScoreMessage((prev) => [...prev, msg]);
-            showToast(msg);
+            if (activeRound?.rules?.enableNegative) {
+              const msg = `⏰ Time's up! -${penaltyPerQuestion} points for unanswered question: ${q.question}`;
+              setScoreMessage((prev) => [...prev, msg]);
+              showToast(msg);
+            } else {
+              const msg = `⏰ Time's up! For unanswered question: ${q.question}`;
+              setScoreMessage((prev) => [...prev, msg]);
+              showToast(msg);
+            }
           } catch (err) {
             console.error("Timeout penalty error:", err);
             showToast("Failed to deduct points for timeout!");
@@ -522,31 +528,6 @@ const RapidFireRound = ({ onFinish }) => {
 
         for (const q of unansweredQs) {
           // Add to answered questions with "No answer given"
-          setAnsweredQuestions((prev) => [
-            ...prev,
-            {
-              id: q.id,
-              question: q.question,
-              correctAnswer:
-                q.options.find((opt) => opt.id === q.correctOptionId)?.text ||
-                "",
-              userAnswer: "No answer given",
-              isCorrect: false,
-              isPassed: false,
-            },
-          ]);
-        }
-      } else {
-        // No negative points, but still show unanswered questions
-        for (const q of unansweredQs) {
-          const correctOption = q.options.find(
-            (opt) => opt.id === q.correctOptionId
-          );
-
-          const msg = `⏰ Time's up! for unanswered question : ${q.question}`;
-          setScoreMessage((prev) => [...prev, msg]);
-          showToast(msg);
-
           setAnsweredQuestions((prev) => [
             ...prev,
             {
@@ -573,7 +554,8 @@ const RapidFireRound = ({ onFinish }) => {
       !finishQus &&
       !finalFinished &&
       roundStarted &&
-      !timeoutApplied
+      !timeoutApplied &&
+      !isRunning
     ) {
       handleTimeout();
     }
@@ -587,6 +569,7 @@ const RapidFireRound = ({ onFinish }) => {
     teamQuestions,
     answeredQuestions,
     timeoutApplied,
+    isRunning,
   ]);
 
   // ---------------- Handle Next Team ----------------
@@ -704,6 +687,35 @@ const RapidFireRound = ({ onFinish }) => {
               onSubmit={() => handleAnswer(true)}
               placeholder="Enter your answer"
             />
+
+            <div className="centered-control">
+              <Button
+                className="pass-question-btn"
+                onClick={() => {
+                  if (
+                    !finishQus &&
+                    !finalFinished &&
+                    roundStarted &&
+                    activeRound?.rules?.enablePass
+                  ) {
+                    passQuestion();
+                  }
+                }}
+              >
+                <IoHandLeftOutline className="icon" /> Pass Question{" "}
+                <IoHandRightOutline className="icon" />
+              </Button>
+            </div>
+
+            {activeRound?.rules?.enableTimer && (
+              <TimerControls
+                isRunning={isRunning}
+                startTimer={startTimer}
+                pauseTimer={pauseTimer}
+                resetTimer={resetTimer}
+                TEAM_TIME_LIMIT={roundTime}
+              />
+            )}
           </>
         ) : (
           <p className="text-gray-400 mt-4">Loading questions...</p>
