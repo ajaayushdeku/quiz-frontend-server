@@ -37,9 +37,12 @@ const RoundSelect = () => {
         setLoading(true);
         setError("");
 
-        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          "http://localhost:4000/api/quiz/get-allquiz",
+          {
+            withCredentials: true,
+          }
+        );
 
         const quizzes = res.data.quizzes || [];
         const selectedQuiz = quizzes.find((q) => q._id === quizId);

@@ -3,8 +3,8 @@ import {
   addTeam,
   getTeams,
   deleteTeam,
-  addPoints,
-  reducePoints,
+  // addPoints,
+  // reducePoints,
 } from "../controller/teamController";
 import { authMiddleware } from "../middleware/auth";
 import {

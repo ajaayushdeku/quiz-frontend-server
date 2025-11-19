@@ -12,6 +12,7 @@ export default function AuthForm() {
     password: "",
     role: "user",
   });
+
   const [message, setMessage] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
@@ -24,15 +25,18 @@ export default function AuthForm() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setMessage("");
+
     try {
       if (isRegister) {
+        // Register
         const res = await axios.post(
           "http://localhost:4000/api/auth/register",
           formData,
           { withCredentials: true }
         );
-        setMessage(res.data.message);
+        setMessage(res.data.message || "Registered successfully!");
       } else {
+        // Login
         const res = await axios.post(
           "http://localhost:4000/api/auth/login",
           {
@@ -42,28 +46,35 @@ export default function AuthForm() {
           { withCredentials: true }
         );
 
-        const user = res.data.user;
+        const user = res.data?.user;
+        if (!user) {
+          setMessage("Invalid server response.");
+          return;
+        }
+
         console.log("Login response:", user);
 
         if (user.role === "admin") {
           navigate("/admin/dashboard");
         } else if (user.role === "user") {
-          // For user, pass the adminId of the creator to fetch quizzes
-          const adminId = user.createdBy;
+          // Get adminId (support both keys)
+          const adminId = user.createdBy || user.adminId;
+
           if (!adminId) {
             setMessage("No admin assigned. Cannot fetch quizzes.");
             return;
           }
+
           navigate(`/quizselect?adminId=${adminId}`);
         } else {
           setMessage("Unknown user role.");
         }
       }
     } catch (err) {
-      console.log("Login error:", err.response?.data);
-      setMessage(
-        err.response?.data?.message || "Something went wrong, try again"
-      );
+      const serverMsg = err.response?.data?.message;
+      console.log("Login/Register error:", err.response?.data);
+
+      setMessage(serverMsg || "Something went wrong, try again");
     }
   };
 
@@ -73,7 +84,9 @@ export default function AuthForm() {
         <h2 className="admin-login-title">
           {isRegister ? "Register" : "Login"}
         </h2>
+
         {message && <p className="error-message">{message}</p>}
+
         <form onSubmit={handleSubmit} className="admin-login-form">
           {isRegister && (
             <>
@@ -88,6 +101,7 @@ export default function AuthForm() {
                   required
                 />
               </div>
+
               <div className="form-group">
                 <label>Role:</label>
                 <select

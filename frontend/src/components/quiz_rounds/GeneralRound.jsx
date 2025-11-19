@@ -73,19 +73,18 @@ const GeneralRound = ({ onFinish }) => {
         setLoading(true);
         setError("");
 
-        // Fetch quizzes (admin or user)
-        let url = "http://localhost:4000/api/quiz/get-quiz";
-        if (adminId) {
-          url = `http://localhost:4000/api/quiz/get-quizbyadmin/${adminId}`;
-        }
-
-        const quizRes = await axios.get(url, { withCredentials: true });
-        const allQuizzes = quizRes.data.quizzes || [];
-
-        // Find the current quiz by quizId or roundId
-        const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        // Fetch single quiz by ID
+        const quizRes = await axios.get(
+          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+          { withCredentials: true }
         );
+
+        const currentQuiz = quizRes.data.quiz;
+
+        // // Find the current quiz by quizId or roundId
+        // const currentQuiz = allQuizzes.find(
+        //   (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        // );
         if (!currentQuiz) return console.warn("Quiz not found");
 
         // Format Teams

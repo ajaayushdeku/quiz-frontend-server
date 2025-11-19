@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
+import mongoose from "mongoose";
 import Team from "../models/team";
 
-//  Extend Request type locally
 interface AuthRequest extends Request {
   user?: {
     id: string;
@@ -10,103 +10,250 @@ interface AuthRequest extends Request {
   };
 }
 
-// Add new team
+// Add new team (with quizId)
 export const addTeam = async (req: AuthRequest, res: Response) => {
   try {
     const adminId = req.user?.id;
-    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+    if (!adminId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    const { name } = req.body;
-    if (!name)
+    const { name, quizId } = req.body;
+
+    if (!name?.trim()) {
       return res.status(400).json({ message: "Team name is required" });
+    }
 
-    const team = new Team({ name, adminId, points: 0 });
+    if (!quizId) {
+      return res.status(400).json({ message: "quizId is required" });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(quizId)) {
+      return res.status(400).json({ message: "Invalid quizId" });
+    }
+
+    // Check if quiz exists
+    const Quiz = mongoose.model("Quiz");
+    const quiz = await Quiz.findById(quizId);
+    if (!quiz) {
+      return res.status(404).json({ message: "Quiz not found" });
+    }
+
+    const team = new Team({
+      name: name.trim(),
+      adminId,
+      quizId,
+      points: 0,
+    });
+
     await team.save();
 
-    res.status(201).json(team);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to add team" });
-    console.error(err);
+    // Optionally: Add team to quiz's teams array
+    await Quiz.findByIdAndUpdate(quizId, {
+      $push: { teams: team._id },
+      $inc: { numTeams: 1 },
+    });
+
+    res.status(201).json({
+      message: "Team added successfully",
+      team,
+    });
+  } catch (err: any) {
+    console.error("Error adding team:", err);
+    res.status(500).json({
+      message: "Failed to add team",
+      error: err.message,
+    });
   }
 };
 
-// Get teams for logged-in admin
+// Get all teams
 export const getTeams = async (req: AuthRequest, res: Response) => {
   try {
     const adminId = req.user?.id;
-    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+    if (!adminId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    const teams = await Team.find({ adminId });
-    res.json(teams);
-  } catch (err) {
-    res.status(500).json({ message: "Failed to fetch teams" });
-    console.error(err);
+    const teams = await Team.find({ adminId }).populate("quizId", "name");
+    res.status(200).json(teams);
+  } catch (err: any) {
+    console.error("Error fetching teams:", err);
+    res.status(500).json({
+      message: "Failed to fetch teams",
+      error: err.message,
+    });
   }
 };
 
-// Delete team (only if owned by admin)
-export const deleteTeam = async (req: AuthRequest, res: Response) => {
+// Get teams by quizId
+export const getTeamsByQuiz = async (req: Request, res: Response) => {
   try {
-    const adminId = req.user?.id;
-    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+    const { quizId } = req.params;
 
-    const { id } = req.params;
-    const team = await Team.findOneAndDelete({ _id: id, adminId });
+    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId)) {
+      return res.status(400).json({ message: "Invalid quizId" });
+    }
 
-    if (!team)
-      return res.status(404).json({ message: "Team not found or not yours" });
+    const teams = await Team.find({ quizId }).sort({ name: 1 });
 
-    res.json({ message: "Team removed", team });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to delete team" });
-    console.error(err);
+    res.status(200).json({
+      message: "Teams retrieved successfully",
+      teams,
+    });
+  } catch (err: any) {
+    console.error("Error fetching teams:", err);
+    res.status(500).json({
+      message: "Failed to fetch teams",
+      error: err.message,
+    });
   }
 };
 
-// Increase team points
-export const addPoints = async (req: AuthRequest, res: Response) => {
+// Delete team
+export const deleteTeam = async (req: Request, res: Response) => {
   try {
-    const adminId = req.user?.id;
-    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
-
     const { id } = req.params;
-    const { points } = req.body;
 
-    if (!points || isNaN(points)) {
-      return res.status(400).json({ message: "Points must be a number" });
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid team ID" });
     }
 
     const team = await Team.findById(id);
-    if (!team) return res.status(404).json({ message: "Team not found" });
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" });
+    }
 
-    team.points += points;
-    await team.save();
+    // Remove team from quiz
+    const Quiz = mongoose.model("Quiz");
+    await Quiz.findByIdAndUpdate(team.quizId, {
+      $pull: { teams: team._id },
+      $inc: { numTeams: -1 },
+    });
 
-    res.json({ message: "Points added", team });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to add points" });
-    console.error(err);
+    await Team.findByIdAndDelete(id);
+
+    res.status(200).json({
+      message: "Team deleted successfully",
+    });
+  } catch (err: any) {
+    console.error("Error deleting team:", err);
+    res.status(500).json({
+      message: "Failed to delete team",
+      error: err.message,
+    });
   }
 };
 
-// Reduce team points by 5
-export const reducePoints = async (req: AuthRequest, res: Response) => {
-  try {
-    const adminId = req.user?.id;
-    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
-    const { id } = req.params;
+// import { Request, Response } from "express";
+// import Team from "../models/team";
 
-    const team = await Team.findById(id);
-    if (!team) return res.status(404).json({ message: "Team not found" });
+// //  Extend Request type locally
+// interface AuthRequest extends Request {
+//   user?: {
+//     id: string;
+//     role?: string;
+//     email?: string;
+//   };
+// }
 
-    team.points -= 5;
-    if (team.points < 0) team.points = 0;
+// // Add new team
+// export const addTeam = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const adminId = req.user?.id;
+//     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
 
-    await team.save();
+//     const { name } = req.body;
+//     if (!name)
+//       return res.status(400).json({ message: "Team name is required" });
 
-    res.json({ message: "5 points deducted", team });
-  } catch (err) {
-    res.status(500).json({ message: "Failed to reduce points" });
-    console.error(err);
-  }
-};
+//     const team = new Team({ name, adminId, points: 0 });
+//     await team.save();
+
+//     res.status(201).json(team);
+//   } catch (err) {
+//     res.status(500).json({ message: "Failed to add team" });
+//     console.error(err);
+//   }
+// };
+
+// // Get teams for logged-in admin
+// export const getTeams = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const adminId = req.user?.id;
+//     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+
+//     const teams = await Team.find({ adminId });
+//     res.json(teams);
+//   } catch (err) {
+//     res.status(500).json({ message: "Failed to fetch teams" });
+//     console.error(err);
+//   }
+// };
+
+// // Delete team (only if owned by admin)
+// export const deleteTeam = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const adminId = req.user?.id;
+//     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+
+//     const { id } = req.params;
+//     const team = await Team.findOneAndDelete({ _id: id, adminId });
+
+//     if (!team)
+//       return res.status(404).json({ message: "Team not found or not yours" });
+
+//     res.json({ message: "Team removed", team });
+//   } catch (err) {
+//     res.status(500).json({ message: "Failed to delete team" });
+//     console.error(err);
+//   }
+// };
+
+// // Increase team points
+// export const addPoints = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const adminId = req.user?.id;
+//     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+
+//     const { id } = req.params;
+//     const { points } = req.body;
+
+//     if (!points || isNaN(points)) {
+//       return res.status(400).json({ message: "Points must be a number" });
+//     }
+
+//     const team = await Team.findById(id);
+//     if (!team) return res.status(404).json({ message: "Team not found" });
+
+//     team.points += points;
+//     await team.save();
+
+//     res.json({ message: "Points added", team });
+//   } catch (err) {
+//     res.status(500).json({ message: "Failed to add points" });
+//     console.error(err);
+//   }
+// };
+
+// // Reduce team points by 5
+// export const reducePoints = async (req: AuthRequest, res: Response) => {
+//   try {
+//     const adminId = req.user?.id;
+//     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+//     const { id } = req.params;
+
+//     const team = await Team.findById(id);
+//     if (!team) return res.status(404).json({ message: "Team not found" });
+
+//     team.points -= 5;
+//     if (team.points < 0) team.points = 0;
+
+//     await team.save();
+
+//     res.json({ message: "5 points deducted", team });
+//   } catch (err) {
+//     res.status(500).json({ message: "Failed to reduce points" });
+//     console.error(err);
+//   }
+// };

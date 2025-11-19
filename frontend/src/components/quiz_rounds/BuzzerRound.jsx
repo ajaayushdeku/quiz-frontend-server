@@ -26,7 +26,7 @@ import { formatTime } from "../../utils/formatTime";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
-const PreBuzzedTimer = 60;
+const PreBuzzedTimer = 20;
 const COLORS = [
   "#d61344ff",
   "#0ab9d4ff",
@@ -73,12 +73,18 @@ const BuzzerRound = ({ onFinish }) => {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
+        // Fetch single quiz by ID
         const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quiz",
+          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
           { withCredentials: true }
         );
-        const allQuizzes = quizRes.data.quizzes || [];
-        const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+
+        const currentQuiz = quizRes.data.quiz;
+
+        // // Find the current quiz by quizId or roundId
+        // const currentQuiz = allQuizzes.find(
+        //   (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        // );
         if (!currentQuiz) return;
 
         setTeams(
@@ -382,7 +388,7 @@ const BuzzerRound = ({ onFinish }) => {
             const result = await submitAnswerToBackend({
               teamId: activeTeam.id,
               questionId: currentQuestion.id,
-              givenAnswer: -1, // negative/timeout
+              givenAnswer: "No Answer, Time Out", // negative/timeout
             });
 
             if (!result) return;

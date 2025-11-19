@@ -15,9 +15,12 @@ const ResultsPage = () => {
   useEffect(() => {
     const fetchQuizTeams = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          "http://localhost:4000/api/quiz/get-allquiz",
+          {
+            withCredentials: true,
+          }
+        );
 
         const quizzes = res.data.quizzes || [];
         const currentQuiz = quizzes.find((q) => q._id === quizId);

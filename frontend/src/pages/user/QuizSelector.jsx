@@ -25,9 +25,12 @@ const QuizSelector = () => {
         setError("");
 
         // Single endpoint handles both admin and user roles
-        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          "http://localhost:4000/api/quiz/get-allquiz",
+          {
+            withCredentials: true,
+          }
+        );
 
         console.log("Fetched quizzes:", res.data.quizzes);
         setQuizzes(res.data.quizzes || []);

@@ -48,14 +48,18 @@ const EstimationRound = ({ onFinish }) => {
     const fetchData = async () => {
       if (!quizId || !roundId) return;
       try {
+        // Fetch single quiz by ID
         const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quiz",
-          {
-            withCredentials: true,
-          }
+          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+          { withCredentials: true }
         );
-        const allQuizzes = quizRes.data.quizzes || [];
-        const currentQuiz = allQuizzes.find((q) => q._id === quizId);
+
+        const currentQuiz = quizRes.data.quiz;
+
+        // // Find the current quiz by quizId or roundId
+        // const currentQuiz = allQuizzes.find(
+        //   (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        // );
         if (!currentQuiz) return;
 
         const formattedTeams = currentQuiz.teams.map((t) => ({

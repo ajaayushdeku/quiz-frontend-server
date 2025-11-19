@@ -24,20 +24,20 @@ const RoundIntro = () => {
         setLoading(true);
         setError("");
 
-        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+          {
+            withCredentials: true,
+          }
+        );
 
-        const quizzes = res.data.quizzes || [];
-        const selectedQuiz = quizzes.find((q) => q._id === quizId);
-        if (!selectedQuiz) {
+        const currentQuiz = res.data.quiz || [];
+        if (!currentQuiz) {
           setError("Quiz not found.");
           return;
         }
 
-        const selectedRound = selectedQuiz.rounds.find(
-          (r) => r._id === roundId
-        );
+        const selectedRound = currentQuiz.rounds.find((r) => r._id === roundId);
         if (!selectedRound) {
           setError("Round not found.");
           return;
@@ -54,7 +54,7 @@ const RoundIntro = () => {
 
         setRoundInfo({
           roundNumber: String(
-            selectedQuiz.rounds.indexOf(selectedRound) + 1
+            currentQuiz.rounds.indexOf(selectedRound) + 1
           ).padStart(2, "0"),
           roundTitle: selectedRound.name,
           rules: roundRules,

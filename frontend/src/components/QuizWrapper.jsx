@@ -22,9 +22,12 @@ const QuizWrapper = ({ children }) => {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          "http://localhost:4000/api/quiz/get-allquiz",
+          {
+            withCredentials: true,
+          }
+        );
 
         const allQuizzes = res.data.quizzes || [];
         const currentQuiz = allQuizzes.find((q) => q._id === quizId);

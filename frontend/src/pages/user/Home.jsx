@@ -25,9 +25,12 @@ const Home = () => {
         setError("");
 
         // Single endpoint for both roles
-        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-          withCredentials: true,
-        });
+        const res = await axios.get(
+          "http://localhost:4000/api/quiz/get-allquiz",
+          {
+            withCredentials: true,
+          }
+        );
 
         const allQuizzes = res.data.quizzes || [];
         const selectedQuiz = allQuizzes.find((q) => q._id === quizId);
@@ -71,6 +74,18 @@ const Home = () => {
     const timer = setTimeout(() => setSplashScreen(false), 3500);
     return () => clearTimeout(timer);
   }, []);
+
+  const resetTeamPoints = async () => {
+    try {
+      await axios.put(
+        `http://localhost:4000/api/quiz/reset/${quizData.id}`,
+        {},
+        { withCredentials: true }
+      );
+    } catch (err) {
+      console.error("Failed to reset team points:", err);
+    }
+  };
 
   if (loading) {
     return (
@@ -120,7 +135,11 @@ const Home = () => {
             <img src={logo} alt="quiz" className="home-logo" />
             <h1 className="home-title">{quizData.name}</h1>
 
-            <NavLink to={`/roundselect/${quizData.id}`} className="nav-link">
+            <NavLink
+              to={`/roundselect/${quizData.id}`}
+              className="nav-link"
+              onClick={resetTeamPoints}
+            >
               <button className="start-btn">
                 START <FaPlay />
               </button>

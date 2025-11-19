@@ -43,6 +43,7 @@ const COLORS = [
 
 const RapidFireRound = ({ onFinish }) => {
   const { quizId, roundId } = useParams();
+  console.log("quizId:", quizId, "roundId:", roundId);
 
   const [teams, setTeams] = useState([]);
   const [quesFetched, setQuesFetched] = useState([]);
@@ -75,15 +76,13 @@ const RapidFireRound = ({ onFinish }) => {
           roundId
         );
 
+        // Fetch single quiz by ID
         const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quiz",
+          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
           { withCredentials: true }
         );
 
-        const allQuizzes = quizRes.data.quizzes || [];
-        const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds.some((r) => r._id === roundId)
-        );
+        const currentQuiz = quizRes.data.quiz;
 
         if (!currentQuiz) return console.warn("⚠️ Quiz not found");
 
@@ -123,7 +122,7 @@ const RapidFireRound = ({ onFinish }) => {
 
         const allQuestions = questionRes.data.data || [];
         const filteredQuestions = allQuestions.filter((q) =>
-          round.questions.includes(q._id)
+          round?.questions?.includes(q._id)
         );
 
         const formattedQuestions = filteredQuestions.map((q) => {
@@ -266,7 +265,7 @@ const RapidFireRound = ({ onFinish }) => {
     givenAnswer = null,
     isPassed = false,
   }) => {
-    if (!teamId || !questionId) return null;
+    if (!teamId || !questionId || !quizId) return null;
 
     const payload = {
       quizId: quizId,
@@ -327,6 +326,7 @@ const RapidFireRound = ({ onFinish }) => {
 
     try {
       const result = await submitAnswerToBackend({
+        quizId: quizId,
         teamId: activeTeam.id,
         questionId: currentQuestion.id,
         givenAnswer,
