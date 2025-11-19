@@ -395,7 +395,6 @@ const SubjectRound = ({ onFinish }) => {
       } else {
         // Second-hand completed, reset to first-hand and move to next team
         setSecondHand(false);
-        goToNextTeam();
         // Reset category for next team's first-hand
         setSelectedCategory(null);
         setLockedQuestion(null);
@@ -784,7 +783,9 @@ const SubjectRound = ({ onFinish }) => {
                   return (
                     <Button
                       key={cat}
-                      className={`category-btn ${isDisabled ? "disabled" : ""}`}
+                      className={` ${
+                        isDisabled ? "category-btn-empty" : "category-btn"
+                      }`}
                       onClick={() => !isDisabled && setSelectedCategory(cat)}
                       disabled={isDisabled}
                     >

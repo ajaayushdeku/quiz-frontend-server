@@ -544,9 +544,11 @@ button:hover {
   height: 20vh;
   padding: 1rem 1.7rem;
   border-radius: 0.6rem;
-  background-color: rgba(255, 255, 255, 0.092);
-  color: #000000;
+  background-color: rgb(102, 102, 102);
+  color: #eeeeee;
+
   font-size: 1rem;
+  font-weight: 700;
   outline: none;
   border: 1px solid #ccc;
   transition: all 0.3s ease;

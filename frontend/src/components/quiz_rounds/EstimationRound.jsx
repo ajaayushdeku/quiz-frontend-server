@@ -13,6 +13,7 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import useShiftToShow from "../../hooks/useShiftToShow";
 import { MdGroup } from "react-icons/md";
+import { useUIHelpers } from "../../hooks/useUIHelpers";
 
 const COLORS = [
   "#8d1734ff",
@@ -38,6 +39,8 @@ const EstimationRound = ({ onFinish }) => {
   const [teamAnswers, setTeamAnswers] = useState({});
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
+  const [scoreMessage, setScoreMessage] = useState("");
+  const { showToast } = useUIHelpers();
 
   const TEAM_COLORS = Object.fromEntries(
     teams.map((team, i) => [team.name, COLORS[i % COLORS.length]])
@@ -139,6 +142,18 @@ const EstimationRound = ({ onFinish }) => {
 
       const { correctAnswer, winner, message } = response.data;
       setResult({ correctAnswer, winner, message });
+
+      // Find winner team name
+      const winnerTeamName =
+        teams.find((t) => t.id === winner.teamId)?.name || "Unknown";
+      const pointsEarned = winner.pointsAwarded || 0;
+
+      // Show toast notification
+      showToast(`🎯 Team ${winnerTeamName} is the Closest!`);
+
+      // Set score message
+      const scoreMsg = `🏆 ${winnerTeamName} wins! +${pointsEarned} points`;
+      setScoreMessage(scoreMsg);
       setSubmitted(true);
     } catch (err) {
       console.error("❌ Submit error:", err.response?.data || err.message);
@@ -154,6 +169,7 @@ const EstimationRound = ({ onFinish }) => {
     setSubmitted(false);
     setTeamAnswers(Object.fromEntries(teams.map((t) => [t.name, ""])));
     setResult(null);
+    setScoreMessage("");
   };
 
   useEffect(() => {
@@ -182,15 +198,11 @@ const EstimationRound = ({ onFinish }) => {
 
   return (
     <section className="quiz-container">
-      {/* {scoreMessage && (
+      {scoreMessage && (
         <div className="score-message-list detail-info">
-          {scoreMessage.map((msg, i) => (
-            <div key={i} className="score-message">
-              {msg}
-            </div>
-          ))}
+          <div className="score-message">{scoreMessage}</div>
         </div>
-      )} */}
+      )}
 
       <TeamDisplay
         teams={teams}
