@@ -1,4 +1,3 @@
-// ============= CONTROLLER: controllers/createQuizController.ts =============
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Quiz from "../models/createQuiz";
@@ -10,6 +9,7 @@ interface AuthRequest extends Request {
   user?: {
     id: string;
     role?: string;
+    createdBy?: string;
     email?: string;
   };
 }
@@ -47,7 +47,10 @@ interface QuizInput {
   teams: { name: string }[];
 }
 
-export const createQuiz = async (req: AuthRequest, res: Response) => {
+export const createQuiz = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
   const session = await mongoose.startSession();
   session.startTransaction();
 
@@ -79,7 +82,7 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     }
 
     // Step 1: Create Quiz first (without teams and rounds initially)
-    const quiz = await Quiz.create(
+    const quizArray = await Quiz.create(
       [
         {
           name: name.trim(),
@@ -92,14 +95,12 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
       { session }
     );
 
-    // Ensure the created quiz exists before accessing quiz[0]
-    if (!quiz || !quiz[0]) {
-      await session.abortTransaction();
-      session.endSession();
+    const quiz = quizArray[0];
+    if (!quiz) {
       throw new Error("Failed to create quiz");
     }
 
-    const quizId = quiz[0]._id;
+    const quizId = quiz._id;
 
     // Step 2: Create Teams with quizId
     const createdTeams = await Team.insertMany(
@@ -192,16 +193,17 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     }
 
     // Step 4: Update quiz with teams and rounds
-    quiz[0].rounds = createdRounds.map((r) => r._id as mongoose.Types.ObjectId);
-    quiz[0].teams = createdTeams.map((t) => t._id as mongoose.Types.ObjectId);
-    await quiz[0].save({ session });
+    quiz.rounds = createdRounds.map((r) => r._id) as any;
+    quiz.teams = createdTeams.map((t) => t._id) as any;
+    await quiz.save({ session });
+
     // Step 5: Commit transaction
     await session.commitTransaction();
     session.endSession();
 
     return res.status(201).json({
       message: "Quiz created successfully",
-      quiz: quiz[0],
+      quiz: quiz,
       rounds: createdRounds,
       teams: createdTeams,
     });
@@ -215,19 +217,20 @@ export const createQuiz = async (req: AuthRequest, res: Response) => {
     });
   }
 };
+
 export const getQuizById = async (
   req: AuthRequest,
   res: Response
 ): Promise<Response> => {
   try {
-    const { quizId } = req.params;
+    const quizId = req.params.quizId;
     const adminId = req.user?.id;
 
     if (!adminId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId as string)) {
+    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId)) {
       return res.status(400).json({ message: "Invalid quiz ID" });
     }
 
@@ -248,6 +251,45 @@ export const getQuizById = async (
     return res.status(500).json({
       message: "Failed to fetch quiz",
       error: error.message,
+    });
+  }
+};
+
+export const getQuizzesForUser = async (
+  req: AuthRequest,
+  res: Response
+): Promise<Response> => {
+  try {
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    let quizzes;
+    if (user.role === "admin") {
+      quizzes = await Quiz.find({ adminId: user.id })
+        .populate("rounds")
+        .populate("teams")
+        .lean();
+    } else if (user.role === "user") {
+      // Only quizzes created by the admin who created this quiz master
+      quizzes = await Quiz.find({ adminId: user.createdBy })
+        .populate("rounds")
+        .populate("teams")
+        .lean();
+    } else {
+      return res.status(403).json({ message: "Forbidden" });
+    }
+
+    return res.status(200).json({
+      message: "Quizzes fetched successfully",
+      quizzes,
+    });
+  } catch (err: any) {
+    console.error("Error fetching quizzes:", err);
+    return res.status(500).json({
+      message: "Failed to fetch quizzes",
+      error: err.message,
     });
   }
 };
@@ -292,7 +334,7 @@ export const deleteQuiz = async (
   session.startTransaction();
 
   try {
-    const { quizId } = req.params;
+    const quizId = req.params.id; // Make sure route uses :quizId
     const adminId = req.user?.id;
 
     if (!adminId) {
@@ -301,7 +343,7 @@ export const deleteQuiz = async (
       return res.status(401).json({ message: "Unauthorized" });
     }
 
-    if (!mongoose.Types.ObjectId.isValid(quizId as string)) {
+    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId)) {
       await session.abortTransaction();
       session.endSession();
       return res.status(400).json({ message: "Invalid quiz ID" });
@@ -321,7 +363,7 @@ export const deleteQuiz = async (
     // Delete related rounds
     await Round.deleteMany({ _id: { $in: quiz.rounds } }, { session });
 
-    // Delete quiz history and submissions (if you have these models)
+    // Delete quiz history and submissions (if models exist)
     const QuizHistory = mongoose.model("QuizHistory");
     const Submit = mongoose.model("Submit");
     await QuizHistory.deleteMany({ quizId }, { session });

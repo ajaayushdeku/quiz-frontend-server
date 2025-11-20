@@ -1283,6 +1283,15 @@ button:hover {
   }
 }
 
+.password-icon {
+  position: absolute;
+  right: 10px;
+  top: 62px;
+  cursor: pointer;
+  font-size: 20px;
+  color: #555;
+}
+
 @media (max-width: 600px) {
   .table-card {
     padding: 20px;

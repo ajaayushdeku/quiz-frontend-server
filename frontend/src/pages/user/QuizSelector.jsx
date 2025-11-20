@@ -18,6 +18,7 @@ const QuizSelector = () => {
   const queryParams = new URLSearchParams(location.search);
   const adminId = queryParams.get("adminId");
 
+  ///get-quizForUser
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
@@ -26,7 +27,7 @@ const QuizSelector = () => {
 
         // Single endpoint handles both admin and user roles
         const res = await axios.get(
-          "http://localhost:4000/api/quiz/get-allquiz",
+          "http://localhost:4000/api/quiz/get-quizForUser",
           {
             withCredentials: true,
           }

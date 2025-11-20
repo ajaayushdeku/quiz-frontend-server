@@ -47,7 +47,7 @@ router.post(
 
 router.get(
   "/get-questions",
-  authMiddleware(["admin"]),
+  authMiddleware(["admin", "user"]),
   async (req, res, next) => {
     try {
       const authReq = req as AuthenticatedRequest;
@@ -57,14 +57,18 @@ router.get(
     }
   }
 );
-router.put("/update/:id", authMiddleware(["admin"]), async (req, res, next) => {
-  try {
-    const authReq = req as AuthenticatedRequest;
-    await updateQuestion(authReq, res);
-  } catch (err) {
-    next(err);
+router.put(
+  "/update/:id",
+  authMiddleware(["admin", "user"]),
+  async (req, res, next) => {
+    try {
+      const authReq = req as AuthenticatedRequest;
+      await updateQuestion(authReq, res);
+    } catch (err) {
+      next(err);
+    }
   }
-});
+);
 router.delete(
   "/delete/:id",
   authMiddleware(["admin"]),

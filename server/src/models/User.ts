@@ -9,7 +9,10 @@ export interface IUser extends Document {
 }
 
 export interface IUserModel extends Model<IUser> {
-  isEmailTaken(email: string, excludeUserId?: mongoose.Types.ObjectId): Promise<boolean>;
+  isEmailTaken(
+    email: string,
+    excludeUserId?: mongoose.Types.ObjectId
+  ): Promise<boolean>;
 }
 
 const userSchema = new Schema<IUser, IUserModel>(
@@ -23,7 +26,6 @@ const userSchema = new Schema<IUser, IUserModel>(
   { timestamps: true }
 );
 
-
 userSchema.set("toJSON", {
   transform: function (doc, ret: Record<string, any>) {
     ret.id = ret._id;
@@ -32,7 +34,6 @@ userSchema.set("toJSON", {
     return ret;
   },
 });
-
 
 userSchema.statics.isEmailTaken = async function (
   email: string,

@@ -5,6 +5,7 @@ interface AuthRequest extends Request {
   user?: {
     id: string;
     role: string;
+    createdBy: string;
   };
 }
 
@@ -27,7 +28,11 @@ export const authMiddleware = (roles: string[] = []) => {
       }
 
       // Attach user to request
-      req.user = { id: decoded.id, role: decoded.role };
+      req.user = {
+        id: decoded.id,
+        role: decoded.role,
+        createdBy: decoded.createdBy,
+      };
 
       next();
     } catch (err) {

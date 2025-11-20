@@ -40,6 +40,9 @@ const EstimationRound = ({ onFinish }) => {
   const [submitted, setSubmitted] = useState(false);
   const [result, setResult] = useState(null);
   const [scoreMessage, setScoreMessage] = useState("");
+
+  const [showScoresModal, setShowScoresModal] = useState(false);
+
   const { showToast } = useUIHelpers();
 
   const TEAM_COLORS = Object.fromEntries(
@@ -53,21 +56,25 @@ const EstimationRound = ({ onFinish }) => {
       try {
         // Fetch single quiz by ID
         const quizRes = await axios.get(
-          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+          "http://localhost:4000/api/quiz/get-quizForUser",
           { withCredentials: true }
         );
 
-        const currentQuiz = quizRes.data.quiz;
+        const allQuizzes = quizRes.data.quizzes || [];
 
-        // // Find the current quiz by quizId or roundId
-        // const currentQuiz = allQuizzes.find(
-        //   (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
-        // );
+        console.log("All Quiz:", allQuizzes);
+
+        // Find the current quiz by quizId or roundId
+        const currentQuiz = allQuizzes.find(
+          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        );
+
         if (!currentQuiz) return;
 
         const formattedTeams = currentQuiz.teams.map((t) => ({
           id: t._id,
           name: t.name,
+          points: t.points || 0,
         }));
         setTeams(formattedTeams);
 
@@ -148,6 +155,14 @@ const EstimationRound = ({ onFinish }) => {
         teams.find((t) => t.id === winner.teamId)?.name || "Unknown";
       const pointsEarned = winner.pointsAwarded || 0;
 
+      setTeams((prevTeams) =>
+        prevTeams.map((t) =>
+          t.id === winner.teamId ? { ...t, points: t.points + pointsEarned } : t
+        )
+      );
+
+      console.log("Winner id:", winner.id);
+
       // Show toast notification
       showToast(`🎯 Team ${winnerTeamName} is the Closest!`);
 
@@ -201,6 +216,46 @@ const EstimationRound = ({ onFinish }) => {
       {scoreMessage && (
         <div className="score-message-list detail-info">
           <div className="score-message">{scoreMessage}</div>
+        </div>
+      )}
+
+      {/* View Scores Button */}
+      <button
+        className="view-scores-btn detail-info"
+        onClick={() => setShowScoresModal(true)}
+      >
+        View Team Scores
+      </button>
+
+      {showScoresModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowScoresModal(false)}
+        >
+          <div
+            className="scores-modal"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+          >
+            <h3>Current Team Scores</h3>
+            <ul>
+              {teams.map((team, idx) => (
+                <div key={team.id}>
+                  <span
+                    className="team-color-indicator"
+                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
+                  ></span>
+                  <span className="team-name-view">{team.name}:</span>
+                  <span className="team-points-view">{team.points} pts</span>
+                </div>
+              ))}
+            </ul>
+            <button
+              className="close-modal-btn"
+              onClick={() => setShowScoresModal(false)}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 

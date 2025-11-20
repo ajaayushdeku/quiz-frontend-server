@@ -14,7 +14,7 @@ const TeamStats = () => {
     const fetchQuizzesAndHistories = async () => {
       try {
         const quizRes = await axios.get(
-          `http://localhost:4000/api/quiz/get-quiz`,
+          `http://localhost:4000/api/quiz/get-allquiz`,
           { withCredentials: true }
         );
         const quizData = quizRes.data.quizzes || [];

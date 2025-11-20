@@ -5,7 +5,7 @@ import "../../styles/ResultsPage.css";
 import { MdGroup } from "react-icons/md";
 
 const FinishDisplay = ({ onFinish, message }) => {
-  const { quizId } = useParams();
+  const { quizId, roundId } = useParams();
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [winnerIds, setWinnerIds] = useState([]);
@@ -14,12 +14,35 @@ const FinishDisplay = ({ onFinish, message }) => {
   useEffect(() => {
     const fetchQuizTeams = async () => {
       try {
-        const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-          withCredentials: true,
-        });
+        // const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
+        //   withCredentials: true,
+        // });
 
-        const quizzes = res.data.quizzes || [];
-        const currentQuiz = quizzes.find((q) => q._id === quizId);
+        // const quizzes = res.data.quizzes || [];
+        // const currentQuiz = quizzes.find((q) => q._id === quizId);
+
+        // Fetch single quiz by ID
+        // const quizRes = await axios.get(
+        //   `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+        //   { withCredentials: true }
+        // );
+
+        // const currentQuiz = quizRes.data.quiz;
+
+        // Fetch single quiz by ID
+        const quizRes = await axios.get(
+          "http://localhost:4000/api/quiz/get-quizForUser",
+          { withCredentials: true }
+        );
+
+        const allQuizzes = quizRes.data.quizzes || [];
+
+        console.log("All Quiz:", allQuizzes);
+
+        // Find the current quiz by quizId or roundId
+        const currentQuiz = allQuizzes.find(
+          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        );
 
         if (currentQuiz?.teams?.length) {
           const formattedTeams = currentQuiz.teams.map((team, idx) => ({

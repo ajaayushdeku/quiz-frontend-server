@@ -10,6 +10,7 @@ import {
   BsPersonFillGear,
   BsPersonFillX,
 } from "react-icons/bs";
+import { BiHide, BiShow } from "react-icons/bi";
 
 export default function AdminCreateUser() {
   const [formData, setFormData] = useState({
@@ -19,7 +20,9 @@ export default function AdminCreateUser() {
     role: "user",
   });
 
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -28,6 +31,7 @@ export default function AdminCreateUser() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setMessage("");
     setLoading(true);
 
     try {
@@ -42,11 +46,14 @@ export default function AdminCreateUser() {
         }
       );
 
+      setMessage("✅ Quiz Master Created Successfully!");
+
       toast.success(`User created: ${res.data.user?.name || "Unknown"}`);
       setFormData({ name: "", email: "", password: "", role: "user" });
     } catch (err) {
       console.error(err);
       toast.error(err.response?.data?.message || "Failed to create user");
+      setMessage(serverMsg || "Something went wrong, try again");
     } finally {
       setLoading(false);
     }
@@ -92,18 +99,27 @@ export default function AdminCreateUser() {
             </label>
 
             {/* Password */}
-            <label className="quiz-label">
-              Password:
-              <input
-                type="password"
-                name="password"
-                value={formData.password}
-                onChange={handleChange}
-                placeholder="Enter password"
-                className="quiz-input"
-                required
-              />
-            </label>
+            <div style={{ position: "relative" }}>
+              <label className="quiz-label">
+                Password:
+                <input
+                  type={showPassword ? "text" : "password"}
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  placeholder="Enter password"
+                  className="quiz-input"
+                  required
+                  style={{ paddingRight: "40px" }}
+                />
+                <span
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  className="password-icon"
+                >
+                  {showPassword ? <BiHide /> : <BiShow />}
+                </span>
+              </label>
+            </div>
           </div>
 
           <button

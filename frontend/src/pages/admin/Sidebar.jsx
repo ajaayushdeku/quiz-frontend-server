@@ -23,7 +23,7 @@ export default function AdminLayout() {
     },
     { name: "Create Quiz", path: "/admin/rounds", icon: <IoExtensionPuzzle /> },
     { name: "History", path: "/admin/history", icon: <MdHistory /> },
-    { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
+    // { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
     {
       name: "Create Quiz-Master",
       path: "/admin/create",

@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { NavLink, useParams } from "react-router-dom";
 import axios from "axios";
 import logo from "../../assets/images/logo.png";
 import "../../styles/ResultsPage.css"; // using the updated CSS
 import { MdGroup } from "react-icons/md";
 import { GiFinishLine } from "react-icons/gi";
+import { RiArrowGoBackFill } from "react-icons/ri";
 
 const ResultsPage = () => {
   const { quizId } = useParams();
@@ -16,7 +17,7 @@ const ResultsPage = () => {
     const fetchQuizTeams = async () => {
       try {
         const res = await axios.get(
-          "http://localhost:4000/api/quiz/get-allquiz",
+          "http://localhost:4000/api/quiz/get-quizForUser",
           {
             withCredentials: true,
           }
@@ -52,6 +53,13 @@ const ResultsPage = () => {
     <section className="results-page">
       {showScores ? (
         <div className="finish-container">
+          <NavLink to={`/quizselect`} className="nav-link go-back-to-btn">
+            <button className="back-btn">
+              <RiArrowGoBackFill />
+              To Quiz Select Screen{" "}
+            </button>
+          </NavLink>
+
           <div className="scoreboard-header">
             <img src={logo} alt="Left Logo" className="scoreboard-logo" />
             <h1 className="scoreboard-title">FINAL SCORES</h1>
@@ -79,7 +87,9 @@ const ResultsPage = () => {
                       <div className="team-title">
                         <MdGroup className="team-icon" />
 
-                        <div>{team.name.toUpperCase()}</div>
+                        <div className="team-topic">
+                          {team.name.toUpperCase()}
+                        </div>
                       </div>
                       <div className="team-points">
                         {" "}

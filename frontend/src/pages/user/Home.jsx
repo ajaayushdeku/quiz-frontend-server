@@ -26,7 +26,7 @@ const Home = () => {
 
         // Single endpoint for both roles
         const res = await axios.get(
-          "http://localhost:4000/api/quiz/get-allquiz",
+          "http://localhost:4000/api/quiz/get-quizForUser",
           {
             withCredentials: true,
           }

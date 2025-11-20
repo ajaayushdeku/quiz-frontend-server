@@ -65,6 +65,8 @@ const SubjectRound = ({ onFinish }) => {
   const [availableCategories, setAvailableCategories] = useState([]);
   const [usedQuestions, setUsedQuestions] = useState(new Set());
 
+  const [showScoresModal, setShowScoresModal] = useState(false);
+
   const location = useLocation();
 
   const [loading, setLoading] = useState(true);
@@ -79,18 +81,33 @@ const SubjectRound = ({ onFinish }) => {
         setLoading(true);
         setError("");
 
-        // Fetch single quiz by ID
-        const quizRes = await axios.get(
-          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
-          { withCredentials: true }
-        );
+        // // Fetch single quiz by ID
+        // const quizRes = await axios.get(
+        //   `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+        //   { withCredentials: true }
+        // );
 
-        const currentQuiz = quizRes.data.quiz;
+        // const currentQuiz = quizRes.data.quiz;
 
         // // Find the current quiz by quizId or roundId
         // const currentQuiz = allQuizzes.find(
         //   (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
         // );
+
+        // Fetch single quiz by ID
+        const quizRes = await axios.get(
+          "http://localhost:4000/api/quiz/get-quizForUser",
+          { withCredentials: true }
+        );
+
+        const allQuizzes = quizRes.data.quizzes || [];
+
+        console.log("All Quiz:", allQuizzes);
+
+        // Find the current quiz by quizId or roundId
+        const currentQuiz = allQuizzes.find(
+          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        );
 
         if (!currentQuiz) return console.warn("Quiz not found");
 
@@ -98,7 +115,7 @@ const SubjectRound = ({ onFinish }) => {
           id: team._id,
           name: team.name || `Team ${index + 1}`,
           points: team.points || 0,
-          passesUsed: team.passesUsed || 0,
+          // passesUsed: team.passesUsed || 0,
         }));
         setTeams(formattedTeams);
 
@@ -353,6 +370,14 @@ const SubjectRound = ({ onFinish }) => {
       if (result) {
         const { pointsEarned, isCorrect, teamPoints } = result;
 
+        setTeams((prevTeams) =>
+          prevTeams.map((t) =>
+            t.id === activeTeam.id
+              ? { ...t, points: t.points + pointsEarned }
+              : t
+          )
+        );
+
         const msg = isCorrect
           ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
           : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
@@ -458,6 +483,14 @@ const SubjectRound = ({ onFinish }) => {
       if (passResult) {
         const { pointsEarned, isCorrect } = passResult;
 
+        setTeams((prevTeams) =>
+          prevTeams.map((t) =>
+            t.id === activeTeam.id
+              ? { ...t, points: t.points + pointsEarned }
+              : t
+          )
+        );
+
         const msg = isCorrect
           ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
           : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
@@ -477,13 +510,13 @@ const SubjectRound = ({ onFinish }) => {
       showToast("Failed to submit answer!");
     }
 
-    setTeams((prevTeams) =>
-      prevTeams.map((team) =>
-        team.id === activeTeam.id
-          ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
-          : team
-      )
-    );
+    // setTeams((prevTeams) =>
+    //   prevTeams.map((team) =>
+    //     team.id === activeTeam.id
+    //       ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
+    //       : team
+    //   )
+    // );
 
     // Second-hand handling
     if (
@@ -572,7 +605,19 @@ const SubjectRound = ({ onFinish }) => {
 
           if (!result) return;
 
-          const { pointsEarned } = result;
+          // const { pointsEarned } = result;
+
+          const pointsEarned =
+            result?.pointsEarned || (reduceBool ? -roundPoints : 0);
+
+          // Update points
+          setTeams((prevTeams) =>
+            prevTeams.map((team) =>
+              team.id === activeTeam.id
+                ? { ...team, points: team.points + pointsEarned }
+                : team
+            )
+          );
 
           const msg = `⏰ Time's up! ${
             pointsEarned < 0 ? pointsEarned : 0
@@ -694,7 +739,7 @@ const SubjectRound = ({ onFinish }) => {
   // ---------------- Keyboard Shortcuts ----------------
   useCtrlKeyPass(() => {
     if (!activeRound?.rules?.enablePass) return;
-    if (teams[activeIndex]?.passesUsed >= activeRound.rules.passLimit) return;
+    // if (teams[activeIndex]?.passesUsed >= activeRound.rules.passLimit) return;
     handlePass();
   }, [activeTeam, secondHand, currentQuestion, questionDisplay, activeRound]);
 
@@ -746,6 +791,46 @@ const SubjectRound = ({ onFinish }) => {
       {scoreMessage && (
         <div className="score-message-list detail-info">
           <div className="score-message">{scoreMessage}</div>
+        </div>
+      )}
+
+      {/* View Scores Button */}
+      <button
+        className="view-scores-btn detail-info"
+        onClick={() => setShowScoresModal(true)}
+      >
+        View Team Scores
+      </button>
+
+      {showScoresModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowScoresModal(false)}
+        >
+          <div
+            className="scores-modal"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+          >
+            <h3>Current Team Scores</h3>
+            <ul>
+              {teams.map((team, idx) => (
+                <div key={team.id}>
+                  <span
+                    className="team-color-indicator"
+                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
+                  ></span>
+                  <span className="team-name-view">{team.name}:</span>
+                  <span className="team-points-view">{team.points} pts</span>
+                </div>
+              ))}
+            </ul>
+            <button
+              className="close-modal-btn"
+              onClick={() => setShowScoresModal(false)}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 

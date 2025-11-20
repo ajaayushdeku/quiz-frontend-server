@@ -64,6 +64,7 @@ const RapidFireRound = ({ onFinish }) => {
 
   const [scoreMessage, setScoreMessage] = useState([]);
   const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
+  const [showScoresModal, setShowScoresModal] = useState(false);
 
   // ---------------- Fetching Data from DB ----------------
   useEffect(() => {
@@ -76,14 +77,25 @@ const RapidFireRound = ({ onFinish }) => {
           roundId
         );
 
+        // // Fetch single quiz by ID
+        // const quizRes = await axios.get(
+        //   `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+        //   { withCredentials: true }
+        // );
+
         // Fetch single quiz by ID
         const quizRes = await axios.get(
-          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+          "http://localhost:4000/api/quiz/get-quizForUser",
           { withCredentials: true }
         );
 
-        const currentQuiz = quizRes.data.quiz;
+        const allQuizzes = quizRes.data.quizzes || [];
 
+        console.log("All Quiz:", allQuizzes);
+
+        const currentQuiz = allQuizzes.find(
+          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        );
         if (!currentQuiz) return console.warn("⚠️ Quiz not found");
 
         const roundIndex = currentQuiz.rounds.findIndex(
@@ -97,7 +109,7 @@ const RapidFireRound = ({ onFinish }) => {
           id: team._id,
           name: team.name || `Team ${index + 1}`,
           points: team.points || 0,
-          passesUsed: team.passesUsed || 0,
+          // passesUsed: team.passesUsed || 0,
         }));
         console.log("🧩 Formatted teams:", formattedTeams);
         setTeams(formattedTeams);
@@ -336,6 +348,14 @@ const RapidFireRound = ({ onFinish }) => {
       if (result) {
         const { pointsEarned, isCorrect } = result;
 
+        setTeams((prevTeams) =>
+          prevTeams.map((t) =>
+            t.id === activeTeam.id
+              ? { ...t, points: t.points + pointsEarned }
+              : t
+          )
+        );
+
         const msg = isCorrect
           ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
           : activeRound?.rules?.enableNegative && pointsEarned < 0
@@ -422,6 +442,14 @@ const RapidFireRound = ({ onFinish }) => {
       if (result) {
         const { pointsEarned } = result;
 
+        setTeams((prevTeams) =>
+          prevTeams.map((t) =>
+            t.id === activeTeam.id
+              ? { ...t, points: t.points + pointsEarned }
+              : t
+          )
+        );
+
         // Only show negative points if both enableNegative AND enablePass are true
         const msg =
           rules.enableNegative && pointsEarned < 0
@@ -465,15 +493,15 @@ const RapidFireRound = ({ onFinish }) => {
 
     // Increment passesUsed AFTER question progression
     // Use setTimeout to ensure it happens after other state updates complete
-    setTimeout(() => {
-      setTeams((prevTeams) =>
-        prevTeams.map((team) =>
-          team.id === activeTeam.id
-            ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
-            : team
-        )
-      );
-    }, 0);
+    // setTimeout(() => {
+    //   setTeams((prevTeams) =>
+    //     prevTeams.map((team) =>
+    //       team.id === activeTeam.id
+    //         ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
+    //         : team
+    //     )
+    //   );
+    // }, 0);
   };
 
   // ---------------- Handle Timer End ----------------
@@ -498,18 +526,24 @@ const RapidFireRound = ({ onFinish }) => {
           activeRound.rules.negativePoints || 0
         );
 
+        let result;
+
         for (const q of unansweredQs) {
           const correctOption = q.options.find(
             (opt) => opt.id === q.correctOptionId
           );
 
           try {
-            await submitAnswerToBackend({
+            result = await submitAnswerToBackend({
               teamId: activeTeam.id,
               questionId: q.id,
               givenAnswer: "Incomplete Answers To The Question",
               isPassed: false,
             });
+
+            if (!result) return;
+
+            // const { pointsEarned } = result;
 
             if (activeRound?.rules?.enableNegative) {
               const msg = `⏰ Time's up! -${penaltyPerQuestion} points for unanswered question: ${q.question}`;
@@ -541,6 +575,23 @@ const RapidFireRound = ({ onFinish }) => {
               isPassed: false,
             },
           ]);
+        }
+
+        for (const q of unansweredQs) {
+          if (!result) return;
+
+          const pointsEarned =
+            result?.pointsEarned ||
+            (activeRound?.rules?.enableNegative ? -roundPoints : 0);
+
+          // Update points
+          setTeams((prevTeams) =>
+            prevTeams.map((team) =>
+              team.id === activeTeam.id
+                ? { ...team, points: team.points + pointsEarned }
+                : team
+            )
+          );
         }
       }
 
@@ -646,6 +697,46 @@ const RapidFireRound = ({ onFinish }) => {
               {msg}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* View Scores Button */}
+      <button
+        className="view-scores-btn detail-info"
+        onClick={() => setShowScoresModal(true)}
+      >
+        View Team Scores
+      </button>
+
+      {showScoresModal && (
+        <div
+          className="modal-overlay"
+          onClick={() => setShowScoresModal(false)}
+        >
+          <div
+            className="scores-modal"
+            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
+          >
+            <h3>Current Team Scores</h3>
+            <ul>
+              {teams.map((team, idx) => (
+                <div key={team.id}>
+                  <span
+                    className="team-color-indicator"
+                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
+                  ></span>
+                  <span className="team-name-view">{team.name}:</span>
+                  <span className="team-points-view">{team.points} pts</span>
+                </div>
+              ))}
+            </ul>
+            <button
+              className="close-modal-btn"
+              onClick={() => setShowScoresModal(false)}
+            >
+              Close
+            </button>
+          </div>
         </div>
       )}
 

@@ -46,28 +46,13 @@ export default function AuthForm() {
           { withCredentials: true }
         );
 
-        const user = res.data?.user;
-        if (!user) {
-          setMessage("Invalid server response.");
-          return;
-        }
+        setMessage("Login successful!");
+        const { role } = res.data.user;
 
-        console.log("Login response:", user);
-
-        if (user.role === "admin") {
+        if (role === "admin") {
           navigate("/admin/dashboard");
-        } else if (user.role === "user") {
-          // Get adminId (support both keys)
-          const adminId = user.createdBy || user.adminId;
-
-          if (!adminId) {
-            setMessage("No admin assigned. Cannot fetch quizzes.");
-            return;
-          }
-
-          navigate(`/quizselect?adminId=${adminId}`);
-        } else {
-          setMessage("Unknown user role.");
+        } else if (role === "user") {
+          navigate("/quizselect"); // 👈 redirect for user role
         }
       }
     } catch (err) {

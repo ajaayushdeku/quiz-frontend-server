@@ -39,11 +39,9 @@ export const deleteQuizMaster = async (req: AuthRequest, res: Response) => {
     const quizMaster = await User.findOne({ _id: id, createdBy: req.user.id });
 
     if (!quizMaster) {
-      return res
-        .status(404)
-        .json({
-          message: "Quiz master not found or not created by this admin",
-        });
+      return res.status(404).json({
+        message: "Quiz master not found or not created by this admin",
+      });
     }
 
     await User.findByIdAndDelete(id);

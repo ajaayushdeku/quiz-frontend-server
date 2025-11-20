@@ -25,13 +25,21 @@ const RoundIntro = () => {
         setError("");
 
         const res = await axios.get(
-          `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
+          "http://localhost:4000/api/quiz/get-quizForUser",
           {
             withCredentials: true,
           }
         );
 
-        const currentQuiz = res.data.quiz || [];
+        const allQuizzes = res.data.quizzes || [];
+
+        console.log("All Quiz:", allQuizzes);
+
+        // Find the current quiz by quizId or roundId
+        const currentQuiz = allQuizzes.find(
+          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+        );
+
         if (!currentQuiz) {
           setError("Quiz not found.");
           return;

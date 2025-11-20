@@ -5,13 +5,19 @@ import {
   deleteQuiz,
   getAllQuiz,
   getQuizById,
+  getQuizzesForUser,
   resetQuizTeamsPoints,
 } from "../controller/createQuizController";
 const router = Router();
 
 router.post("/create-quiz", authMiddleware(["admin"]), createQuiz);
-router.get("/get-allquiz", authMiddleware(["admin"]), getAllQuiz);
-router.get("/get-quiz/:quizId", authMiddleware(["admin"]), getQuizById);
+router.get("/get-allquiz", authMiddleware(["admin", "user"]), getAllQuiz);
+router.get("/get-quiz/:quizId", authMiddleware(["admin", "user"]), getQuizById);
+router.get(
+  "/get-quizForUser",
+  authMiddleware(["admin", "user"]),
+  getQuizzesForUser
+);
 router.delete("/delete-quiz/:id", authMiddleware(["admin"]), deleteQuiz);
 router.put("/reset/:quizId", authMiddleware(["admin"]), resetQuizTeamsPoints);
 

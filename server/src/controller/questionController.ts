@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Question from "../models/question";
+import User from "../models/User";
 
 interface AuthenticatedRequest extends Request {
   user?: { id: string; role?: string; email?: string };
@@ -108,6 +109,9 @@ export const getQuestions = async (
 ): Promise<Response> => {
   try {
     const adminId = req.user?.id;
+    console.log("AdminId:", adminId);
+    const user = await User.findById(adminId);
+    console.log(user);
     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
 
     const questions = await Question.find({ adminId })
