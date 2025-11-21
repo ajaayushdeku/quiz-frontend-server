@@ -14,6 +14,10 @@ interface IQuizHistory extends Document {
   teamId: mongoose.Types.ObjectId;
   answers: IAnswer[];
   totalPoints: number;
+  startedAt: Date;
+  startedBy: mongoose.Types.ObjectId;
+  endedAt?: Date;
+  sessionId: mongoose.Types.ObjectId;
 }
 
 const quizHistorySchema = new Schema<IQuizHistory>(
@@ -62,6 +66,10 @@ const quizHistorySchema = new Schema<IQuizHistory>(
       type: Number,
       default: 0,
     },
+    startedAt: { type: Date, default: Date.now },
+    endedAt: { type: Date },
+    startedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    sessionId: { type: Schema.Types.ObjectId },
   },
   { timestamps: true }
 );

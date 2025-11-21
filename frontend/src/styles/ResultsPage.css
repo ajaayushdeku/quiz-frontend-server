@@ -507,27 +507,31 @@
   border: 2px dashed #696a6b;
 }
 /* ---------------- Button Top-Left ---------------- */
+
+.view-score-icon {
+  font-size: 4rem;
+}
+
 .view-scores-btn {
   position: absolute;
-  top: 5rem;
-  right: 15rem;
-  background: linear-gradient(90deg, #606060, #00aaff);
+  top: 1rem;
+  left: 1rem;
+  background: transparent;
   color: #ffffff;
   border: none;
-  padding: 1rem 1.5rem;
+  padding: 0rem 0rem;
   font-weight: 700;
   font-size: 1.1rem;
-  border-radius: 20px;
   cursor: pointer;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
   transition: transform 0.2s ease, box-shadow 0.2s ease;
   z-index: 1000;
 }
 
 .view-scores-btn:hover {
-  background: linear-gradient(90deg, #6060602d, #00aaff5b);
+  color: rgb(232, 210, 123);
   transform: translateY(-2px);
-  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+  text-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
 }
 
 /* ---------------- Overlay ---------------- */
@@ -611,10 +615,9 @@
 
 .team-color-indicator {
   display: inline-block;
-  width: 14px;
-  height: 14px;
-  margin-right: 0.8rem;
+  margin-right: 2rem;
   border-radius: 50%;
+  font-size: 1.7rem;
   flex-shrink: 0;
 }
 .team-name-view,
@@ -654,19 +657,42 @@
 }
 
 /* ---------------- Responsive ---------------- */
-@media (max-width: 480px) {
+@media (max-width: 1280px) {
   .scores-modal {
     width: 90%;
     padding: 1.5rem;
   }
 
   .scores-modal li {
-    font-size: 1rem;
+    font-size: 0.6rem;
+  }
+
+  .scores-modal h3 {
+    font-size: 2rem;
   }
 
   .view-scores-btn {
-    padding: 0.5rem 1rem;
-    font-size: 0.9rem;
+    padding: 0.5rem 1.1rem;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .team-color-indicator {
+    display: inline-block;
+
+    margin-right: 1rem;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    flex-shrink: 0;
+  }
+
+  .team-name-view {
+    font-size: 1.2rem;
+  }
+
+  .team-points-view {
+    font-size: 1.5rem;
+    color: rgb(40, 134, 166);
   }
 
   .close-modal-btn {

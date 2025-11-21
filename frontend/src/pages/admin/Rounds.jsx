@@ -70,11 +70,14 @@ export default function CreateQuiz() {
   // --- ROUND HANDLERS ---
   const handleNumRoundsChange = (e) => {
     const count = Math.max(1, parseInt(e.target.value) || 1);
+    // Since new rounds default to "general round"
+    const defaultCategory = "general round";
+
     const isTimerAlwaysOn = [
       "general round",
       "subject round",
       "rapid fire round",
-    ].includes(value.toLowerCase());
+    ].includes(defaultCategory.toLowerCase());
 
     setNumRounds(count);
     setRounds((prev) => {

@@ -21,8 +21,9 @@ import BuzzerButton from "../quiz_components/BuzzerButton";
 import QuestionCard from "../quiz_components/QuestionCard";
 
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { formatTime } from "../../utils/formatTime";
+import { TbScoreboard } from "react-icons/tb";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
@@ -67,6 +68,9 @@ const BuzzerRound = ({ onFinish }) => {
 
   const [showScoresModal, setShowScoresModal] = useState(false);
 
+  const location = useLocation();
+  const { historyIds } = location.state || {}; // { teamId: historyId }
+
   const [teamsAttempted, setTeamsAttempted] = useState([]); // Track all teams attempted
 
   const normalize = (str) => str?.trim().toLowerCase() || "";
@@ -75,19 +79,6 @@ const BuzzerRound = ({ onFinish }) => {
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
-        // // Fetch single quiz by ID
-        // const quizRes = await axios.get(
-        //   `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
-        //   { withCredentials: true }
-        // );
-
-        // const currentQuiz = quizRes.data.quiz;
-
-        // // Find the current quiz by quizId or roundId
-        // const currentQuiz = allQuizzes.find(
-        //   (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
-        // );
-
         // Fetch single quiz by ID
         const quizRes = await axios.get(
           "http://localhost:4000/api/quiz/get-quizForUser",
@@ -477,7 +468,7 @@ const BuzzerRound = ({ onFinish }) => {
         className="view-scores-btn detail-info"
         onClick={() => setShowScoresModal(true)}
       >
-        View Team Scores
+        <TbScoreboard className="view-score-icon" />
       </button>
 
       {showScoresModal && (
@@ -612,7 +603,12 @@ const BuzzerRound = ({ onFinish }) => {
           <p className="text-gray-400 mt-4">Loading questions...</p>
         )
       ) : (
-        <FinishDisplay onFinish={onFinish} message="Buzzer Round Finished!" />
+        <FinishDisplay
+          onFinish={onFinish}
+          message="Buzzer Round Finished!"
+          historyIds={historyIds} // { teamId: historyId, ... }
+          teams={teams}
+        />
       )}
 
       {fullscreenMedia && (

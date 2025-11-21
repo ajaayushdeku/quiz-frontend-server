@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Question from "../models/question";
-import User from "../models/User";
 
 interface AuthenticatedRequest extends Request {
-  user?: { id: string; role?: string; email?: string };
+  user?: { id: string; role?: string; email?: string; createdBy?: string };
   file?: Express.Multer.File & {
     path?: string;
     filename?: string;
@@ -108,18 +107,29 @@ export const getQuestions = async (
   res: Response
 ): Promise<Response> => {
   try {
-    const adminId = req.user?.id;
-    console.log("AdminId:", adminId);
-    const user = await User.findById(adminId);
-    console.log(user);
-    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+    const user = req.user;
+    if (!user) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
 
-    const questions = await Question.find({ adminId })
-      .populate("correctAnswer", "text")
-      .lean();
+    let adminId;
 
-    if (!questions || questions.length === 0) {
-      return res.status(404).json({ message: "No questions found" });
+    if (user.role === "admin") {
+      adminId = user.id; // admin sees their own questions
+    } else {
+      adminId = user.createdBy; // user sees admin’s questions
+    }
+
+    if (!adminId) {
+      return res.status(400).json({ message: "Admin ID not found for user" });
+    }
+
+    const questions = await Question.find({ adminId }).lean();
+
+    if (questions.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No questions found for this admin" });
     }
 
     return res.status(200).json({
@@ -136,6 +146,7 @@ export const getQuestions = async (
     });
   }
 };
+
 // Update question
 export const updateQuestion = async (
   req: AuthenticatedRequest,

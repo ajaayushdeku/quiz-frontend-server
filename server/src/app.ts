@@ -7,6 +7,7 @@ import playerRoutes from "./routes/player";
 import teamRoutes from "./routes/team";
 import rounds from "./routes/round";
 import quizRoutes from "./routes/quiz";
+import playQuiz from "./routes/playQuiz";
 //import QuizHistory from "./routes/quizHistory";
 import history from "./routes/history";
 import quizMasterRoutes from "./routes/manageQuizMaster";
@@ -45,6 +46,7 @@ app.use("/api/quiz", quizRoutes);
 app.use("/api/quizMaster", quizMasterRoutes);
 //app.use("/api/history",QuizHistory );
 app.use("/api/history", history);
+app.use("/api/playquiz", playQuiz);
 
 // test route in app.ts (temporarily)
 app.get("/api/test-cloudinary", (req, res) => {

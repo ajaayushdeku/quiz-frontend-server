@@ -26,16 +26,11 @@ const RoundIntro = () => {
 
         const res = await axios.get(
           "http://localhost:4000/api/quiz/get-quizForUser",
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
 
         const allQuizzes = res.data.quizzes || [];
 
-        console.log("All Quiz:", allQuizzes);
-
-        // Find the current quiz by quizId or roundId
         const currentQuiz = allQuizzes.find(
           (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
         );
@@ -69,6 +64,7 @@ const RoundIntro = () => {
           category:
             selectedRound.category?.toLowerCase().replace(/\s+/g, "_") ||
             "general_round",
+          teams: currentQuiz.teams?.map((t) => t._id) || [],
         });
       } catch (err) {
         console.error("Error fetching round info:", err);
@@ -110,26 +106,55 @@ const RoundIntro = () => {
       </section>
     );
   }
+  const handleNextClick = async () => {
+    try {
+      const ids = {};
+      for (const teamId of roundInfo.teams) {
+        const res = await axios.post(
+          "http://localhost:4000/api/playquiz/start",
+          { quizId, roundId, teamId },
+          { withCredentials: true }
+        );
+        ids[teamId] = res.data.historyId;
+      }
 
-  const handleNextClick = () => {
-    switch (roundInfo.category) {
-      case "general_round":
-        navigate(`/quiz/${quizId}/round/${roundId}/general`);
-        break;
-      case "rapid_fire_round":
-        navigate(`/quiz/${quizId}/round/${roundId}/rapidfire`);
-        break;
-      case "buzzer_round":
-        navigate(`/quiz/${quizId}/round/${roundId}/buzzer`);
-        break;
-      case "estimation_round":
-        navigate(`/quiz/${quizId}/round/${roundId}/estimation`);
-        break;
-      case "subject_round":
-        navigate(`/quiz/${quizId}/round/${roundId}/subjective`);
-        break;
-      default:
-        navigate(`/quiz/${quizId}/round/${roundId}`);
+      // Navigate to round component with historyIds
+      // navigate(`/quiz/${quizId}/round/${roundId}/general`, {
+      //   state: { historyIds: ids },
+      // });
+
+      // Navigate after starting
+      switch (roundInfo.category) {
+        case "general_round":
+          navigate(`/quiz/${quizId}/round/${roundId}/general`, {
+            state: { historyIds: ids },
+          });
+          break;
+        case "rapid_fire_round":
+          navigate(`/quiz/${quizId}/round/${roundId}/rapidfire`, {
+            state: { historyIds: ids },
+          });
+          break;
+        case "buzzer_round":
+          navigate(`/quiz/${quizId}/round/${roundId}/buzzer`, {
+            state: { historyIds: ids },
+          });
+          break;
+        case "estimation_round":
+          navigate(`/quiz/${quizId}/round/${roundId}/estimation`, {
+            state: { historyIds: ids },
+          });
+          break;
+        case "subject_round":
+          navigate(`/quiz/${quizId}/round/${roundId}/subjective`, {
+            state: { historyIds: ids },
+          });
+          break;
+        default:
+          navigate(`/quiz/${quizId}/round/${roundId}`);
+      }
+    } catch (err) {
+      console.error("Failed to start the round:", err);
     }
   };
 

@@ -1,6 +1,6 @@
 import axios from "axios";
 import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import { FaArrowRight } from "react-icons/fa6";
 import { IoHandLeftOutline, IoHandRightOutline } from "react-icons/io5";
 
@@ -26,6 +26,8 @@ import TeamDisplay from "../quiz_components/TeamDisplay";
 import QuestionCard from "../quiz_components/QuestionCard";
 import { BiShow } from "react-icons/bi";
 import TimerControls from "../quiz_components/TimerControls";
+import { TbScoreboard } from "react-icons/tb";
+import { MdGroup } from "react-icons/md";
 
 const { settings } = rulesConfig.rapid_fire_round;
 const INITIAL_TIMER = settings.roundTime;
@@ -61,6 +63,9 @@ const RapidFireRound = ({ onFinish }) => {
   const [activeRound, setActiveRound] = useState(null);
   const [roundPoints, setRoundPoints] = useState([]);
   const [roundTime, setRoundTime] = useState(INITIAL_TIMER);
+
+  const location = useLocation();
+  const { historyIds } = location.state || {}; // { teamId: historyId }
 
   const [scoreMessage, setScoreMessage] = useState([]);
   const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
@@ -570,7 +575,7 @@ const RapidFireRound = ({ onFinish }) => {
               correctAnswer:
                 q.options.find((opt) => opt.id === q.correctOptionId)?.text ||
                 "",
-              userAnswer: "No answer given",
+              userAnswer: "Timer Ran Out",
               isCorrect: false,
               isPassed: false,
             },
@@ -705,7 +710,7 @@ const RapidFireRound = ({ onFinish }) => {
         className="view-scores-btn detail-info"
         onClick={() => setShowScoresModal(true)}
       >
-        View Team Scores
+        <TbScoreboard className="view-score-icon" />
       </button>
 
       {showScoresModal && (
@@ -721,12 +726,23 @@ const RapidFireRound = ({ onFinish }) => {
             <ul>
               {teams.map((team, idx) => (
                 <div key={team.id}>
+                  <span>
+                    <span className="team-color-indicator">
+                      <MdGroup style={{ color: TEAM_COLORS[team.name] }} />
+                    </span>
+                    <span
+                      className="team-name-view"
+                      style={{ color: TEAM_COLORS[team.name] }}
+                    >
+                      {team.name}:
+                    </span>
+                  </span>
                   <span
-                    className="team-color-indicator"
-                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
-                  ></span>
-                  <span className="team-name-view">{team.name}:</span>
-                  <span className="team-points-view">{team.points} pts</span>
+                    className="team-points-view"
+                    style={{ color: TEAM_COLORS[team.name] }}
+                  >
+                    {team.points} pts
+                  </span>
                 </div>
               ))}
             </ul>
@@ -815,6 +831,8 @@ const RapidFireRound = ({ onFinish }) => {
         <FinishDisplay
           onFinish={onFinish}
           message="Rapid Fire Round Finished!"
+          historyIds={historyIds} // { teamId: historyId, ... }
+          teams={teams}
         />
       ) : (
         <div className="turn-finished-msg">

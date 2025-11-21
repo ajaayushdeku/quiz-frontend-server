@@ -61,6 +61,8 @@ export default function ManageQuizzes() {
     fetchQuizzes();
   }, []);
 
+  console.log("Formatted Quiz:", quizzes);
+
   // 🗑️ Delete quiz
   const handleDelete = async (id) => {
     if (!window.confirm("Are you sure you want to delete this quiz?")) return;

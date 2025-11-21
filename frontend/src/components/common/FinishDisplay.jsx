@@ -3,80 +3,94 @@ import { useParams } from "react-router-dom";
 import axios from "axios";
 import "../../styles/ResultsPage.css";
 import { MdGroup } from "react-icons/md";
-
-const FinishDisplay = ({ onFinish, message }) => {
+const FinishDisplay = ({
+  onFinish,
+  message,
+  historyIds = {},
+  teams: initialTeams = [],
+}) => {
   const { quizId, roundId } = useParams();
-  const [teams, setTeams] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const [teams, setTeams] = useState(initialTeams);
+  const [loading, setLoading] = useState(!initialTeams.length);
   const [winnerIds, setWinnerIds] = useState([]);
   const [showConfetti, setShowConfetti] = useState(false);
 
   useEffect(() => {
-    const fetchQuizTeams = async () => {
-      try {
-        // const res = await axios.get("http://localhost:4000/api/quiz/get-quiz", {
-        //   withCredentials: true,
-        // });
+    if (teams.length) {
+      const maxPoints = Math.max(...teams.map((t) => t.points));
+      const winners = teams
+        .filter((t) => t.points === maxPoints && maxPoints > 0)
+        .map((t) => t.id);
 
-        // const quizzes = res.data.quizzes || [];
-        // const currentQuiz = quizzes.find((q) => q._id === quizId);
+      setWinnerIds(winners);
+      if (winners.length > 0) {
+        setShowConfetti(true);
+        setTimeout(() => setShowConfetti(false), 5000);
+      }
+    } else {
+      // Fetch teams if not passed
+      const fetchQuizTeams = async () => {
+        try {
+          const quizRes = await axios.get(
+            "http://localhost:4000/api/quiz/get-quizForUser",
+            { withCredentials: true }
+          );
 
-        // Fetch single quiz by ID
-        // const quizRes = await axios.get(
-        //   `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
-        //   { withCredentials: true }
-        // );
+          const allQuizzes = quizRes.data.quizzes || [];
+          const currentQuiz = allQuizzes.find(
+            (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
+          );
 
-        // const currentQuiz = quizRes.data.quiz;
+          if (currentQuiz?.teams?.length) {
+            const formattedTeams = currentQuiz.teams.map((team, idx) => ({
+              id: team._id || idx,
+              name: team.name || `Team ${idx + 1}`,
+              points: team.points || 0,
+            }));
+            setTeams(formattedTeams);
 
-        // Fetch single quiz by ID
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quizForUser",
+            const maxPoints = Math.max(...formattedTeams.map((t) => t.points));
+            const winners = formattedTeams
+              .filter((t) => t.points === maxPoints && maxPoints > 0)
+              .map((t) => t.id);
+            setWinnerIds(winners);
+
+            if (winners.length > 0) {
+              setShowConfetti(true);
+              setTimeout(() => setShowConfetti(false), 5000);
+            }
+          }
+        } catch (error) {
+          console.error("❌ Failed to fetch quiz data:", error);
+        } finally {
+          setLoading(false);
+        }
+      };
+
+      fetchQuizTeams();
+    }
+  }, [teams, quizId, roundId]);
+
+  const handleNextRound = async () => {
+    try {
+      // Call /end for each team
+      for (const teamId in historyIds) {
+        const historyId = historyIds[teamId];
+        await axios.post(
+          "http://localhost:4000/api/playquiz/end",
+          { historyId },
           { withCredentials: true }
         );
-
-        const allQuizzes = quizRes.data.quizzes || [];
-
-        console.log("All Quiz:", allQuizzes);
-
-        // Find the current quiz by quizId or roundId
-        const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
-        );
-
-        if (currentQuiz?.teams?.length) {
-          const formattedTeams = currentQuiz.teams.map((team, idx) => ({
-            id: team._id || idx,
-            name: team.name || `Team ${idx + 1}`,
-            points: team.points || 0,
-          }));
-
-          const maxPoints = Math.max(...formattedTeams.map((t) => t.points));
-          const winners = formattedTeams
-            .filter((t) => t.points === maxPoints && maxPoints > 0)
-            .map((t) => t.id);
-
-          setWinnerIds(winners);
-          setTeams(formattedTeams);
-
-          if (winners.length > 0) {
-            setShowConfetti(true);
-            setTimeout(() => setShowConfetti(false), 5000); // stop confetti after 5 sec
-          }
-        }
-      } catch (error) {
-        console.error("❌ Failed to fetch quiz data:", error);
-      } finally {
-        setLoading(false);
       }
-    };
+      console.log("Round ended successfully for all teams!");
+    } catch (err) {
+      console.error("Failed to end the round:", err);
+    }
 
-    if (quizId) fetchQuizTeams();
-  }, [quizId]);
+    onFinish(); // Proceed to next round
+  };
 
   if (loading) return <div className="finish-loading">Loading scores...</div>;
-
-  const maxPoints = Math.max(...teams.map((t) => t.points));
 
   return (
     <section className="finish-display-section">
@@ -91,7 +105,7 @@ const FinishDisplay = ({ onFinish, message }) => {
       <div className="finish-display-container">
         <h1 className="finish-message">🎉 {message}!</h1>
 
-        <button onClick={onFinish} className="next-round-btn">
+        <button onClick={handleNextRound} className="next-round-btn">
           NEXT ROUND
         </button>
 

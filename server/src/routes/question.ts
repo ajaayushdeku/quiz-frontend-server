@@ -45,30 +45,22 @@ router.post(
   }
 );
 
-router.get(
-  "/get-questions",
-  authMiddleware(["admin", "user"]),
-  async (req, res, next) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      await getQuestions(authReq, res);
-    } catch (err) {
-      next(err);
-    }
+router.get("/get-questions", authMiddleware(), async (req, res, next) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    await getQuestions(authReq, res);
+  } catch (err) {
+    next(err);
   }
-);
-router.put(
-  "/update/:id",
-  authMiddleware(["admin", "user"]),
-  async (req, res, next) => {
-    try {
-      const authReq = req as AuthenticatedRequest;
-      await updateQuestion(authReq, res);
-    } catch (err) {
-      next(err);
-    }
+});
+router.put("/update/:id", authMiddleware(["admin"]), async (req, res, next) => {
+  try {
+    const authReq = req as AuthenticatedRequest;
+    await updateQuestion(authReq, res);
+  } catch (err) {
+    next(err);
   }
-);
+});
 router.delete(
   "/delete/:id",
   authMiddleware(["admin"]),
@@ -81,6 +73,7 @@ router.delete(
     }
   }
 );
+export default router;
 
 // router.patch(
 //   "/update/:id",
@@ -95,7 +88,6 @@ router.delete(
 //   async (req, res, next) => deleteQuestion
 // );
 
-export default router;
 // -----------------------------
 // Router
 // -----------------------------

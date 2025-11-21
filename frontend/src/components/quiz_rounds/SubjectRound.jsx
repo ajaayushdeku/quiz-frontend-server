@@ -25,6 +25,7 @@ import { formatTime } from "../../utils/formatTime";
 import rulesConfig from "../../config/rulesConfig";
 import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
+import { TbScoreboard } from "react-icons/tb";
 
 const { settings } = rulesConfig.general_round;
 const TEAM_TIME_LIMIT = settings.teamTimeLimit;
@@ -68,6 +69,7 @@ const SubjectRound = ({ onFinish }) => {
   const [showScoresModal, setShowScoresModal] = useState(false);
 
   const location = useLocation();
+  const { historyIds } = location.state || {}; // { teamId: historyId }
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -80,19 +82,6 @@ const SubjectRound = ({ onFinish }) => {
       try {
         setLoading(true);
         setError("");
-
-        // // Fetch single quiz by ID
-        // const quizRes = await axios.get(
-        //   `http://localhost:4000/api/quiz/get-quiz/${quizId}`,
-        //   { withCredentials: true }
-        // );
-
-        // const currentQuiz = quizRes.data.quiz;
-
-        // // Find the current quiz by quizId or roundId
-        // const currentQuiz = allQuizzes.find(
-        //   (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
-        // );
 
         // Fetch single quiz by ID
         const quizRes = await axios.get(
@@ -799,7 +788,7 @@ const SubjectRound = ({ onFinish }) => {
         className="view-scores-btn detail-info"
         onClick={() => setShowScoresModal(true)}
       >
-        View Team Scores
+        <TbScoreboard className="view-score-icon" />
       </button>
 
       {showScoresModal && (
@@ -972,6 +961,8 @@ const SubjectRound = ({ onFinish }) => {
         <FinishDisplay
           onFinish={onFinish}
           message={"Subject Round Finished!"}
+          historyIds={historyIds} // { teamId: historyId, ... }
+          teams={teams}
         />
       )}
 

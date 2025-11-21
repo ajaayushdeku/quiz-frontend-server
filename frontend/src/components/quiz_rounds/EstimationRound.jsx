@@ -10,10 +10,11 @@ import QuestionCard from "../quiz_components/QuestionCard";
 import TeamAnswerBoxes from "../quiz_components/TeamAnswerBoxes";
 import FinishDisplay from "../common/FinishDisplay";
 import axios from "axios";
-import { useParams } from "react-router-dom";
+import { useLocation, useParams } from "react-router-dom";
 import useShiftToShow from "../../hooks/useShiftToShow";
 import { MdGroup } from "react-icons/md";
 import { useUIHelpers } from "../../hooks/useUIHelpers";
+import { TbScoreboard } from "react-icons/tb";
 
 const COLORS = [
   "#8d1734ff",
@@ -44,6 +45,9 @@ const EstimationRound = ({ onFinish }) => {
   const [showScoresModal, setShowScoresModal] = useState(false);
 
   const { showToast } = useUIHelpers();
+
+  const location = useLocation();
+  const { historyIds } = location.state || {}; // { teamId: historyId }
 
   const TEAM_COLORS = Object.fromEntries(
     teams.map((team, i) => [team.name, COLORS[i % COLORS.length]])
@@ -224,7 +228,7 @@ const EstimationRound = ({ onFinish }) => {
         className="view-scores-btn detail-info"
         onClick={() => setShowScoresModal(true)}
       >
-        View Team Scores
+        <TbScoreboard className="view-score-icon" />
       </button>
 
       {showScoresModal && (
@@ -380,6 +384,8 @@ const EstimationRound = ({ onFinish }) => {
         <FinishDisplay
           onFinish={onFinish}
           message="Estimation Round Finished!"
+          historyIds={historyIds} // { teamId: historyId, ... }
+          teams={teams}
         />
       )}
       {/* 

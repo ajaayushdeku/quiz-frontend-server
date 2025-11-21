@@ -51,7 +51,6 @@ const TeamStats = () => {
 
   const teams = selectedQuiz ? histories[selectedQuiz] || [] : [];
 
-  // Format quizzes for react-select
   const quizOptions = quizzes.map((quiz) => ({
     value: quiz._id,
     label: quiz.name || "Untitled Quiz",
@@ -61,20 +60,7 @@ const TeamStats = () => {
     <div className="page-container white-theme">
       <h2 className="section-heading">📊 All Quizzes Team Stats</h2>
 
-      {/* <div className="quizzes-list">
-        {quizzes.map((quiz) => (
-          <button
-            key={quiz._id}
-            className={`quiz-tab ${selectedQuiz === quiz._id ? "active" : ""}`}
-            onClick={() => setSelectedQuiz(quiz._id)}
-          >
-            <IoExtensionPuzzle /> {quiz.name || "Untitled Quiz"}
-          </button>
-        ))}
-      </div> */}
-
       <div className="team-stats-cont">
-        {" "}
         {/* Searchable Dropdown */}
         <div className="quiz-dropdown-search">
           <Select
@@ -86,6 +72,7 @@ const TeamStats = () => {
             classNamePrefix="react-select"
           />
         </div>
+
         <div className="teams-container">
           {teams.length === 0 ? (
             <p className="no-history-text centered-control">
@@ -94,6 +81,35 @@ const TeamStats = () => {
           ) : (
             teams.map((team, idx) => (
               <div key={team.teamId || idx} className="team-card">
+                {/* ⭐ NEW: Started By + Time Section */}
+                <div className="started-by-section">
+                  <h4>Started By:</h4>
+                  <p className="starter-name">
+                    {team.startedBy?.name || "Unknown"}
+                  </p>
+                  <p className="starter-email">{team.startedBy?.email}</p>
+
+                  {/* NEW: Started At */}
+                  <div className="time-row">
+                    <strong>Started At:</strong>
+                    <span>
+                      {team.startedAt
+                        ? new Date(team.startedAt).toLocaleString()
+                        : "N/A"}
+                    </span>
+                  </div>
+
+                  {/* NEW: Ended At */}
+                  <div className="time-row">
+                    <strong>Ended At:</strong>
+                    <span>
+                      {team.endedAt
+                        ? new Date(team.endedAt).toLocaleString()
+                        : "Not Finished"}
+                    </span>
+                  </div>
+                </div>
+
                 <h3 className="team-name">
                   <MdGroup /> {team.teamName}
                 </h3>
@@ -111,14 +127,6 @@ const TeamStats = () => {
                         <span>Passed: {round.passed}</span>
                         <span>Points: {round.points}</span>
                       </div>
-                      {/* <div
-                      className="score-bar"
-                      style={{
-                        width: `${
-                          (round.points / team.totals.totalPoints) * 100
-                        }%`,
-                      }}
-                    /> */}
                     </div>
                   ))}
                 </div>

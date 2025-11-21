@@ -15,6 +15,13 @@ interface PopulatedRecord {
     _id: mongoose.Types.ObjectId;
     name: string;
   };
+  startedBy: {
+    _id: mongoose.Types.ObjectId;
+    name: string;
+    email: string;
+  };
+  startedAt: Date;
+  endedAt?: Date;
   answers: Array<{
     questionId: mongoose.Types.ObjectId;
     givenAnswer: string | number;
@@ -28,29 +35,29 @@ interface PopulatedRecord {
 // Get complete quiz history with round-wise stats and totals
 export const getQuizHistory = async (req: Request, res: Response) => {
   try {
-    const { quizId, teamId } = req.params;
+    const { quizId, teamId, userId } = req.params;
 
-    if (!quizId) {
-      return res.status(400).json({ message: "quizId is required" });
-    }
-
-    if (!mongoose.Types.ObjectId.isValid(quizId)) {
-      return res.status(400).json({ message: "Invalid quizId" });
-    }
+    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId))
+      return res.status(400).json({ message: "Invalid or missing quizId" });
 
     // Build query
     const query: any = { quizId };
     if (teamId) {
-      if (!mongoose.Types.ObjectId.isValid(teamId)) {
+      if (!mongoose.Types.ObjectId.isValid(teamId))
         return res.status(400).json({ message: "Invalid teamId" });
-      }
       query.teamId = teamId;
     }
+    if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId))
+        return res.status(400).json({ message: "Invalid userId" });
+      query.startedBy = userId;
+    }
 
-    // Get all history records
+    // Fetch history
     const historyRecords = await QuizHistory.find(query)
       .populate("roundId", "roundNumber name category")
       .populate("teamId", "name")
+      .populate("startedBy", "name email")
       .sort({ "roundId.roundNumber": 1 });
 
     if (!historyRecords || historyRecords.length === 0) {
@@ -59,73 +66,13 @@ export const getQuizHistory = async (req: Request, res: Response) => {
 
     const records = historyRecords as unknown as PopulatedRecord[];
 
-    console.log(
-      `Found ${records.length} history records for quizId: ${quizId}`
-    );
-
-    // Debug: Show what rounds exist
-    const uniqueRounds = [
-      ...new Set(records.map((r) => r.roundId?.roundNumber)),
-    ];
-    console.log(`Unique rounds found: ${uniqueRounds.join(", ")}`);
-
-    // If specific team requested
-    if (teamId) {
-      // Group by round
-      const roundWiseStats = records.map((record) => {
-        const answers = record.answers || [];
-
-        return {
-          roundId: record.roundId._id,
-          roundNumber: record.roundId.roundNumber,
-          roundName:
-            record.roundId.name || `Round ${record.roundId.roundNumber}`,
-          category: record.roundId.category,
-          attempted: answers.length,
-          correct: answers.filter((a) => a.isCorrect).length,
-          wrong: answers.filter((a) => !a.isCorrect && !a.isPassed).length,
-          passed: answers.filter((a) => a.isPassed).length,
-          points: record.totalPoints || 0,
-          answers: answers.map((a) => ({
-            questionId: a.questionId,
-            givenAnswer: a.givenAnswer,
-            pointsEarned: a.pointsEarned,
-            isCorrect: a.isCorrect,
-            isPassed: a.isPassed,
-          })),
-        };
-      });
-
-      // Calculate totals
-      const totals = {
-        totalRounds: roundWiseStats.length,
-        totalAttempted: roundWiseStats.reduce((sum, r) => sum + r.attempted, 0),
-        totalCorrect: roundWiseStats.reduce((sum, r) => sum + r.correct, 0),
-        totalWrong: roundWiseStats.reduce((sum, r) => sum + r.wrong, 0),
-        totalPassed: roundWiseStats.reduce((sum, r) => sum + r.passed, 0),
-        totalPoints: roundWiseStats.reduce((sum, r) => sum + r.points, 0),
-      };
-
-      const firstRecord = records[0];
-      if (!firstRecord) {
-        return res.status(404).json({ message: "No record found" });
-      }
-
-      return res.status(200).json({
-        message: "Quiz history retrieved successfully",
-        teamName: firstRecord.teamId.name,
-        roundWiseStats,
-        totals,
-      });
-    }
-
-    // If all teams (no specific teamId)
     // Group by team
     const teamStatsMap = new Map<
       string,
       {
         teamId: string;
         teamName: string;
+        startedBy: { _id: string; name: string; email: string };
         rounds: Array<{
           roundId: mongoose.Types.ObjectId;
           roundNumber: number;
@@ -136,35 +83,46 @@ export const getQuizHistory = async (req: Request, res: Response) => {
           wrong: number;
           passed: number;
           points: number;
+          startedAt: Date;
+          endedAt?: Date;
         }>;
       }
     >();
 
     records.forEach((record) => {
+      if (!record.teamId || !record.roundId || !record.startedBy) return;
       const tId = record.teamId._id.toString();
 
       if (!teamStatsMap.has(tId)) {
         teamStatsMap.set(tId, {
           teamId: tId,
           teamName: record.teamId.name,
+          startedBy: {
+            _id: record.startedBy._id.toString(),
+            name: record.startedBy.name,
+            email: record.startedBy.email,
+          },
           rounds: [],
         });
       }
 
       const answers = record.answers || [];
+      const roundData = record.roundId;
       const teamData = teamStatsMap.get(tId);
-      if (teamData) {
+
+      if (teamData && roundData) {
         teamData.rounds.push({
-          roundId: record.roundId._id,
-          roundNumber: record.roundId.roundNumber,
-          roundName:
-            record.roundId.name || `Round ${record.roundId.roundNumber}`,
-          category: record.roundId.category,
+          roundId: roundData._id,
+          roundNumber: roundData.roundNumber,
+          roundName: roundData.name || `Round ${roundData.roundNumber}`,
+          category: roundData.category,
           attempted: answers.length,
           correct: answers.filter((a) => a.isCorrect).length,
           wrong: answers.filter((a) => !a.isCorrect && !a.isPassed).length,
           passed: answers.filter((a) => a.isPassed).length,
           points: record.totalPoints || 0,
+          startedAt: record.startedAt,
+          ...(record.endedAt && { endedAt: record.endedAt }),
         });
       }
     });
@@ -183,6 +141,7 @@ export const getQuizHistory = async (req: Request, res: Response) => {
       return {
         teamId: team.teamId,
         teamName: team.teamName,
+        startedBy: team.startedBy,
         roundWiseStats: team.rounds,
         totals,
       };
@@ -192,7 +151,7 @@ export const getQuizHistory = async (req: Request, res: Response) => {
     teamsHistory.sort((a, b) => b.totals.totalPoints - a.totals.totalPoints);
 
     return res.status(200).json({
-      message: "All teams quiz history retrieved successfully",
+      message: "Quiz history retrieved successfully",
       teamsHistory,
     });
   } catch (err: any) {

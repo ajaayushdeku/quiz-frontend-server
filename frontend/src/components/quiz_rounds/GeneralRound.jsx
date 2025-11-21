@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { BiShow } from "react-icons/bi";
+import { TbScoreboard } from "react-icons/tb";
 import { IoHandLeftOutline, IoHandRightOutline } from "react-icons/io5";
 import axios from "axios";
 
@@ -62,6 +63,7 @@ const GeneralRound = ({ onFinish }) => {
   const [showScoresModal, setShowScoresModal] = useState(false);
 
   const location = useLocation();
+  const { historyIds } = location.state || {}; // { teamId: historyId }
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -652,7 +654,7 @@ const GeneralRound = ({ onFinish }) => {
         className="view-scores-btn detail-info"
         onClick={() => setShowScoresModal(true)}
       >
-        View Team Scores
+        <TbScoreboard className="view-score-icon" />
       </button>
 
       {showScoresModal && (
@@ -785,7 +787,9 @@ const GeneralRound = ({ onFinish }) => {
         ) : (
           <FinishDisplay
             onFinish={onFinish}
-            message={"General Round Finished!"}
+            message="General Round Finished!"
+            historyIds={historyIds} // { teamId: historyId, ... }
+            teams={teams}
           />
         )}
       </>
