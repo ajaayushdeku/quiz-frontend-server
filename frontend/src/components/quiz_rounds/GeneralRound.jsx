@@ -41,7 +41,7 @@ const COLORS = [
   "#ffc107ff",
 ];
 
-const GeneralRound = ({ onFinish }) => {
+const GeneralRound = ({ onFinish, sessionId }) => {
   const { quizId, roundId } = useParams();
 
   const { showToast } = useUIHelpers();
@@ -255,6 +255,7 @@ const GeneralRound = ({ onFinish }) => {
       questionId,
       givenAnswer,
       isPassed,
+      sessionId,
     };
 
     console.log("Payload", payload);
@@ -272,6 +273,9 @@ const GeneralRound = ({ onFinish }) => {
       return null;
     }
   };
+
+  if (!sessionId)
+    console.warn("No sessionId provided! QuizWrapper should pass it.");
 
   // ---------------- Option Selection ----------------
   const handleOptionSelection = async (optionId) => {
@@ -788,7 +792,7 @@ const GeneralRound = ({ onFinish }) => {
           <FinishDisplay
             onFinish={onFinish}
             message="General Round Finished!"
-            historyIds={historyIds} // { teamId: historyId, ... }
+            // historyIds={historyIds} // { teamId: historyId, ... }
             teams={teams}
           />
         )}

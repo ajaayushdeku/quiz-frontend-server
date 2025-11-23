@@ -176,6 +176,29 @@ export default function CreateQuiz() {
       current.enableNegative = false; // disable negative if pass selected
     }
 
+    if (field === "enablePass") {
+      current.enablePass = value;
+
+      if (value === true && current.passCondition === "noPass") {
+        // Set default passCondition based on category
+        const category = rounds[index].category.toLowerCase();
+        if (category === "general round" || category === "subject round") {
+          current.passCondition = "onceToNextTeam";
+        } else if (category === "rapid fire round") {
+          current.passCondition = "passQuestion";
+        }
+        current.passLimit = 0;
+        current.passedPoints = 0;
+        current.passedTime = 0;
+      } else if (value === false) {
+        // Reset all pass values if disabled
+        current.passCondition = "noPass";
+        current.passLimit = 0;
+        current.passedPoints = 0;
+        current.passedTime = 0;
+      }
+    }
+
     updated[index].rules = current;
     setRounds(updated);
   };
@@ -450,11 +473,11 @@ export default function CreateQuiz() {
               {" "}
               <button
                 type="button"
-                className="primary-btn next-btn"
+                className="primary-btn next-btn "
                 onClick={() => setStep(2)}
                 disabled={!quizName.trim()}
               >
-                Next <FaArrowRight />
+                <p> Next</p> <FaArrowRight />
               </button>
             </div>
           </section>
@@ -490,11 +513,11 @@ export default function CreateQuiz() {
             <div className="step-nav-buttons">
               <button
                 type="button"
-                className="secondary-btn"
+                className="secondary-btn next-btn"
                 onClick={() => setStep(1)}
               >
                 <FaArrowLeft />
-                Back
+                <p>Back</p>
               </button>
               <button
                 type="button"
@@ -502,7 +525,7 @@ export default function CreateQuiz() {
                 onClick={() => setStep(3)}
                 disabled={teams.some((t) => !t.name.trim())}
               >
-                Next <FaArrowRight />
+                <p> Next</p> <FaArrowRight />
               </button>
             </div>
           </section>
@@ -750,14 +773,8 @@ export default function CreateQuiz() {
                                 const value = e.target.value;
 
                                 if (value === "noPass") {
-                                  handleRuleChange(
-                                    index,
-                                    "passCondition",
-                                    value
-                                  );
-                                  handleRuleChange(index, "passLimit", 0);
-                                  handleRuleChange(index, "passedPoints", 0);
-                                  handleRuleChange(index, "passedTime", 0);
+                                  // Deselect enablePass if "noPass" selected
+                                  handleRuleChange(index, "enablePass", false);
                                 } else {
                                   handleRuleChange(
                                     index,
@@ -780,7 +797,7 @@ export default function CreateQuiz() {
 
                               {round.category.toLowerCase() ===
                                 "rapid fire round" && (
-                                <option value="passQuestion">
+                                <option value="passQuestions">
                                   Pass Question
                                 </option>
                               )}
@@ -1001,11 +1018,11 @@ export default function CreateQuiz() {
             <div className="step-nav-buttons">
               <button
                 type="button"
-                className="secondary-btn"
+                className="secondary-btn next-btn"
                 onClick={() => setStep(2)}
               >
                 <FaArrowLeft />
-                Back
+                <p> Back</p>
               </button>
               <button
                 type="submit"

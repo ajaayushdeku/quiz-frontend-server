@@ -318,7 +318,7 @@
   padding: 1rem;
   margin-bottom: 1rem;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
-  width: 80%;
+  width: 50%;
   position: relative;
 }
 
@@ -338,13 +338,19 @@
   width: 80%;
 }
 
-.winner-card .team-points {
+.winner-card .team-points,
+.winner-card .team-icon,
+.winner-card .team-topic {
   color: #1a1a1a;
 }
 
 .scoreboard-card .team-title {
-  color: #1a1a1a;
+  color: #f2f2f2;
   font-size: 1.5rem;
+}
+
+.team-topic {
+  font-size: 2rem;
 }
 
 @keyframes winner-pulse {
@@ -361,15 +367,20 @@
 /* Winner Badge */
 .winner-badge {
   position: absolute;
-  top: -12px;
-  right: -10px;
-  font-size: 1rem;
+  top: -20px;
+  right: -1px;
+  font-size: 1.2rem;
   font-weight: bold;
-  color: rgb(101, 101, 101);
-  background: linear-gradient(135deg, #ffdf70, #ffbb33, #ffdf70);
-  border: 1px solid rgb(65, 65, 65);
+  color: rgb(0, 0, 0);
+  /* background: linear-gradient(135deg, #ffdf70, #ffbb33);
+  border: 1px solid rgb(65, 65, 65); */
   padding: 0.2rem 0.5rem;
   border-radius: 50px;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 /* Confetti */
@@ -485,15 +496,15 @@
 .back-btn {
   display: flex;
   align-items: center;
-  gap: 1.3rem;
-  background: linear-gradient(135deg, #ffffff, #f7f1f1, #ffffff);
+  gap: 0.5rem;
+  background: linear-gradient(135deg, #ffffff, #f7f1f1);
   border: 2px dashed #ffffff;
   /* text-shadow: 0 0 15px rgba(121, 123, 123, 0.4); */
   color: rgb(52, 52, 52);
   font-size: 1rem;
   font-weight: 700;
   padding: 0.8rem 1rem;
-  border-radius: 20px;
+  border-radius: 50px;
   text-decoration: none;
   cursor: pointer;
   transition: all 0.3s ease;
@@ -506,6 +517,12 @@
   transform: scale(1.05);
   border: 2px dashed #696a6b;
 }
+
+.back-btn-icon {
+  font-size: 1rem;
+  font-weight: 700;
+}
+
 /* ---------------- Button Top-Left ---------------- */
 
 .view-score-icon {

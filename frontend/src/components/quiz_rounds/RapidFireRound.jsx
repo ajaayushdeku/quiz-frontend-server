@@ -43,7 +43,7 @@ const COLORS = [
   "#ffc107ff",
 ];
 
-const RapidFireRound = ({ onFinish }) => {
+const RapidFireRound = ({ onFinish, sessionId }) => {
   const { quizId, roundId } = useParams();
   console.log("quizId:", quizId, "roundId:", roundId);
 
@@ -291,6 +291,7 @@ const RapidFireRound = ({ onFinish }) => {
       questionId,
       givenAnswer,
       isPassed,
+      sessionId,
     };
 
     console.log("Payload", payload);
@@ -308,6 +309,9 @@ const RapidFireRound = ({ onFinish }) => {
       return null;
     }
   };
+
+  if (!sessionId)
+    console.warn("No sessionId provided! QuizWrapper should pass it.");
 
   // ---------------- Handle Answer Submission ----------------
   const handleAnswer = async (submitted = false) => {
@@ -831,7 +835,7 @@ const RapidFireRound = ({ onFinish }) => {
         <FinishDisplay
           onFinish={onFinish}
           message="Rapid Fire Round Finished!"
-          historyIds={historyIds} // { teamId: historyId, ... }
+          // historyIds={historyIds} // { teamId: historyId, ... }
           teams={teams}
         />
       ) : (

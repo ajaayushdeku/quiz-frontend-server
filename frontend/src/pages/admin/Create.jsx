@@ -128,7 +128,7 @@ export default function AdminCreateUser() {
             disabled={loading}
             style={{ marginTop: "2rem" }}
           >
-            {loading ? "Creating..." : "Create User"}
+            {loading ? "Creating..." : "Create Quiz Master"}
           </button>
         </form>
       </div>

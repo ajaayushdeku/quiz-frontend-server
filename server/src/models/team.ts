@@ -1,20 +1,20 @@
-import mongoose, { Schema, Document, Types } from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 
 export interface ITeam extends Document {
   name: string;
-  points: number;
   quizId: mongoose.Types.ObjectId;
-  adminId: Types.ObjectId | string;
+  adminId: mongoose.Types.ObjectId;
+  points: number;
 }
 
-const TeamSchema: Schema<ITeam> = new Schema(
+const teamSchema = new Schema<ITeam>(
   {
     name: { type: String, required: true },
-    points: { type: Number, default: 0 },
-    quizId: { type: Schema.Types.ObjectId, ref: "Quiz" },
+    quizId: { type: Schema.Types.ObjectId, ref: "Quiz", required: true },
     adminId: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    points: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
 
-export default mongoose.model<ITeam>("Team", TeamSchema);
+export default mongoose.model<ITeam>("Team", teamSchema);

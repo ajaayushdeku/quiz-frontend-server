@@ -43,6 +43,17 @@
 /* ======================= */
 /* Buttons Container Section */
 /* ======================= */
+
+.next-btn {
+  display: flex;
+  flex-direction: row;
+  gap: 0.5rem;
+  justify-content: center;
+  align-items: center;
+  padding: 0.1rem 1rem;
+  font-weight: 700;
+}
+
 .button-row {
   display: flex;
   flex-direction: row;

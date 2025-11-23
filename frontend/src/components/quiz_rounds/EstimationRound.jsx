@@ -27,7 +27,7 @@ const COLORS = [
   "#ffc107ff",
 ];
 
-const EstimationRound = ({ onFinish }) => {
+const EstimationRound = ({ onFinish, sessionId }) => {
   const { quizId, roundId } = useParams();
 
   const [teams, setTeams] = useState([]);
@@ -142,6 +142,7 @@ const EstimationRound = ({ onFinish }) => {
       roundId,
       questionId: currentQuestion._id,
       answers: answersPayload,
+      sessionId,
     };
 
     try {
@@ -179,6 +180,9 @@ const EstimationRound = ({ onFinish }) => {
       alert("Failed to submit answers! Check console for details.");
     }
   };
+
+  if (!sessionId)
+    console.warn("No sessionId provided! QuizWrapper should pass it.");
 
   console.log("Results:", result);
 
@@ -384,7 +388,7 @@ const EstimationRound = ({ onFinish }) => {
         <FinishDisplay
           onFinish={onFinish}
           message="Estimation Round Finished!"
-          historyIds={historyIds} // { teamId: historyId, ... }
+          // historyIds={historyIds} // { teamId: historyId, ... }
           teams={teams}
         />
       )}

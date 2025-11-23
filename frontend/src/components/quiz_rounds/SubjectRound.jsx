@@ -41,7 +41,7 @@ const COLORS = [
   "#ffc107ff",
 ];
 
-const SubjectRound = ({ onFinish }) => {
+const SubjectRound = ({ onFinish, sessionId }) => {
   const { quizId, roundId } = useParams();
 
   const { showToast } = useUIHelpers();
@@ -299,6 +299,7 @@ const SubjectRound = ({ onFinish }) => {
       questionId,
       givenAnswer,
       isPassed,
+      sessionId,
     };
 
     console.log("Payload", payload);
@@ -316,6 +317,9 @@ const SubjectRound = ({ onFinish }) => {
       return null;
     }
   };
+
+  if (!sessionId)
+    console.warn("No sessionId provided! QuizWrapper should pass it.");
 
   // ---------------- Mark question as used ----------------
   const markQuestionAsUsed = (questionId) => {
@@ -961,7 +965,7 @@ const SubjectRound = ({ onFinish }) => {
         <FinishDisplay
           onFinish={onFinish}
           message={"Subject Round Finished!"}
-          historyIds={historyIds} // { teamId: historyId, ... }
+          // historyIds={historyIds} // { teamId: historyId, ... }
           teams={teams}
         />
       )}

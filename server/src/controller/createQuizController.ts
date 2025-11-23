@@ -29,7 +29,7 @@ interface RoundInput {
     enableNegative?: boolean;
     negativePoints?: number;
     enablePass?: boolean;
-    passCondition?: "onceToNextTeam" | "allTeams";
+    passCondition?: "onceToNextTeam" | "passQuestions";
     passLimit?: number;
     passedPoints?: number;
     passedTime?: number;

@@ -39,7 +39,7 @@ const COLORS = [
   "#ffc107ff",
 ];
 
-const BuzzerRound = ({ onFinish }) => {
+const BuzzerRound = ({ onFinish, sessionId }) => {
   const { showToast } = useUIHelpers();
   const { quizId, roundId } = useParams();
 
@@ -281,7 +281,7 @@ const BuzzerRound = ({ onFinish }) => {
     try {
       const res = await axios.post(
         "http://localhost:4000/api/history/submit-ans",
-        { quizId, roundId, teamId, questionId, givenAnswer },
+        { quizId, roundId, teamId, questionId, givenAnswer, sessionId },
         { withCredentials: true }
       );
       return res.data;
@@ -291,6 +291,9 @@ const BuzzerRound = ({ onFinish }) => {
       return null;
     }
   };
+
+  if (!sessionId)
+    console.warn("No sessionId provided! QuizWrapper should pass it.");
 
   // -------------------- Handle Answer Submit --------------------
   const handleSubmit = async () => {
@@ -606,7 +609,7 @@ const BuzzerRound = ({ onFinish }) => {
         <FinishDisplay
           onFinish={onFinish}
           message="Buzzer Round Finished!"
-          historyIds={historyIds} // { teamId: historyId, ... }
+          // historyIds={historyIds} // { teamId: historyId, ... }
           teams={teams}
         />
       )}

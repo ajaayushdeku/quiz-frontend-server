@@ -75,8 +75,9 @@
 .team-card {
   background: #f0f4ff;
   border-radius: 12px;
+  border-left: 4px solid #c8d3f0;
   padding: 20px;
-  box-shadow: 0 4px 12px #063e8d;
+  box-shadow: 0 4px 12px #a1c6f9;
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
@@ -106,13 +107,14 @@
 
 .round-tab {
   min-width: 150px;
-  width: 21rem;
+  width: 25rem;
   background: #6098e8;
   border-radius: 12px;
   padding: 1rem 2rem;
   flex-shrink: 0;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s;
+  border-left: 4px solid #3c6fb5;
 }
 
 .round-scroll::-webkit-scrollbar {
@@ -152,7 +154,8 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #30507c;
+  background: #e4c33f;
+  border-left: 4px solid #c4a93c;
   padding: 12px 16px;
   border-radius: 10px;
   font-weight: 600;
@@ -196,21 +199,48 @@
   }
 }
 
-.started-by-section {
-  background: #f7f7f7;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 12px;
-  border-left: 4px solid #4b7bec;
-}
-
-.started-by-section h4 {
-  margin-bottom: 6px;
-}
-
 .time-row {
   display: flex;
   justify-content: space-between;
   font-size: 14px;
   margin-top: 4px;
+}
+
+.starter-name {
+  color: white;
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.selected-quiz-name {
+  color: #30507c;
+  font-size: 1.8rem;
+}
+
+.played-by-top-box {
+  padding: 16px;
+  margin-top: 10px;
+  border-radius: 12px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  background: #3b6cb1;
+  margin-bottom: 12px;
+  border-left: 4px solid #6098e8;
+  color: white;
+}
+
+.played-by-top-box h4 {
+  margin: 0;
+  font-size: 1rem;
+}
+
+.played-by-top-box p {
+  margin: 0;
+  font-size: 1.7rem;
+  font-weight: 700;
+}
+
+.played-by-top-box .starter-name {
+  font-size: 17px;
+  margin-top: 5px;
 }

@@ -18,15 +18,14 @@ const QuizWrapper = ({ children }) => {
     teamQueue: [],
   });
 
-  // ✅ Fetch quiz data (rounds + teams)
+  const sessionId = localStorage.getItem("sessionId"); // ✅ get sessionId
+
   useEffect(() => {
     const fetchQuizData = async () => {
       try {
         const res = await axios.get(
           "http://localhost:4000/api/quiz/get-quizForUser",
-          {
-            withCredentials: true,
-          }
+          { withCredentials: true }
         );
 
         const allQuizzes = res.data.quizzes || [];
@@ -37,27 +36,23 @@ const QuizWrapper = ({ children }) => {
           return;
         }
 
-        // ✅ Get rounds
         const rounds = currentQuiz.rounds || [];
         setRoundSequence(rounds);
         const idx = rounds.findIndex((r) => r._id === roundId);
         setCurrentRoundIndex(idx);
 
-        // ✅ Get teams
         const teamList = currentQuiz.teams || [];
         const formattedTeams = teamList.map((team, i) => ({
           id: team._id,
-          name: team.name || `Team ${i + 1}`,
+          name: team.name,
         }));
 
         setTeams(formattedTeams);
 
-        // Initialize scores
         const initialScores = {};
         formattedTeams.forEach((t) => (initialScores[t.name] = 0));
         setTeamScores(initialScores);
 
-        // Initialize teamData
         setTeamData({
           activeTeam: formattedTeams[0]?.name || "",
           teamQueue: formattedTeams.map((t) => t.name),
@@ -72,10 +67,9 @@ const QuizWrapper = ({ children }) => {
     if (quizId && roundId) fetchQuizData();
   }, [quizId, roundId]);
 
-  // ✅ Move to next round intro
   const handleRoundComplete = () => {
     if (!roundSequence.length || currentRoundIndex === -1) {
-      navigate("/result");
+      navigate(`/result/${quizId}`);
       return;
     }
 
@@ -83,11 +77,10 @@ const QuizWrapper = ({ children }) => {
     if (nextRound) {
       navigate(`/round/${quizId}/${nextRound._id}/`);
     } else {
-      navigate(`/result/${quizId}`); // last round done
+      navigate(`/result/${quizId}`);
     }
   };
 
-  // ✅ Update score
   const updateTeamScore = (team, points) => {
     setTeamScores((prev) => ({
       ...prev,
@@ -97,7 +90,6 @@ const QuizWrapper = ({ children }) => {
 
   if (loading) return <div>Loading...</div>;
 
-  // ✅ Pass shared data to all rounds
   return React.cloneElement(children, {
     onFinish: handleRoundComplete,
     teamScores,
@@ -105,6 +97,7 @@ const QuizWrapper = ({ children }) => {
     teamData,
     setTeamData,
     teams,
+    sessionId, // ✅ pass sessionId to rounds
     roundSettings: rulesConfig[roundId]?.settings || {},
   });
 };

@@ -629,7 +629,8 @@ button:hover {
   gap: 0.5rem;
   font-size: 1.2rem;
   padding: 1rem 2rem;
-  background: linear-gradient(135deg, #4efb5f, #32be76ff);
+  /* background: linear-gradient(135deg, #4efb5f, #32be76ff); */
+  background: linear-gradient(135deg, #3185fa, rgb(50, 108, 190));
   color: #000;
   font-weight: 700;
   border-radius: 0.8rem;
@@ -637,7 +638,8 @@ button:hover {
 }
 
 .add-question-btn:hover {
-  background: linear-gradient(135deg, #32be76ff, #4efb5f);
+  /* background: linear-gradient(135deg, #32be76ff, #4efb5f); */
+  background: linear-gradient(135deg, rgb(50, 108, 190), #3185fa);
   transform: scale(1.05);
   color: #fff;
 }

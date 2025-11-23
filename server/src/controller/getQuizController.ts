@@ -1,161 +1,167 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
-import QuizHistory from "../models/quizHistory";
+import QuizHistory, { IQuizHistory } from "../models/quizHistory";
+import Session from "../models/session";
 
-interface PopulatedRecord {
-  _id: mongoose.Types.ObjectId;
-  quizId: mongoose.Types.ObjectId;
-  roundId: {
-    _id: mongoose.Types.ObjectId;
-    roundNumber: number;
-    name?: string;
-    category: string;
-  };
-  teamId: {
-    _id: mongoose.Types.ObjectId;
-    name: string;
-  };
+interface RoundStats {
+  roundId: string;
+  roundNumber: number;
+  roundName: string;
+  attempted: number;
+  correct: number;
+  wrong: number;
+  passed: number;
+  pointsEarned: number;
+}
+
+interface TeamStats {
+  teamId: string;
+  teamName: string;
+  roundWiseStats: RoundStats[];
+}
+
+interface SessionStats {
+  sessionId: string;
+  quizId: string;
   startedBy: {
-    _id: mongoose.Types.ObjectId;
+    id: string;
     name: string;
     email: string;
   };
   startedAt: Date;
-  endedAt?: Date;
-  answers: Array<{
-    questionId: mongoose.Types.ObjectId;
-    givenAnswer: string | number;
-    pointsEarned: number;
-    isCorrect: boolean;
-    isPassed: boolean;
-  }>;
-  totalPoints: number;
+  endedAt: Date | undefined;
+  teams: TeamStats[];
+  totals: {
+    totalRounds: number;
+    totalAttempted: number;
+    totalCorrect: number;
+    totalWrong: number;
+    totalPassed: number;
+    totalPoints: number;
+  };
 }
 
-// Get complete quiz history with round-wise stats and totals
+// Define populated types
+interface PopulatedTeam {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+}
+
+interface PopulatedRound {
+  _id: mongoose.Types.ObjectId;
+  roundNumber: number;
+  name: string;
+}
+
+interface PopulatedUser {
+  _id: mongoose.Types.ObjectId;
+  name: string;
+  email: string;
+}
+
+interface PopulatedQuizHistory
+  extends Omit<IQuizHistory, "teamId" | "roundId" | "startedBy"> {
+  teamId: PopulatedTeam;
+  roundId: PopulatedRound;
+  startedBy: PopulatedUser;
+}
+
 export const getQuizHistory = async (req: Request, res: Response) => {
   try {
-    const { quizId, teamId, userId } = req.params;
+    const { quizId } = req.params;
 
-    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId))
-      return res.status(400).json({ message: "Invalid or missing quizId" });
+    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId as string))
+      return res.status(400).json({ message: "Invalid quizId" });
 
-    // Build query
-    const query: any = { quizId };
-    if (teamId) {
-      if (!mongoose.Types.ObjectId.isValid(teamId))
-        return res.status(400).json({ message: "Invalid teamId" });
-      query.teamId = teamId;
-    }
-    if (userId) {
-      if (!mongoose.Types.ObjectId.isValid(userId))
-        return res.status(400).json({ message: "Invalid userId" });
-      query.startedBy = userId;
-    }
+    // Populate all required references
+    const histories = (await QuizHistory.find({ quizId })
+      .populate("teamId")
+      .populate("roundId")
+      .populate("startedBy")
+      .lean()) as unknown as PopulatedQuizHistory[];
 
-    // Fetch history
-    const historyRecords = await QuizHistory.find(query)
-      .populate("roundId", "roundNumber name category")
-      .populate("teamId", "name")
-      .populate("startedBy", "name email")
-      .sort({ "roundId.roundNumber": 1 });
+    const sessionMap: Record<string, SessionStats> = {};
 
-    if (!historyRecords || historyRecords.length === 0) {
-      return res.status(404).json({ message: "No history found" });
-    }
-
-    const records = historyRecords as unknown as PopulatedRecord[];
-
-    // Group by team
-    const teamStatsMap = new Map<
-      string,
-      {
-        teamId: string;
-        teamName: string;
-        startedBy: { _id: string; name: string; email: string };
-        rounds: Array<{
-          roundId: mongoose.Types.ObjectId;
-          roundNumber: number;
-          roundName: string;
-          category: string;
-          attempted: number;
-          correct: number;
-          wrong: number;
-          passed: number;
-          points: number;
-          startedAt: Date;
-          endedAt?: Date;
-        }>;
-      }
-    >();
-
-    records.forEach((record) => {
-      if (!record.teamId || !record.roundId || !record.startedBy) return;
-      const tId = record.teamId._id.toString();
-
-      if (!teamStatsMap.has(tId)) {
-        teamStatsMap.set(tId, {
-          teamId: tId,
-          teamName: record.teamId.name,
+    histories.forEach((h) => {
+      const history = h as PopulatedQuizHistory;
+      const sessionId =
+        history.sessionId?.toString() ||
+        (history._id as mongoose.Types.ObjectId).toString();
+      if (!sessionMap[sessionId]) {
+        sessionMap[sessionId] = {
+          sessionId,
+          quizId: h.quizId.toString(),
           startedBy: {
-            _id: record.startedBy._id.toString(),
-            name: record.startedBy.name,
-            email: record.startedBy.email,
+            id: h.startedBy._id.toString(),
+            name: h.startedBy.name,
+            email: h.startedBy.email,
           },
-          rounds: [],
-        });
+          startedAt: h.startedAt,
+          endedAt: h.endedAt,
+          teams: [],
+          totals: {
+            totalRounds: 0,
+            totalAttempted: 0,
+            totalCorrect: 0,
+            totalWrong: 0,
+            totalPassed: 0,
+            totalPoints: 0,
+          },
+        };
       }
 
-      const answers = record.answers || [];
-      const roundData = record.roundId;
-      const teamData = teamStatsMap.get(tId);
+      const teamId = h.teamId._id.toString();
+      const teamName = h.teamId.name;
 
-      if (teamData && roundData) {
-        teamData.rounds.push({
-          roundId: roundData._id,
-          roundNumber: roundData.roundNumber,
-          roundName: roundData.name || `Round ${roundData.roundNumber}`,
-          category: roundData.category,
-          attempted: answers.length,
-          correct: answers.filter((a) => a.isCorrect).length,
-          wrong: answers.filter((a) => !a.isCorrect && !a.isPassed).length,
-          passed: answers.filter((a) => a.isPassed).length,
-          points: record.totalPoints || 0,
-          startedAt: record.startedAt,
-          ...(record.endedAt && { endedAt: record.endedAt }),
+      const roundId = h.roundId._id.toString();
+      const roundNumber = h.roundId.roundNumber;
+      const roundName = h.roundId.name;
+
+      const roundStats: RoundStats = {
+        roundId,
+        roundNumber,
+        roundName,
+        attempted: h.answers?.length || 0,
+        correct: h.answers?.filter((a) => a.isCorrect).length || 0,
+        wrong: h.answers?.filter((a) => !a.isCorrect).length || 0,
+        passed: h.answers?.filter((a) => a.isPassed).length || 0,
+        pointsEarned:
+          h.answers?.reduce((sum, a) => sum + a.pointsEarned, 0) || 0,
+      };
+
+      // Find team in session or create it
+      const existingTeamIndex = sessionMap[sessionId].teams.findIndex(
+        (t) => t.teamId === teamId
+      );
+      if (existingTeamIndex === -1) {
+        sessionMap[sessionId].teams.push({
+          teamId,
+          teamName,
+          roundWiseStats: [roundStats],
         });
+      } else {
+        const existingTeam = sessionMap[sessionId].teams[existingTeamIndex];
+        if (existingTeam) {
+          existingTeam.roundWiseStats.push(roundStats);
+        }
       }
+
+      // Update session totals
+      const totals = sessionMap[sessionId]!.totals;
+      totals.totalRounds += 1;
+      totals.totalAttempted += roundStats.attempted;
+      totals.totalCorrect += roundStats.correct;
+      totals.totalWrong += roundStats.wrong;
+      totals.totalPassed += roundStats.passed;
+      totals.totalPoints += roundStats.pointsEarned;
     });
 
-    // Calculate totals for each team
-    const teamsHistory = Array.from(teamStatsMap.values()).map((team) => {
-      const totals = {
-        totalRounds: team.rounds.length,
-        totalAttempted: team.rounds.reduce((sum, r) => sum + r.attempted, 0),
-        totalCorrect: team.rounds.reduce((sum, r) => sum + r.correct, 0),
-        totalWrong: team.rounds.reduce((sum, r) => sum + r.wrong, 0),
-        totalPassed: team.rounds.reduce((sum, r) => sum + r.passed, 0),
-        totalPoints: team.rounds.reduce((sum, r) => sum + r.points, 0),
-      };
-
-      return {
-        teamId: team.teamId,
-        teamName: team.teamName,
-        startedBy: team.startedBy,
-        roundWiseStats: team.rounds,
-        totals,
-      };
-    });
-
-    // Sort by total points descending
-    teamsHistory.sort((a, b) => b.totals.totalPoints - a.totals.totalPoints);
-
-    return res.status(200).json({
+    return res.json({
       message: "Quiz history retrieved successfully",
-      teamsHistory,
+      quizHistories: Object.values(sessionMap),
     });
   } catch (err: any) {
-    console.error("History Controller Error:", err);
+    console.error("getQuizHistory error:", err);
     return res
       .status(500)
       .json({ message: "Internal server error", error: err.message });
