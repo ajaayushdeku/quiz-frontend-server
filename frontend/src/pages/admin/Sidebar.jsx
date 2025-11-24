@@ -22,13 +22,14 @@ export default function AdminLayout() {
       icon: <MdQuestionAnswer />,
     },
     { name: "Create Quiz", path: "/admin/rounds", icon: <IoExtensionPuzzle /> },
-    { name: "History", path: "/admin/history", icon: <MdHistory /> },
-    // { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
     {
       name: "Create Quiz-Master",
       path: "/admin/create",
       icon: <BsPersonFill />,
     },
+    { name: "History", path: "/admin/history", icon: <MdHistory /> },
+    // { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
+
     { name: "Start Quiz", path: "/quizselect", icon: <MdPlayCircleOutline /> },
   ];
 

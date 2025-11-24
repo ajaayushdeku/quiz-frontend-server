@@ -716,4 +716,24 @@
     padding: 0.5rem 1rem;
     font-size: 0.9rem;
   }
+
+  .view-score-icon {
+    font-size: 3rem;
+  }
+
+  .view-scores-btn {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    background: transparent;
+    color: #ffffff;
+    border: none;
+    padding: 0rem 0rem;
+    font-weight: 700;
+    font-size: 1.1rem;
+    cursor: pointer;
+    /* box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 1000;
+  }
 }

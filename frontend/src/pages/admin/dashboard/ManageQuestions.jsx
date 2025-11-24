@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import toast, { Toaster } from "react-hot-toast";
 import { MdEdit, MdDelete, MdSave, MdCancel } from "react-icons/md";
+import { IoChevronBack, IoChevronForward } from "react-icons/io5";
 
 export default function ManageQuestions() {
   const [questions, setQuestions] = useState([]);
@@ -276,7 +277,7 @@ export default function ManageQuestions() {
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
-                Previous
+                <IoChevronBack />
               </button>
 
               <span className="pagination-info">
@@ -288,7 +289,7 @@ export default function ManageQuestions() {
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
               >
-                Next
+                <IoChevronForward />
               </button>
             </div>
           </div>

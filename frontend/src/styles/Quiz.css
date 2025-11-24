@@ -553,7 +553,7 @@
 
 .time-controls {
   position: fixed;
-  bottom: 1.5rem;
+  bottom: 0rem;
   margin-top: 1rem;
 
   padding: 0.5rem 1rem;

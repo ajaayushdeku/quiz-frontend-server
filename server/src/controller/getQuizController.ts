@@ -29,7 +29,7 @@ interface SessionStats {
     email: string;
   };
   startedAt: Date;
-  endedAt: Date | undefined;
+  endedAt?: Date | undefined;
   teams: TeamStats[];
   totals: {
     totalRounds: number;

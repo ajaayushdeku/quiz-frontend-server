@@ -181,12 +181,7 @@ export default function CreateQuiz() {
 
       if (value === true && current.passCondition === "noPass") {
         // Set default passCondition based on category
-        const category = rounds[index].category.toLowerCase();
-        if (category === "general round" || category === "subject round") {
-          current.passCondition = "onceToNextTeam";
-        } else if (category === "rapid fire round") {
-          current.passCondition = "passQuestion";
-        }
+        current.passCondition = "onceToNextTeam";
         current.passLimit = 0;
         current.passedPoints = 0;
         current.passedTime = 0;
@@ -370,6 +365,7 @@ export default function CreateQuiz() {
         );
 
       if (
+        round.category.toLowerCase() !== "rapid fire round" &&
         round.rules.enablePass &&
         round.rules.passCondition === "onceToNextTeam" &&
         (!round.rules.passedPoints || !round.rules.passedTime)
@@ -797,7 +793,7 @@ export default function CreateQuiz() {
 
                               {round.category.toLowerCase() ===
                                 "rapid fire round" && (
-                                <option value="passQuestions">
+                                <option value="onceToNextTeam">
                                   Pass Question
                                 </option>
                               )}
@@ -809,10 +805,12 @@ export default function CreateQuiz() {
                           </label>
 
                           {/* Only show these fields if passCondition is NOT "noPass" */}
-                          {round.rules.passCondition !== "noPass" && (
-                            <>
-                              {" "}
-                              {/* <label className="quiz-label-d">
+                          {round.category.toLowerCase() !==
+                            "rapid fire round" &&
+                            round.rules.passCondition !== "noPass" && (
+                              <>
+                                {" "}
+                                {/* <label className="quiz-label-d">
                             Pass Limit:
                             <input
                               type="number"
@@ -829,46 +827,46 @@ export default function CreateQuiz() {
                               disabled={round.rules.passCondition === "noPass"}
                             />
                           </label> */}
-                              <label className="quiz-label-d">
-                                Passed Points:
-                                <input
-                                  type="number"
-                                  min="0"
-                                  value={round.rules.passedPoints}
-                                  onChange={(e) =>
-                                    handleRuleChange(
-                                      index,
-                                      "passedPoints",
-                                      parseInt(e.target.value)
-                                    )
-                                  }
-                                  className="quiz-input-d"
-                                  disabled={
-                                    round.rules.passCondition === "noPass"
-                                  }
-                                />
-                              </label>
-                              <label className="quiz-label-d">
-                                Passed Time (sec):
-                                <input
-                                  type="number"
-                                  min="0"
-                                  value={round.rules.passedTime}
-                                  onChange={(e) =>
-                                    handleRuleChange(
-                                      index,
-                                      "passedTime",
-                                      parseInt(e.target.value)
-                                    )
-                                  }
-                                  className="quiz-input-d"
-                                  disabled={
-                                    round.rules.passCondition === "noPass"
-                                  }
-                                />
-                              </label>
-                            </>
-                          )}
+                                <label className="quiz-label-d">
+                                  Passed Points:
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={round.rules.passedPoints}
+                                    onChange={(e) =>
+                                      handleRuleChange(
+                                        index,
+                                        "passedPoints",
+                                        parseInt(e.target.value)
+                                      )
+                                    }
+                                    className="quiz-input-d"
+                                    disabled={
+                                      round.rules.passCondition === "noPass"
+                                    }
+                                  />
+                                </label>
+                                <label className="quiz-label-d">
+                                  Passed Time (sec):
+                                  <input
+                                    type="number"
+                                    min="0"
+                                    value={round.rules.passedTime}
+                                    onChange={(e) =>
+                                      handleRuleChange(
+                                        index,
+                                        "passedTime",
+                                        parseInt(e.target.value)
+                                      )
+                                    }
+                                    className="quiz-input-d"
+                                    disabled={
+                                      round.rules.passCondition === "noPass"
+                                    }
+                                  />
+                                </label>
+                              </>
+                            )}
                         </div>
                       )}
                     </>

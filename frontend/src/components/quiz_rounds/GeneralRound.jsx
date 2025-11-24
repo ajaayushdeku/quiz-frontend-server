@@ -311,6 +311,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         questionId: currentQuestion.id,
         givenAnswer,
         isPassed: passIt ? true : false,
+        // isPassed: false,
       });
 
       if (result) {
@@ -324,11 +325,13 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           )
         );
 
+        console.log("Result:", result);
+
         const msg = isCorrect
           ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
-          : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
-              activeTeam.name
-            }`;
+          : activeRound?.rules?.enableNegative && pointsEarned < 0
+          ? `❌ Wrong! ${pointsEarned} points for ${activeTeam.name}`
+          : `❌ Wrong! No points for ${activeTeam.name}`;
 
         setScoreMessage(msg);
         showToast(msg);
@@ -421,19 +424,14 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           )
         );
 
-        const msg = isCorrect
-          ? `✅ Correct! +${pointsEarned} points for ${activeTeam.name}`
-          : `❌ Wrong! ${pointsEarned < 0 ? pointsEarned : 0} points for ${
-              activeTeam.name
-            }`;
+        // Only show negative points if both enableNegative AND enablePass are true
+        const msg =
+          rules.enableNegative && pointsEarned < 0
+            ? `⏩ Question passed! ${pointsEarned} points`
+            : `⏩ Question passed!`;
 
         setScoreMessage(msg);
         showToast(msg);
-      }
-
-      if (passResult) {
-        setScoreMessage(`⏩ Question passed!`);
-        showToast(`⏩ Question passed!`);
       }
     } catch (err) {
       console.error("Submission Error:", err?.response?.data || err);
@@ -675,10 +673,11 @@ const GeneralRound = ({ onFinish, sessionId }) => {
               {teams.map((team, idx) => (
                 <div key={team.id}>
                   <span
-                    className="team-color-indicator"
-                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
-                  ></span>
-                  <span className="team-name-view">{team.name}:</span>
+                    className="team-name-view"
+                    style={{ color: TEAM_COLORS[team.name] }}
+                  >
+                    {team.name.toUpperCase()}:
+                  </span>
                   <span className="team-points-view">{team.points} pts</span>
                 </div>
               ))}
