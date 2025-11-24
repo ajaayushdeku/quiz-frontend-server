@@ -503,7 +503,7 @@
   justify-content: center;
   margin: auto;
   position: relative;
-  top: -4rem;
+  /* top: -4rem; */
   min-height: 250px;
 }
 
@@ -521,12 +521,14 @@
 }
 
 .start-question-btn {
+  margin-top: 5rem;
   padding: 1.2rem 2.1rem;
   font-size: 1.6rem;
   border-radius: 1rem;
 }
 
 .pass-question-btn {
+  margin-top: -10rem;
   padding: 0.8rem 1.5rem;
   font-size: 1.4rem;
   border-radius: 5rem;

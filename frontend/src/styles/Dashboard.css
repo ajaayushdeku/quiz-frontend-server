@@ -190,7 +190,7 @@ button:hover {
 }
 
 .primary-btn {
-  background: #007bff;
+  background: rgb(40, 134, 166);
   color: #fff;
   font-weight: 700;
 }
@@ -387,7 +387,7 @@ button:hover {
 
 .add-team-btn {
   background-color: transparent;
-  color: rgb(0, 170, 255);
+  color: rgb(40, 134, 166);
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -544,9 +544,8 @@ button:hover {
   height: 20vh;
   padding: 1rem 1.7rem;
   border-radius: 0.6rem;
-  background-color: rgb(102, 102, 102);
+  background-color: #333333;
   color: #eeeeee;
-
   font-size: 1rem;
   font-weight: 700;
   outline: none;
@@ -554,10 +553,11 @@ button:hover {
   transition: all 0.3s ease;
 }
 
-.info-icon {
+/* .info-icon {
+  color: #000;
   width: 1rem;
   vertical-align: middle;
-}
+} */
 
 .quiz-input:hover,
 .quiz-input:focus {

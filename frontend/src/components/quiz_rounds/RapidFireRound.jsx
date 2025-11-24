@@ -774,6 +774,7 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
         lowTimer={roundTime / 3}
         midTimer={roundTime / 2}
         highTimer={roundTime}
+        enableNegative={activeRound?.rules?.enableNegative || false}
       />
 
       {!roundStarted && !finalFinished ? (

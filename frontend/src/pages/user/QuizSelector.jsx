@@ -101,7 +101,7 @@ const QuizSelector = () => {
       {/* Hero Section */}
       <section className="hero-section">
         <div className="hero-content">
-          <h1 className="hero-title">Master Your Knowledge</h1>
+          <h1 className="hero-title">Get Ready. Get Set. Quiz!</h1>
           <p className="hero-description">
             Challenge yourself with our curated collection of quizzes. Test your
             skills, compete with teams, and have fun.

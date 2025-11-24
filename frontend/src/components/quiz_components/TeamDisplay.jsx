@@ -18,6 +18,7 @@ const TeamDisplay = ({
   lowTimer = 15,
   midTimer = 30,
   highTimer = 60,
+  enableNegative = false,
 }) => {
   return (
     <header className="quiz-header">
@@ -82,6 +83,30 @@ const TeamDisplay = ({
               <>{headMessage}</>
             )}
           </div>
+
+          {enableNegative && (
+            <div
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <div
+                style={{
+                  backgroundColor: "#e23a3aff",
+                  color: "#ffffffff",
+                  border: "2px solid #ffffffff",
+                  padding: "0.4rem 1rem",
+                  width: "fit-content",
+                  borderRadius: "20px",
+                  fontWeight: "700",
+                }}
+              >
+                Negative Pointing Enabled
+              </div>
+            </div>
+          )}
         </div>
       ) : (
         <div style={{ textAlign: "center" }}>
