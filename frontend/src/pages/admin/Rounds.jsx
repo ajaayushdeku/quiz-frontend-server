@@ -1022,7 +1022,7 @@ export default function CreateQuiz() {
               </button>
               <button
                 type="submit"
-                className="primary-btn add-question-btn"
+                className=" create-quiz-btn"
                 onClick={handleSubmit}
                 disabled={loading}
               >

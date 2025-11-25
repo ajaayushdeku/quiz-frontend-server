@@ -185,6 +185,10 @@
 
 .session-time {
   font-size: 0.95rem;
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }
 
 .session-time strong {
@@ -468,4 +472,14 @@
     font-size: 0.85rem;
     padding: 0.4rem 0.8rem;
   }
+}
+
+.not-endedAt {
+  padding: 0.2rem 1rem;
+  border: 2px solid white;
+  border-radius: 20px;
+  background-color: rgb(245, 40, 40);
+  color: white;
+  font-size: 0.85rem;
+  font-weight: 700;
 }

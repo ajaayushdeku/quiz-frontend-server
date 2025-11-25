@@ -79,8 +79,15 @@ const TeamStats = () => {
 
   const sessions = selectedQuiz ? histories[selectedQuiz] || [] : [];
 
+  // Sort sessions by most recent attempt first
+  const sortedSessions = [...sessions].sort((a, b) => {
+    const aDate = new Date(a.startedAt).getTime();
+    const bDate = new Date(b.startedAt).getTime();
+    return bDate - aDate; // descending
+  });
+
   // Group sessions by startedBy user
-  const groupedByUser = sessions.reduce((acc, session) => {
+  const groupedByUser = sortedSessions.reduce((acc, session) => {
     const userId =
       session.startedBy?.email || session.startedBy?.name || "Unknown";
     if (!acc[userId]) {
@@ -92,6 +99,12 @@ const TeamStats = () => {
     acc[userId].sessions.push(session);
     return acc;
   }, {});
+
+  const sortedUsers = Object.entries(groupedByUser).sort((a, b) => {
+    const aLatest = new Date(a[1].sessions[0]?.startedAt || 0).getTime();
+    const bLatest = new Date(b[1].sessions[0]?.startedAt || 0).getTime();
+    return bLatest - aLatest; // descending
+  });
 
   return (
     <div className="page-container white-theme">
@@ -128,7 +141,7 @@ const TeamStats = () => {
           <p className="no-history-text">No team history available.</p>
         ) : (
           <div className="user-groups-container">
-            {Object.entries(groupedByUser).map(([userId, userData]) => {
+            {sortedUsers.map(([userId, userData]) => {
               const isUserExpanded = expandedUsers[userId];
               const totalAttempts = userData.sessions.length;
 
@@ -181,10 +194,19 @@ const TeamStats = () => {
                           {/* Session Info */}
                           <div className="session-info-box">
                             <div className="session-time">
-                              <strong>Started:</strong> {startedAt}
+                              <strong>Started At:</strong> {startedAt}
                             </div>
                             <div className="session-time">
-                              <strong>Ended:</strong> {endedAt}
+                              <strong>Ended At:</strong>{" "}
+                              <div
+                                className={` ${
+                                  endedAt === "Not finished"
+                                    ? "not-endedAt"
+                                    : "yes-endedAT"
+                                }`}
+                              >
+                                {endedAt}
+                              </div>
                             </div>
                           </div>
 

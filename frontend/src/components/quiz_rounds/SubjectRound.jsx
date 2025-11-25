@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useLocation, useParams } from "react-router-dom";
 import { BiShow } from "react-icons/bi";
 import { IoHandLeftOutline, IoHandRightOutline } from "react-icons/io5";
+
 import axios from "axios";
 
 import "../../styles/Quiz.css";
