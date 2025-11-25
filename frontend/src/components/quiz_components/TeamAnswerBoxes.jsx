@@ -12,10 +12,17 @@ const TeamAnswerBoxes = ({
   return (
     <div className="team-answer-boxes">
       {Object.values(teams).map((team) => (
-        <div key={team.id} className="estimate-card">
+        <div
+          key={team.id}
+          className="estimate-card"
+          style={{ border: `2px solid ${teamColors[team.name] || "#333"}` }}
+        >
           <label
             className="team-label"
-            style={{ color: teamColors[team.name] || "#333" }}
+            style={{
+              color: teamColors[team.name] || "#333",
+              marginBottom: "1rem",
+            }}
           >
             {team.name} Answer:
           </label>

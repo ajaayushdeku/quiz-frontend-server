@@ -21,7 +21,7 @@ const QuizSelector = () => {
   const location = useLocation();
   const quizSectionRef = useRef(null);
 
-  const ITEMS_PER_PAGE = 3;
+  const ITEMS_PER_PAGE = 4;
 
   // Extract adminId from query params if present
   const queryParams = new URLSearchParams(location.search);

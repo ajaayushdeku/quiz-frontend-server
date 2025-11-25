@@ -99,18 +99,21 @@ const TeamStats = () => {
 
       <div className="team-stats-cont">
         <div className="quiz-dropdown-search">
-          <Select
-            options={quizOptions}
-            placeholder="Search or select a quiz..."
-            isSearchable
-            onChange={(option) => {
-              setSelectedQuiz(option.value);
-              setExpandedUsers({});
-              setExpandedTeams({});
-            }}
-            className="react-select-container select"
-            classNamePrefix="react-select"
-          />
+          <label className="quiz-label">
+            Type the Quiz Name to Search for Teams Stats:
+            <Select
+              options={quizOptions}
+              placeholder="Search or select a quiz..."
+              isSearchable
+              onChange={(option) => {
+                setSelectedQuiz(option.value);
+                setExpandedUsers({});
+                setExpandedTeams({});
+              }}
+              className="react-select-container select"
+              classNamePrefix="react-select"
+            />
+          </label>
 
           {selectedQuiz && (
             <h3 className="selected-quiz-name">
@@ -122,9 +125,7 @@ const TeamStats = () => {
         </div>
 
         {!sessions.length ? (
-          <p className="no-history-text centered-control">
-            No team history available.
-          </p>
+          <p className="no-history-text">No team history available.</p>
         ) : (
           <div className="user-groups-container">
             {Object.entries(groupedByUser).map(([userId, userData]) => {

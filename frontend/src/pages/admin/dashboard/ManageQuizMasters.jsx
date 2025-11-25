@@ -150,7 +150,7 @@ export default function ManageQuizMasters() {
                   <th>Name</th>
                   <th>Email</th>
                   <th>Role</th>
-                  <th>Actions</th>
+                  <th className="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>

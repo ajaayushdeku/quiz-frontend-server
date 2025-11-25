@@ -22,7 +22,16 @@ const TeamDisplay = ({
 }) => {
   return (
     <header className="quiz-header">
-      <div className="info-msg detail-info">{toastMessage}</div>
+      <div className="info-msg detail-info">
+        {toastMessage}{" "}
+        {enableNegative && (
+          <div className="negative-pointing-wrapper">
+            <div className="negative-pointing-badge">
+              Negative Pointing Enabled
+            </div>
+          </div>
+        )}
+      </div>
 
       {/* If estimationEnable is true, show all teams instead of one */}
       {!estimationEnable ? (
@@ -83,30 +92,6 @@ const TeamDisplay = ({
               <>{headMessage}</>
             )}
           </div>
-
-          {enableNegative && (
-            <div
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-              }}
-            >
-              <div
-                style={{
-                  backgroundColor: "#e23a3aff",
-                  color: "#ffffffff",
-                  border: "2px solid #ffffffff",
-                  padding: "0.4rem 1rem",
-                  width: "fit-content",
-                  borderRadius: "20px",
-                  fontWeight: "700",
-                }}
-              >
-                Negative Pointing Enabled
-              </div>
-            </div>
-          )}
         </div>
       ) : (
         <div style={{ textAlign: "center" }}>

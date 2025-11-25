@@ -105,9 +105,9 @@
 }
 
 .pre-buzz-timer {
-  width: 32%;
-  font-size: 1.2rem;
-  margin-top: 1rem;
+  /* width: 32%; */
+  font-size: 1rem;
+  margin-top: 1.2rem;
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -115,21 +115,21 @@
   gap: 1rem;
   z-index: 100;
   background: rgba(255, 255, 255, 0.05);
-  border: 3px dashed rgba(255, 255, 255, 0.4);
+  /* border: 3px dashed rgba(255, 255, 255, 0.4); */
   border-radius: 1rem;
   box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
     inset 0 0 10px rgba(255, 255, 255, 0.2);
   backdrop-filter: blur(8px);
   transition: transform 0.2s;
-  padding: 0.5rem 1.2rem;
+  padding: 0.1rem 1rem;
 
   font-weight: 700;
   color: rgb(243, 243, 243);
 }
 
 .pre-buzz-timer .pre-timer {
-  font-size: 1.7rem;
-  color: rgb(241, 144, 144);
+  font-size: 1.8rem;
+  color: rgb(255, 96, 96);
   font-weight: 800;
 }
 

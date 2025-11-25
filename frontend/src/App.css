@@ -6,5 +6,10 @@
 }
 
 * {
-  font-family: "SuperJoyful", sans-serif;
+  /* font-family: "SuperJoyful", sans-serif; */
+  font-family: "Cabin Sketch", cursive;
+}
+
+body {
+  font-family: "Cabin Sketch", cursive;
 }

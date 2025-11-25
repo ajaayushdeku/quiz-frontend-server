@@ -19,11 +19,13 @@ import FinishDisplay from "../common/FinishDisplay";
 import TeamDisplay from "../quiz_components/TeamDisplay";
 import BuzzerButton from "../quiz_components/BuzzerButton";
 import QuestionCard from "../quiz_components/QuestionCard";
+import TimerControls from "../quiz_components/TimerControls";
 
 import axios from "axios";
 import { useLocation, useParams } from "react-router-dom";
 import { formatTime } from "../../utils/formatTime";
 import { TbScoreboard } from "react-icons/tb";
+import PreBuzzTimerControls from "../quiz_components/PreBuzzTimerControls";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
@@ -171,10 +173,9 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
     isLastQuestion,
   } = useQuestionManager(quesFetched);
 
-  const { timeRemaining, startTimer, pauseTimer, resetTimer } = useTimer(
-    roundTime,
-    false
-  );
+  const { timeRemaining, startTimer, pauseTimer, resetTimer, isRunning } =
+    useTimer(roundTime, false);
+
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 50);
 
   // -------------------- Buzzer Logic --------------------
@@ -191,34 +192,44 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
   };
 
   // -------------------- Pre-buzz timer --------------------
-  useEffect(() => {
-    if (!preBuzzActive) return;
+  // useEffect(() => {
+  //   if (!preBuzzActive) return;
 
-    if (preBuzzTime <= 0) {
-      setPreBuzzActive(false);
-      // Start first team's turn from queue if available
-      if (teamQueue.length > 0) {
-        const [firstTeam, ...rest] = teamQueue;
-        setActiveTeam(firstTeam);
-        setBuzzerPressed(firstTeam.name);
-        setTeamQueue(rest);
-        resetTimer(roundTime); // start team turn timer
-        startTimer();
-        showToast(`👉 Team ${firstTeam.name} now answers!`);
-      } else {
-        // No team buzzed → show correct answer
-        const correctOption = currentQuestion.options.find(
-          (opt) => opt.id === currentQuestion.correctOptionId
-        );
-        setCorrectAnswerValue(correctOption?.text || "");
-        setShowCorrectAnswer(true);
-      }
-      return;
-    }
+  //   if (preBuzzTime <= 0) {
+  //     setPreBuzzActive(false);
 
-    const timer = setTimeout(() => setPreBuzzTime((t) => t - 1), 1000);
-    return () => clearTimeout(timer);
-  }, [preBuzzTime, preBuzzActive, teamQueue, currentQuestion]);
+  //     // Start first team's turn from queue if available
+  //     if (teamQueue.length > 0) {
+  //       const [firstTeam, ...rest] = teamQueue;
+
+  //       // Set active team but DO NOT SHOW INPUT until AFTER this moment
+  //       setActiveTeam(firstTeam);
+  //       setBuzzerPressed(firstTeam.name);
+  //       setTeamQueue(rest);
+
+  //       // Reset team timer and start after pre-buzz ends
+  //       resetTimer(roundTime);
+
+  //       // startTimer();
+  //       setTimeout(() => {
+  //         startTimer(); // <--- Team timer now starts AFTER pre-buzz
+  //       }, 300);
+
+  //       showToast(`👉 Team ${firstTeam.name} now answers!`);
+  //     } else {
+  //       // No team buzzed → show correct answer
+  //       const correctOption = currentQuestion.options.find(
+  //         (opt) => opt.id === currentQuestion.correctOptionId
+  //       );
+  //       setCorrectAnswerValue(correctOption?.text || "");
+  //       setShowCorrectAnswer(true);
+  //     }
+  //     return;
+  //   }
+
+  //   const timer = setTimeout(() => setPreBuzzTime((t) => t - 1), 1000);
+  //   return () => clearTimeout(timer);
+  // }, [preBuzzTime, preBuzzActive, teamQueue, currentQuestion]);
 
   const moveToNextTeamOrQuestion = () => {
     pauseTimer();
@@ -292,6 +303,7 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
     }
   };
 
+  // -------------------- Session Id Checking --------------------
   if (!sessionId)
     console.warn("No sessionId provided! QuizWrapper should pass it.");
 
@@ -374,30 +386,6 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
     }
   };
 
-  useEffect(() => {
-    if (questionDisplay) {
-      setPreBuzzActive(true);
-      setPreBuzzTime(PreBuzzedTimer); // reset
-    }
-  }, [questionDisplay]);
-
-  // -------------- SHIFT to show the question ---------------
-  useShiftToShow(() => {
-    if (!questionDisplay) setQuestionDisplay(true);
-  }, [questionDisplay]);
-
-  // -------------------- Media Full Screen Display --------------------
-  const handleMediaClick = (url) => setFullscreenMedia(url);
-  const closeFullscreen = () => setFullscreenMedia(null);
-
-  // -------------------- Hide Components When Round Finished --------------------
-  useEffect(() => {
-    const details = document.getElementsByClassName("detail-info");
-    Array.from(details).forEach((el) => {
-      el.style.display = quizCompleted ? "none" : "block";
-    });
-  }, [quizCompleted]);
-
   // -------------------- Handle Time Out Effect --------------------
   useEffect(() => {
     const handleTimeout = async () => {
@@ -449,9 +437,54 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
     if (timeRemaining === 0) handleTimeout();
   }, [timeRemaining, buzzerPressed, activeTeam, reduceBool]);
 
+  // -------------------- Start Pre Buzz Timer When Question is Shown --------------------
+  useEffect(() => {
+    if (questionDisplay) {
+      setPreBuzzActive(true);
+      setPreBuzzTime(PreBuzzedTimer); // reset
+    }
+  }, [questionDisplay]);
+
+  // -------------- SHIFT to show the question ---------------
+  useShiftToShow(() => {
+    if (!questionDisplay) setQuestionDisplay(true);
+  }, [questionDisplay]);
+
+  // -------------------- Media Full Screen Display --------------------
+  const handleMediaClick = (url) => setFullscreenMedia(url);
+  const closeFullscreen = () => setFullscreenMedia(null);
+
+  // -------------------- Hide Components When Round Finished --------------------
+  useEffect(() => {
+    const details = document.getElementsByClassName("detail-info");
+    Array.from(details).forEach((el) => {
+      el.style.display = quizCompleted ? "none" : "block";
+    });
+  }, [quizCompleted]);
+
+  // -------------------- Format Pre Buzz Timer --------------------
   const formatPreBuzzTime = (seconds) => {
     const secs = seconds;
     return `${secs.toString().padStart(2, "0")}`;
+  };
+
+  // -------------------- Handle PreBuzz Timer End -------------------
+  const handlePreBuzzEnd = () => {
+    if (teamQueue.length > 0) {
+      const [firstTeam, ...rest] = teamQueue;
+      setActiveTeam(firstTeam);
+      setBuzzerPressed(firstTeam.name);
+      setTeamQueue(rest);
+      resetTimer(roundTime);
+      startTimer();
+      showToast(`👉 Team ${firstTeam.name} now answers!`);
+    } else {
+      const correctOption = currentQuestion.options.find(
+        (opt) => opt.id === currentQuestion.correctOptionId
+      );
+      setCorrectAnswerValue(correctOption?.text || "");
+      setShowCorrectAnswer(true);
+    }
   };
 
   return (
@@ -518,12 +551,21 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
         highTimer={roundTime}
         enableNegative={activeRound?.rules?.enableNegative || false}
       />
-
       {preBuzzActive && (
-        <div className=" pre-buzz-timer">
-          <div>⏱️ All Team must Buzz within: </div>{" "}
-          <div className="pre-timer"> {formatPreBuzzTime(preBuzzTime)}s</div>
-        </div>
+        <>
+          <div className="pre-buzz-timer">
+            <div>⏱️ All Team must Buzz within: </div>
+            <div className="pre-timer">{formatPreBuzzTime(preBuzzTime)}s</div>
+          </div>
+
+          <PreBuzzTimerControls
+            preBuzzActive={preBuzzActive}
+            preBuzzTime={preBuzzTime}
+            setPreBuzzTime={setPreBuzzTime}
+            setPreBuzzActive={setPreBuzzActive}
+            onPreBuzzEnd={handlePreBuzzEnd}
+          />
+        </>
       )}
 
       {!quizCompleted ? (
@@ -584,24 +626,35 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
                 </div>
               </>
             ) : activeTeam ? (
-              <AnswerTextBox
-                value={teamAnswer}
-                onChange={(e) => setTeamAnswer(e.target.value)}
-                onSubmit={handleSubmit}
-                placeholder={`Answer by ${activeTeam.name}`}
-                disabled={isSubmitting}
-              />
+              <>
+                <AnswerTextBox
+                  value={teamAnswer}
+                  onChange={(e) => setTeamAnswer(e.target.value)}
+                  onSubmit={handleSubmit}
+                  placeholder={`Answer by ${activeTeam.name}`}
+                  disabled={isSubmitting}
+                />
+                <TimerControls
+                  isRunning={isRunning}
+                  startTimer={startTimer}
+                  pauseTimer={pauseTimer}
+                  resetTimer={resetTimer}
+                  TEAM_TIME_LIMIT={preBuzzTime}
+                />
+              </>
             ) : null}
 
-            <BuzzerButton
-              teams={teams}
-              teamColors={TEAM_COLORS}
-              buzzerIcon={buzzer}
-              buzzerPressed={buzzerPressed}
-              teamQueue={teamQueue}
-              handleBuzzer={handleBuzzer}
-              disabled={showCorrectAnswer || isSubmitting}
-            />
+            {!activeTeam && (
+              <BuzzerButton
+                teams={teams}
+                teamColors={TEAM_COLORS}
+                buzzerIcon={buzzer}
+                buzzerPressed={buzzerPressed}
+                teamQueue={teamQueue}
+                handleBuzzer={handleBuzzer}
+                disabled={showCorrectAnswer || isSubmitting}
+              />
+            )}
           </>
         ) : (
           <p className="text-gray-400 mt-4">Loading questions...</p>

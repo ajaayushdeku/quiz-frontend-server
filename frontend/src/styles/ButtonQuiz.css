@@ -4,16 +4,17 @@
 .quiz-answer {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
+  gap: clamp(0.5rem, 1vw, 0.75rem);
   margin: 1rem 0;
   justify-content: center;
   align-items: center;
+  padding: 0 0.5rem;
 }
 
 .answer-input {
-  font-size: 1.2rem;
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
   font-weight: 700;
-  padding: 0.8rem 1.5rem;
+  padding: clamp(0.6rem, 0.8vw, 0.8rem) clamp(1rem, 1.5vw, 1.5rem);
   margin: 0.5rem;
   border: 2px solid rgba(255, 255, 255, 0.6);
   border-radius: 0.5rem;
@@ -21,6 +22,13 @@
   color: white;
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
   transition: all 0.3s ease;
+  max-width: 100%;
+}
+
+.answer-input:focus {
+  border-color: #3185fa;
+  outline: none;
+  box-shadow: 0 0 8px rgba(49, 133, 250, 0.4);
 }
 
 .answer-input .correct-answer {
@@ -36,6 +44,7 @@
 .active {
   display: block;
 }
+
 .disable {
   display: none;
 }
@@ -50,18 +59,20 @@
   gap: 0.5rem;
   justify-content: center;
   align-items: center;
-  padding: 0.1rem 1rem;
+  padding: 0.5rem 1rem;
   font-weight: 700;
+  flex-wrap: wrap;
 }
 
 .button-row {
   display: flex;
   flex-direction: row;
   flex-wrap: wrap;
-  gap: 0.5rem;
+  gap: clamp(0.5rem, 1vw, 1rem);
   margin: 10px;
   justify-content: center;
   align-items: center;
+  padding: 0 0.5rem;
 }
 
 .submit-btn,
@@ -69,24 +80,22 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 1rem;
-  margin: 0.5rem 1rem;
-  width: 9rem;
-  height: 3rem;
-  padding: 0 1.5rem;
-  font-size: 1.2rem;
+  gap: clamp(0.5rem, 1vw, 1rem);
+  margin: 0.5rem clamp(0.5rem, 1vw, 1rem);
+  width: clamp(8rem, 9vw, 9rem);
+  min-width: 120px;
+  height: clamp(2.5rem, 3vw, 3rem);
+  padding: 0 clamp(1rem, 1.5vw, 1.5rem);
+  font-size: clamp(1rem, 1.2vw, 1.2rem);
   font-weight: bold;
   color: #e9e9e9;
-
   background-color: transparent;
   border: 2px solid rgba(99, 95, 95, 0.7);
   border-radius: 5rem;
-  /* box-shadow: 0 8px 25px rgba(0, 0, 0, 0.4),
-    inset 0 0 10px rgba(255, 255, 255, 0.2);
-  backdrop-filter: blur(8px); */
   transition: all 0.3s ease;
   cursor: pointer;
   z-index: 200;
+  white-space: nowrap;
 }
 
 .submit-btn:hover,
@@ -97,14 +106,22 @@
   color: #373737;
 }
 
-/* Hover effect for buttons*/
+.submit-btn:active,
+.pass-btn:active {
+  transform: scale(0.98);
+}
+
+/* ======================= */
+/* Buzzer Section */
+/* ======================= */
 
 .buzzer-btn-container {
   display: flex;
-  gap: 1rem;
+  gap: clamp(0.8rem, 1.5vw, 1rem);
   flex-wrap: wrap;
   justify-content: center;
-  margin: 2rem 0;
+  /* margin: 2rem 0; */
+  padding: 0 1rem;
 }
 
 .buzz-btn-data-cont {
@@ -112,24 +129,25 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
+  gap: 0.5rem;
 }
 
 .buzzer-btn {
   position: relative;
   background-color: rgba(255, 255, 255, 0.1);
-  margin: 1rem;
-  padding: 0.8rem 1.5rem;
-  font-size: 1.3rem;
+  margin: clamp(0.5rem, 1vw, 1rem);
+  padding: clamp(0.6rem, 0.8vw, 0.8rem) clamp(1rem, 1.5vw, 1.5rem);
+  font-size: clamp(1rem, 1.3vw, 1.3rem);
   font-weight: 800;
   border: 3px solid #fff;
   border-radius: 1.5rem;
   z-index: 800;
-  /* color: rgb(231, 209, 123); */
-  /* text-shadow: 0 0 5px #5f5f5f, 0 0 0px #8d7c00; */
   transition: all 0.3s ease;
   display: flex;
-  gap: 0.7rem;
+  gap: clamp(0.5rem, 0.7vw, 0.7rem);
   align-items: center;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .buzzer-btn:hover {
@@ -138,38 +156,37 @@
   box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-.buzzer-icon {
-  width: 1vw;
-  min-width: 30px;
-  text-align: center;
-  filter: grayscale(1) brightness(0) invert(0);
+.buzzer-btn:active {
+  transform: translateY(-1px);
 }
 
-.buzzer-icon:hover {
+.buzzer-icon {
+  width: clamp(25px, 1.5vw, 30px);
+  height: auto;
+  min-width: 25px;
+  text-align: center;
+  filter: grayscale(1) brightness(0) invert(0);
+  transition: filter 0.3s ease;
+}
+
+.buzzer-btn:hover .buzzer-icon {
   filter: grayscale(1) brightness(0) invert(1);
 }
 
 /* ======================= */
 /* Team Estimate Section */
 /* ======================= */
-/* =============================== */
-/* Quiz Answer + Estimate Section  */
-/* =============================== */
+
 .quiz-estimate {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
   align-items: flex-start;
-  gap: 1.5rem;
-  width: 65%;
+  gap: clamp(1rem, 1.5vw, 1.5rem);
+  width: clamp(90%, 65%, 1000px);
+  max-width: 95vw;
   margin: 2rem auto;
-}
-
-.quiz-answer {
-  display: flex;
-  flex-direction: row;
-  position: relative;
-  top: 2rem;
+  padding: 0 1rem;
 }
 
 /* Container for all team answer boxes */
@@ -177,21 +194,24 @@
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  flex-wrap: wrap; /* allows responsiveness */
-  gap: 2.5rem;
+  flex-wrap: wrap;
+  gap: clamp(1.5rem, 2.5vw, 2.5rem);
   width: 100%;
-  max-width: 1000px; /* increased max width */
-  margin: 40px auto 0; /* more top margin */
-  padding: 10px; /* small padding around the grid */
+  max-width: 1000px;
+  margin: 1rem auto 0;
+  padding: 10px;
 }
 
 .estimate-card {
   background-color: #5858581e;
   border-radius: 12px;
-  border: 2px dashed rgb(132, 132, 132);
-  padding: 20px;
+  border: 2px solid rgb(255, 255, 255);
+  padding: clamp(15px, 2vw, 20px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s, box-shadow 0.2s;
+  width: 100%;
+  max-width: 450px;
+  min-width: 280px;
 }
 
 .estimate-card:hover {
@@ -201,9 +221,10 @@
 
 .team-label {
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: clamp(1.2rem, 1.5vw, 1.5rem);
   margin-bottom: 8px;
   display: block;
+  word-wrap: break-word;
 }
 
 .answer-container {
@@ -214,16 +235,17 @@
 
 .team-answer-textarea {
   width: 100%;
-  min-height: 70px;
-  padding: 10px 12px;
+  min-height: clamp(60px, 8vh, 70px);
+  padding: clamp(8px, 1vw, 10px) clamp(10px, 1.2vw, 12px);
   border-radius: 10px;
   background-color: #2d2d2d;
-  border: 1px solid #ccc;
+  border: 1px solid #ffffff;
   color: white;
   resize: vertical;
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 1.3vw, 1.3rem);
   font-family: inherit;
   transition: border 0.3s, box-shadow 0.3s;
+  box-sizing: border-box;
 }
 
 .team-answer-textarea:focus {
@@ -236,20 +258,21 @@
   display: flex;
   justify-content: center;
   width: 100%;
+  margin-top: 0.5rem;
 }
 
 .submit-button {
   align-self: flex-start;
-  width: 60%;
+  width: clamp(55%, 60%, 250px);
+  max-width: 100%;
   background-color: #3185fa;
   color: #ffffff;
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 1.3vw, 1.3rem);
   font-weight: 700;
-  padding: 8px 20px;
+  padding: clamp(6px, 0.8vw, 8px) clamp(15px, 2vw, 20px);
   border-radius: 1rem;
   border: 2px solid white;
   margin-top: 1rem;
-
   cursor: pointer;
   transition: background 0.3s, transform 0.2s;
 }
@@ -259,52 +282,43 @@
   transform: translateY(-2px);
 }
 
+.submit-button:active:not(:disabled) {
+  transform: translateY(0);
+}
+
 .submit-button:disabled {
   opacity: 0.6;
   cursor: not-allowed;
 }
 
-/* Responsive: single column on small screens */
-@media (max-width: 768px) {
-  .team-answer-boxes {
-    grid-template-columns: 1fr;
-    gap: 40px; /* maintain spacing on small screens */
-    width: 90%;
-  }
-
-  .buzzer-btn {
-    margin: 0;
-    padding: 0.3rem 1rem;
-    font-size: 1rem;
-    border-radius: 1rem;
-    z-index: 800;
-  }
-}
-/*---------------------------------------------*/
+/* ======================= */
+/* Next Question Buttons */
+/* ======================= */
 
 .next-question-btn,
 .next-question-btn-dup {
   position: relative;
-  padding: 1rem 1.5rem;
+  padding: clamp(0.8rem, 1vw, 1rem) clamp(1.2rem, 1.5vw, 1.5rem);
   display: flex;
   flex-direction: row;
   align-items: center;
-  gap: 0.5rem;
+  gap: clamp(0.4rem, 0.5vw, 0.5rem);
   border-radius: 10rem;
   border: 2px solid white;
   background: #ffffff;
   color: #808080;
   font-weight: 800;
-  font-size: 1rem;
+  font-size: clamp(0.9rem, 1vw, 1rem);
   cursor: pointer;
-  transition: all 0.5s ease;
+  transition: all 0.3s ease;
   align-self: center;
   text-transform: uppercase;
-  transition: background 0.3s ease;
+  white-space: nowrap;
+  max-width: 95vw;
 }
 
 .next-question-btn {
-  margin-top: 5rem;
+  margin-top: clamp(3rem, 5vw, 5rem);
 }
 
 .next-question-btn-dup {
@@ -319,24 +333,285 @@
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
 }
 
+.next-question-btn:active,
+.next-question-btn-dup:active {
+  transform: translateY(0) scale(1);
+}
+
 .next-team-btn {
-  padding: 1rem 0.5rem;
-  width: 17.5rem;
+  padding: clamp(0.8rem, 1vw, 1rem) clamp(0.5rem, 1vw, 1rem);
+  width: clamp(200px, 17.5rem, 280px);
+  max-width: 95vw;
   border-radius: 10rem;
   border: 2px solid white;
   background: #ffffff;
   color: #464646;
   font-weight: 800;
-  font-size: 1.3rem;
+  font-size: clamp(1.1rem, 1.3vw, 1.3rem);
   cursor: pointer;
-  transition: all 0.5s ease;
+  transition: all 0.3s ease;
   align-self: center;
   text-transform: uppercase;
-  transition: background 0.3s ease;
+  white-space: nowrap;
 }
+
 .next-team-btn:hover {
   transform: translateY(-1px) scale(1.05);
   color: #ffffff;
   background: rgba(0, 0, 0, 0.012);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+}
+
+.next-team-btn:active {
+  transform: translateY(0) scale(1);
+}
+
+/* ======================= */
+/* Responsive Breakpoints */
+/* ======================= */
+
+/* Tablets */
+@media (max-width: 1024px) {
+  .quiz-estimate {
+    width: 85%;
+  }
+
+  .team-answer-boxes {
+    gap: 2rem;
+  }
+
+  .estimate-card {
+    max-width: 400px;
+  }
+}
+
+/* Large Mobile / Small Tablets */
+@media (max-width: 768px) {
+  .quiz-answer {
+    gap: 0.5rem;
+  }
+
+  .answer-input {
+    margin: 0.3rem;
+  }
+
+  .button-row {
+    gap: 0.5rem;
+    margin: 5px;
+  }
+
+  .submit-btn,
+  .pass-btn {
+    width: auto;
+    min-width: 100px;
+    height: 2.5rem;
+    margin: 0.3rem 0.5rem;
+    font-size: 1rem;
+    gap: 0.5rem;
+  }
+
+  .buzzer-btn-container {
+    gap: 0.8rem;
+    margin: 1.5rem 0;
+  }
+
+  .buzzer-btn {
+    margin: 0.5rem;
+    padding: 0.6rem 1rem;
+    font-size: 1rem;
+    border-radius: 1rem;
+    border-width: 2px;
+  }
+
+  .buzzer-icon {
+    min-width: 20px;
+    width: 20px;
+  }
+
+  .quiz-estimate {
+    width: 92%;
+    gap: 1rem;
+  }
+
+  .team-answer-boxes {
+    gap: 1.5rem;
+    padding: 5px;
+  }
+
+  .estimate-card {
+    padding: 15px;
+    min-width: 250px;
+  }
+
+  .team-label {
+    font-size: 1.2rem;
+  }
+
+  .team-answer-textarea {
+    min-height: 60px;
+    font-size: 1.1rem;
+  }
+
+  .submit-button {
+    width: 70%;
+    font-size: 1.1rem;
+    padding: 6px 15px;
+  }
+
+  .next-question-btn {
+    margin-top: 3rem;
+  }
+
+  .next-team-btn {
+    width: clamp(180px, 90%, 250px);
+    font-size: 1.1rem;
+  }
+}
+
+/* Mobile */
+@media (max-width: 480px) {
+  .quiz-answer {
+    gap: 0.4rem;
+    margin: 0.5rem 0;
+  }
+
+  .answer-input {
+    font-size: 1rem;
+    padding: 0.5rem 1rem;
+    margin: 0.2rem;
+  }
+
+  .button-row {
+    gap: 0.4rem;
+  }
+
+  .submit-btn,
+  .pass-btn {
+    min-width: 90px;
+    height: 2.2rem;
+    margin: 0.2rem 0.3rem;
+    font-size: 0.9rem;
+    padding: 0 0.8rem;
+    gap: 0.4rem;
+  }
+
+  .buzzer-btn-container {
+    gap: 0.6rem;
+    margin: 1rem 0;
+    padding: 0 0.5rem;
+  }
+
+  .buzzer-btn {
+    margin: 0.3rem;
+    padding: 0.5rem 0.8rem;
+    font-size: 0.9rem;
+    border-radius: 0.8rem;
+    gap: 0.4rem;
+  }
+
+  .quiz-estimate {
+    width: 95%;
+    gap: 0.8rem;
+    padding: 0 0.5rem;
+  }
+
+  .team-answer-boxes {
+    gap: 1.2rem;
+  }
+
+  .estimate-card {
+    padding: 12px;
+    min-width: 220px;
+    border-radius: 10px;
+  }
+
+  .team-label {
+    font-size: 1.1rem;
+    margin-bottom: 6px;
+  }
+
+  .team-answer-textarea {
+    min-height: 55px;
+    font-size: 1rem;
+    padding: 8px 10px;
+  }
+
+  .submit-button {
+    width: 80%;
+    font-size: 1rem;
+    padding: 6px 12px;
+    margin-top: 0.8rem;
+  }
+
+  .next-question-btn,
+  .next-question-btn-dup {
+    padding: 0.7rem 1rem;
+    font-size: 0.85rem;
+    gap: 0.3rem;
+  }
+
+  .next-question-btn {
+    margin-top: 2rem;
+  }
+
+  .next-team-btn {
+    width: clamp(160px, 85%, 220px);
+    padding: 0.7rem 0.8rem;
+    font-size: 1rem;
+  }
+}
+
+/* Extra Small Mobile */
+@media (max-width: 360px) {
+  .answer-input {
+    font-size: 0.9rem;
+    padding: 0.4rem 0.8rem;
+  }
+
+  .submit-btn,
+  .pass-btn {
+    min-width: 80px;
+    height: 2rem;
+    font-size: 0.85rem;
+    padding: 0 0.6rem;
+  }
+
+  .buzzer-btn {
+    margin: 0.2rem;
+    padding: 0.4rem 0.6rem;
+    font-size: 0.85rem;
+    border-width: 2px;
+  }
+
+  .buzzer-icon {
+    min-width: 18px;
+    width: 18px;
+  }
+
+  .estimate-card {
+    padding: 10px;
+    min-width: 200px;
+  }
+
+  .team-label {
+    font-size: 1rem;
+  }
+
+  .team-answer-textarea {
+    min-height: 50px;
+    font-size: 0.95rem;
+  }
+
+  .submit-button {
+    width: 85%;
+    font-size: 0.95rem;
+    padding: 5px 10px;
+  }
+
+  .next-question-btn,
+  .next-question-btn-dup,
+  .next-team-btn {
+    font-size: 0.8rem;
+    padding: 0.6rem 0.8rem;
+  }
 }
