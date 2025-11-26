@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import axios from "axios";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, NavLink } from "react-router-dom";
 import "../../styles/QuizSelector.css";
 import { BsFillPatchQuestionFill } from "react-icons/bs";
 import { RiTeamFill } from "react-icons/ri";
@@ -10,6 +10,7 @@ import {
   IoChevronBack,
   IoChevronForward,
 } from "react-icons/io5";
+import { LayoutDashboard } from "lucide-react";
 
 const QuizSelector = () => {
   const [quizzes, setQuizzes] = useState([]);
@@ -100,6 +101,13 @@ const QuizSelector = () => {
     <div className="modern-quiz-page">
       {/* Hero Section */}
       <section className="hero-section">
+        <NavLink to={`/admin/dashboard`}>
+          <button className="admin-panel-btn">
+            <LayoutDashboard />
+            Admin Panel
+          </button>
+        </NavLink>
+
         <div className="hero-content">
           <h1 className="hero-title">Get Ready. Get Set. Quiz!</h1>
           <p className="hero-description">

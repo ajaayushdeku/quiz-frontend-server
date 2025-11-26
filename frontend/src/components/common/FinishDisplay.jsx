@@ -75,13 +75,21 @@ const FinishDisplay = ({ onFinish, message, teams: initialTeams = [] }) => {
   if (loading) return <div className="finish-loading">Loading scores...</div>;
 
   return (
-    <section className="finish-display-section">
+    <section>
       {showConfetti && (
-        <div className="confetti-container">
-          {[...Array(100)].map((_, i) => (
-            <div key={i} className="confetti-piece" />
-          ))}
-        </div>
+        <>
+          {" "}
+          <div className="confetti-container-one">
+            {[...Array(100)].map((_, i) => (
+              <div key={i} className="confetti-piece" />
+            ))}
+          </div>
+          <div className="confetti-container-two">
+            {[...Array(100)].map((_, i) => (
+              <div key={i} className="confetti-piece" />
+            ))}
+          </div>
+        </>
       )}
 
       <div className="finish-display-container">
@@ -113,8 +121,10 @@ const FinishDisplay = ({ onFinish, message, teams: initialTeams = [] }) => {
                       </div>
                     )}
                     <div className="team-title">
-                      <MdGroup className="team-icon" />
-                      <div>{team.name.toUpperCase()}</div>
+                      <MdGroup className="team-icon-result-page" />
+                      <div className="team-topic">
+                        {team.name.toUpperCase()}
+                      </div>
                     </div>
                     <div className="team-points">{team.points}</div>
                   </div>

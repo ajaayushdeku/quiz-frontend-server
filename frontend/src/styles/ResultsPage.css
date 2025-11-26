@@ -212,16 +212,16 @@
 
 .finish-display-container,
 .finish-container {
-  background-color: #3a3a3a43;
+  /* background-color: #3a3a3a43; */
   border-radius: 16px;
-  box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  /* box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15); */
   text-align: center;
   max-width: 900px;
   width: 100%;
   color: #e0e0e0;
-  border: 2px dashed #555;
+  /* border: 2px dashed #555; */
   height: 90vh;
-  overflow: auto;
+  /* overflow: auto; */
 }
 
 .finish-display-container {
@@ -350,7 +350,7 @@
 }
 
 .team-topic {
-  font-size: 2rem;
+  font-size: 1.8rem;
 }
 
 .team-icon-result-page {
@@ -375,7 +375,7 @@
   position: absolute;
   top: -20px;
   right: -1px;
-  font-size: 1.2rem;
+  font-size: 1rem;
   font-weight: bold;
   color: rgb(0, 0, 0);
   /* background: linear-gradient(135deg, #ffdf70, #ffbb33);
@@ -390,10 +390,19 @@
 }
 
 /* Confetti */
-.confetti-container {
+.confetti-container-one {
   position: fixed;
   top: 0;
   left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.confetti-container-two {
+  position: fixed;
+  top: 0;
   right: 0;
   width: 100%;
   height: 100%;

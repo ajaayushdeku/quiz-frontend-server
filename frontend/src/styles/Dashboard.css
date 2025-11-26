@@ -1154,6 +1154,16 @@ button:hover {
   border-radius: 10rem;
 }
 
+.qn-media {
+  background-color: #ffcc00;
+  color: #000;
+  font-size: 0.8rem;
+  font-weight: 700;
+  margin-left: 10px;
+  padding: 0.3rem 1rem;
+  border-radius: 10rem;
+}
+
 /* ========================================
    RESPONSIVE DESIGN
 ======================================== */

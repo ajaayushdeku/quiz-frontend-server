@@ -306,7 +306,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
               </div>
             )}
 
-            <div className="centered-control">
+            <div className="estimate-centered-control">
               <Button className="next-question-btn" onClick={nextQuestion}>
                 <h3>NEXT QUESTION</h3>
                 <FaArrowRight />
@@ -322,13 +322,15 @@ const EstimationRound = ({ onFinish, sessionId }) => {
                       <div className="winner-team-list">
                         <div>
                           <strong className="winner-team">
-                            <MdGroup className="team-icon" />
+                            <MdGroup
+                              className="team-icon-result-page"
+                              style={{ color: "black" }}
+                            />
                             <h3>{teamName.toUpperCase()}</h3>
                           </strong>
                           <p key={w.teamId} className="winner-item">
-                            <div className="winner-team-info">
+                            <div className="estimation-winner-team-info">
                               <div>
-                                {" "}
                                 Team's Answer: <h3> {w.givenAnswer}</h3>
                               </div>
                               {/* Difference from the Estimation:{" "} */}

@@ -314,7 +314,7 @@ const TeamStats = () => {
                                           </span>
                                           <span>Correct: {round.correct}</span>
                                           <span>Wrong: {round.wrong}</span>
-                                          <span>Passed: {round.passed}</span>
+                                          {/* <span>Passed: {round.passed}</span> */}
                                           <span>
                                             Points: {round.pointsEarned}
                                           </span>
@@ -355,13 +355,13 @@ const TeamStats = () => {
                                             0
                                           )}
                                         </span>
-                                        <span>
+                                        {/* <span>
                                           Passed:{" "}
                                           {team.roundWiseStats.reduce(
                                             (sum, r) => sum + r.passed,
                                             0
                                           )}
-                                        </span>
+                                        </span> */}
                                       </div>
                                       <div className="summary-points">
                                         <span>

@@ -14,18 +14,17 @@ export default function ManageQuestions() {
     options: [],
     correctAnswerId: "",
     correctAnswerText: "",
+    media: { type: "", url: "" },
   });
 
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5; // number of questions per page
+  const itemsPerPage = 5;
 
   const indexOfLastItem = currentPage * itemsPerPage;
   const indexOfFirstItem = indexOfLastItem - itemsPerPage;
   const currentQuestions = questions.slice(indexOfFirstItem, indexOfLastItem);
-
   const totalPages = Math.ceil(questions.length / itemsPerPage);
 
-  // Fetch all questions on mount
   useEffect(() => {
     fetchQuestions();
   }, []);
@@ -46,11 +45,9 @@ export default function ManageQuestions() {
     }
   };
 
-  //  Start editing a question
   const handleEdit = (q) => {
     setEditingId(q._id);
 
-    // Find the correct option text by matching _id
     const correctOption = q.options?.find(
       (opt) => opt?._id?.toString() === q.correctAnswer?.toString()
     );
@@ -61,20 +58,35 @@ export default function ManageQuestions() {
       options: q.options ? q.options.map((opt) => ({ ...opt })) : [],
       correctAnswerId: q.correctAnswer,
       correctAnswerText: correctOption?.text || "",
+      media: q.media || { type: "", url: "" },
     });
   };
 
-  //  Update an option text while editing
   const handleOptionChange = (index, value) => {
     const newOptions = [...editedQuestion.options];
     newOptions[index] = { ...newOptions[index], text: value };
     setEditedQuestion((prev) => ({ ...prev, options: newOptions }));
   };
 
-  //  Save edited question to backend
+  const handleMediaChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setEditedQuestion((prev) => ({
+        ...prev,
+        media: {
+          type: file.type.startsWith("video") ? "video" : "image",
+          url: reader.result,
+        },
+      }));
+    };
+    reader.readAsDataURL(file);
+  };
+
   const handleSave = async (id) => {
     try {
-      // Try to find selected correct option
       const selectedOption = editedQuestion.options.find(
         (opt) =>
           opt.text.trim().toLowerCase() ===
@@ -87,6 +99,7 @@ export default function ManageQuestions() {
         options: editedQuestion.options,
         correctAnswer:
           selectedOption?._id?.toString() || editedQuestion.correctAnswerId,
+        media: editedQuestion.media,
       };
 
       await axios.put(
@@ -104,7 +117,6 @@ export default function ManageQuestions() {
     }
   };
 
-  //  Delete question
   const handleDelete = async (id) => {
     if (!window.confirm("Delete this question?")) return;
     try {
@@ -139,13 +151,13 @@ export default function ManageQuestions() {
                   <th>Category</th>
                   <th>Options</th>
                   <th>Correct Answer</th>
+                  <th>Media</th>
                   <th className="text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
                 {currentQuestions.map((q) => (
                   <tr key={q._id}>
-                    {/* Question */}
                     <td>
                       {editingId === q._id ? (
                         <input
@@ -164,7 +176,6 @@ export default function ManageQuestions() {
                       )}
                     </td>
 
-                    {/* Category */}
                     <td>
                       {editingId === q._id ? (
                         <input
@@ -183,7 +194,6 @@ export default function ManageQuestions() {
                       )}
                     </td>
 
-                    {/* Options */}
                     <td>
                       {editingId === q._id
                         ? editedQuestion.options.map((opt, idx) => (
@@ -209,7 +219,6 @@ export default function ManageQuestions() {
                           ))}
                     </td>
 
-                    {/* Correct Answer */}
                     <td>
                       {editingId === q._id ? (
                         <input
@@ -231,7 +240,40 @@ export default function ManageQuestions() {
                       )}
                     </td>
 
-                    {/* Actions */}
+                    <td>
+                      {editingId === q._id ? (
+                        <div>
+                          <input
+                            type="file"
+                            accept="image/*,video/*"
+                            onChange={handleMediaChange}
+                          />
+                          {editedQuestion.media.url &&
+                            (editedQuestion.media.type === "image" ? (
+                              <img
+                                src={editedQuestion.media.url}
+                                alt="media"
+                                width="80"
+                              />
+                            ) : (
+                              <video
+                                src={editedQuestion.media.url}
+                                width="120"
+                                controls
+                              />
+                            ))}
+                        </div>
+                      ) : q.media?.url ? (
+                        q.media.type === "file" ? (
+                          <img src={q.media.url} alt="media" width="80" />
+                        ) : (
+                          <video src={q.media.url} width="120" controls />
+                        )
+                      ) : (
+                        "-"
+                      )}
+                    </td>
+
                     <td>
                       {editingId === q._id ? (
                         <div className="btns-container text-center">
@@ -270,7 +312,6 @@ export default function ManageQuestions() {
               </tbody>
             </table>
 
-            {/* Table Page Buttons */}
             <div className="pagination-container">
               <button
                 className="pagination-btn-admin"

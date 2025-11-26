@@ -423,6 +423,20 @@
   /* padding: 1rem; */
 }
 
+.estimate-centered-control {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  z-index: 50;
+  /* min-height: 200px; */
+  width: 100%;
+  max-width: 600px;
+  margin-top: -3.5rem;
+  /* padding: 1rem; */
+}
+
 .start-question-btn,
 .pass-question-btn {
   display: flex;
@@ -1080,6 +1094,23 @@
 }
 
 .winner-team-info h3 {
+  font-size: 1.6rem;
+  margin-bottom: 0.5rem;
+  color: #ffdf70;
+}
+
+.estimation-winner-team-info {
+  padding: 1rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #ffffff;
+  display: flex;
+  gap: 1.5rem;
+  justify-content: center;
+  align-items: center;
+}
+
+.estimation-winner-team-info h3 {
   font-size: 1.6rem;
   margin-bottom: 0.5rem;
   color: #ffdf70;

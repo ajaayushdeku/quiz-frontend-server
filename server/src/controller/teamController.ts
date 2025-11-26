@@ -90,7 +90,7 @@ export const getTeamsByQuiz = async (req: Request, res: Response) => {
   try {
     const { quizId } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(quizId as string)) {
+    if (!quizId || !mongoose.Types.ObjectId.isValid(quizId)) {
       return res.status(400).json({ message: "Invalid quizId" });
     }
 
@@ -109,14 +109,13 @@ export const getTeamsByQuiz = async (req: Request, res: Response) => {
   }
 };
 
-// ---------------------------------------------------------
-// ✅ Delete team
-// ---------------------------------------------------------
+//Delete team
+
 export const deleteTeam = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
 
-    if (!mongoose.Types.ObjectId.isValid(id as string)) {
+    if (!id || !mongoose.Types.ObjectId.isValid(id)) {
       return res.status(400).json({ message: "Invalid team ID" });
     }
 

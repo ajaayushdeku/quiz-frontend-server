@@ -5,6 +5,7 @@ export interface ISession extends Document {
   startedBy: mongoose.Types.ObjectId;
   status: "active" | "completed";
   createdAt: Date;
+  endedAt?: Date;
 }
 
 const sessionSchema = new Schema<ISession>(
@@ -12,6 +13,7 @@ const sessionSchema = new Schema<ISession>(
     quizId: { type: Schema.Types.ObjectId, ref: "Quiz", required: true },
     startedBy: { type: Schema.Types.ObjectId, ref: "User", required: true },
     status: { type: String, enum: ["active", "completed"], default: "active" },
+    endedAt: { type: Date },
   },
   { timestamps: true }
 );

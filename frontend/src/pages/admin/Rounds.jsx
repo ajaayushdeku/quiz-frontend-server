@@ -975,6 +975,14 @@ export default function CreateQuiz() {
                     const limitReached =
                       !checked && round.questions.length >= maxSelectable;
 
+                    // Determine media type
+                    let mediaTag = null;
+                    if (q.media) {
+                      if (q.media.type === "file") {
+                        mediaTag = <span className="qn-media-tag">Media</span>;
+                      }
+                    }
+
                     return (
                       <label
                         key={q._id}
@@ -1004,6 +1012,7 @@ export default function CreateQuiz() {
                         <div className="qn-category">
                           {q.category.toUpperCase()}
                         </div>
+                        {mediaTag && <div className="qn-media">{mediaTag}</div>}
                       </label>
                     );
                   })}
