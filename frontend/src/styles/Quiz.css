@@ -1746,6 +1746,11 @@
 
 /* Badge styling */
 .negative-pointing-badge {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  gap: 0.7rem;
   background-color: #e23a3aff;
   color: #ffffffff;
   border: 2px solid #ffffffff;
@@ -1822,12 +1827,12 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  background-color: #04a909; /* green background */
+  background-color: rgb(5, 163, 137); /* green background */
   color: #fff;
   font-size: 0.9rem;
   font-weight: 700;
   padding: 0.3rem 0.5rem;
-  border: 2px solid rgb(144, 144, 144);
+  border: 2px solid rgb(248, 248, 248);
   border-radius: 20px;
   cursor: pointer;
   transition: all 0.2s ease-in-out;
@@ -1836,7 +1841,7 @@
 
 .speak-text-btn:hover {
   background-color: #ffffff;
-  color: #2d8030;
+  color: rgb(5, 163, 137);
   transform: scale(1.05);
 }
 
@@ -1856,6 +1861,6 @@
 }
 
 .stop-speech {
-  background-color: rgb(227, 49, 49);
+  background-color: rgb(218, 78, 18);
   color: white;
 }

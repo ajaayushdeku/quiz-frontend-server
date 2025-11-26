@@ -109,7 +109,7 @@ const FinishDisplay = ({ onFinish, message, teams: initialTeams = [] }) => {
                     {isWinner && (
                       <div className="winner-badge">
                         <FaCrown />
-                        <p> Winner!</p>
+                        <p> Highest Score!!!</p>
                       </div>
                     )}
                     <div className="team-title">

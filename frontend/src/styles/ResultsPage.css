@@ -339,7 +339,7 @@
 }
 
 .winner-card .team-points,
-.winner-card .team-icon,
+.winner-card .team-icon-result-page,
 .winner-card .team-topic {
   color: #1a1a1a;
 }
@@ -351,6 +351,12 @@
 
 .team-topic {
   font-size: 2rem;
+}
+
+.team-icon-result-page {
+  width: 2.5rem;
+  height: 2.5rem;
+  color: white;
 }
 
 @keyframes winner-pulse {

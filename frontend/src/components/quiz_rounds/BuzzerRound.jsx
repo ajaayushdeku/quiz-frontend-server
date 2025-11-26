@@ -29,7 +29,7 @@ import PreBuzzTimerControls from "../quiz_components/PreBuzzTimerControls";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
-const PreBuzzedTimer = 20;
+const PreBuzzedTimer = 60;
 const COLORS = [
   "#d61344ff",
   "#0ab9d4ff",

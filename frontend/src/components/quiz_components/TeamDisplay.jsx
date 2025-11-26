@@ -3,6 +3,7 @@ import logo from "../../assets/images/logo.png";
 import { formatTime } from "../../utils/formatTime";
 import { FaHandPeace, FaHandPointUp } from "react-icons/fa6";
 import { RiTeamFill } from "react-icons/ri";
+import { ImEvil2 } from "react-icons/im";
 import "../../styles/TeamDisplay.css";
 
 const TeamDisplay = ({
@@ -27,7 +28,7 @@ const TeamDisplay = ({
         {enableNegative && (
           <div className="negative-pointing-wrapper">
             <div className="negative-pointing-badge">
-              Negative Pointing Enabled
+              <ImEvil2 /> Negative Pointing Acitve <ImEvil2 />
             </div>
           </div>
         )}

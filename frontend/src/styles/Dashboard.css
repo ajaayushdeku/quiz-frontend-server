@@ -1010,8 +1010,9 @@ button:hover {
 }
 
 .table-scroll {
-  overflow-x: auto;
+  /* overflow-x: auto; */
   width: 100%;
+  height: fit-content;
 }
 
 .data-table,
@@ -1029,7 +1030,7 @@ button:hover {
 .quiz-data-table td {
   border: 1px solid #e5e7eb;
   padding: 10px 12px;
-  text-align: left;
+  text-align: middle;
   height: 60px;
   vertical-align: middle;
   word-wrap: break-word;
@@ -1066,24 +1067,29 @@ button:hover {
   gap: 0.75rem;
 }
 
-.pagination-btn {
-  background-color: #0bc4ae;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  border: none;
+.pagination-btn-admin {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0, 123, 255);
+  border: 2px solid #b7b7b7;
+  /* border-radius: 50%; */
+  padding: 0.25rem;
+  color: #ffffff;
+  font-size: 1.5rem;
   cursor: pointer;
-  transition: background 0.3s ease;
-  font-size: 1rem;
-  font-weight: 700;
+  transition: all 0.3s ease;
 }
 
-.pagination-btn:hover {
-  background-color: #09798f;
+.pagination-btn-admin:hover:not(:disabled) {
+  background: #2a2a2a;
+  color: #fff;
+  border-color: #6098e8;
+  transform: scale(1.1);
 }
 
-.pagination-btn:disabled {
-  background-color: #a5b4fc;
+.pagination-btn-admin:disabled {
+  opacity: 0.3;
   cursor: not-allowed;
 }
 

@@ -178,7 +178,7 @@ export default function ManageQuizMasters() {
             {/* Table Page Buttons */}
             <div className="pagination-container">
               <button
-                className="pagination-btn"
+                className="pagination-btn-admin"
                 disabled={currentPage === 1}
                 onClick={() => setCurrentPage((prev) => prev - 1)}
               >
@@ -190,11 +190,11 @@ export default function ManageQuizMasters() {
               </span>
 
               <button
-                className="pagination-btn"
+                className="pagination-btn-admin"
                 disabled={currentPage === totalPages}
                 onClick={() => setCurrentPage((prev) => prev + 1)}
               >
-                <IoChevronForward />
+                <IoChevronForward className="pagination-icon" />
               </button>
             </div>
           </div>

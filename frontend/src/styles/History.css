@@ -227,6 +227,31 @@
   border-bottom-color: #6098e8;
 }
 
+.winner-team-collapse-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1.5rem;
+  background: linear-gradient(
+    135deg,
+    rgb(233, 220, 167) 0%,
+    rgb(224, 197, 85) 100%
+  );
+  color: black;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  border-bottom: 2px solid transparent;
+}
+
+.winner-team-collapse-header:hover {
+  background: linear-gradient(
+    135deg,
+    rgb(224, 197, 85) 0%,
+    rgb(233, 220, 167) 100%
+  );
+  border-bottom-color: rgb(224, 197, 85);
+}
+
 .team-header-info {
   display: flex;
   align-items: center;
@@ -236,7 +261,15 @@
 .team-icon {
   font-size: 1rem;
   width: 2rem;
-  color: #3185fa;
+  color: #063e8d;
+}
+
+.winner-team-icon {
+  width: 2.5rem;
+  height: 2.5rem;
+  font-size: 1rem;
+  width: 2rem;
+  color: #2b2b2b;
 }
 
 .team-collapse-name {
@@ -246,8 +279,20 @@
   margin: 0;
 }
 
+.winner-team-collapse-name {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #2e2e2e;
+  margin: 0;
+}
+
 .team-expand-icon {
   color: #3185fa;
+  transition: transform 0.3s ease;
+}
+
+.winner-team-expand-icon {
+  color: #2e2e2e;
   transition: transform 0.3s ease;
 }
 
@@ -351,6 +396,8 @@
 .summary-values {
   display: flex;
   flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: center;
   gap: 15px;
   font-weight: 700;
   font-size: 1.05rem;
@@ -364,10 +411,24 @@
   border-radius: 8px;
 }
 
+.summary-left span {
+  margin-right: 1rem;
+  font-size: 0.9rem; /* default font size for other stats */
+}
+
+.summary-points {
+  font-weight: bold;
+  font-size: 1.2rem; /* larger font for points */
+}
+
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
   .section-heading {
-    font-size: 2rem;
+    font-size: 1.3rem;
+  }
+
+  .selected-quiz-name {
+    font-size: 1.3rem;
   }
 
   .user-header {
@@ -422,7 +483,7 @@
   }
 
   .selected-quiz-name {
-    font-size: 1.4rem;
+    font-size: 1.2rem;
   }
 
   .user-header {
@@ -478,8 +539,8 @@
   padding: 0.2rem 1rem;
   border: 2px solid white;
   border-radius: 20px;
-  background-color: rgb(245, 40, 40);
+  background-color: rgb(211, 76, 76);
   color: white;
-  font-size: 0.85rem;
+  font-size: 0.8rem;
   font-weight: 700;
 }

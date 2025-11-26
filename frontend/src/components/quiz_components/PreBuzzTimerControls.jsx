@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { FaPause, FaPlay } from "react-icons/fa";
 import { VscDebugRestart } from "react-icons/vsc";
+import { IoChevronUp, IoChevronDown } from "react-icons/io5";
 
 const PreBuzzTimerControls = ({
   preBuzzActive,
@@ -10,6 +11,7 @@ const PreBuzzTimerControls = ({
   onPreBuzzEnd, // callback when timer reaches 0
 }) => {
   const [isRunning, setIsRunning] = useState(preBuzzActive);
+  const [open, setOpen] = useState(true); // 🔻 collapse toggle
 
   // Sync local running state with preBuzzActive
   useEffect(() => {
@@ -45,26 +47,49 @@ const PreBuzzTimerControls = ({
   return (
     <>
       <div className="time-controls detail-info">
-        <h4 style={{ textAlign: "center" }}>Pre-Buzz Timer Controls</h4>
-        <div className="time-controls-list">
-          <button
-            onClick={handleStart}
-            disabled={isRunning}
-            className="time-controls-btn"
+        {/* Title + Collapse button */}
+        <div
+          onClick={() => setOpen((o) => !o)}
+          style={{
+            cursor: "pointer",
+          }}
+        >
+          <h4
+            style={{
+              userSelect: "none",
+              textAlign: "center",
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              gap: "1rem",
+            }}
           >
-            <FaPlay />
-          </button>
-          <button
-            onClick={handlePause}
-            disabled={!isRunning}
-            className="time-controls-btn"
-          >
-            <FaPause />
-          </button>
-          <button onClick={handleRestart} className="time-controls-btn">
-            <VscDebugRestart />
-          </button>
+            Pre-Buzz Timer Controls{" "}
+            {!open ? <IoChevronUp size={20} /> : <IoChevronDown size={20} />}
+          </h4>
         </div>
+
+        {open && (
+          <div className="time-controls-list">
+            <button
+              onClick={handleStart}
+              disabled={isRunning}
+              className="time-controls-btn"
+            >
+              <FaPlay />
+            </button>
+            <button
+              onClick={handlePause}
+              disabled={!isRunning}
+              className="time-controls-btn"
+            >
+              <FaPause />
+            </button>
+            <button onClick={handleRestart} className="time-controls-btn">
+              <VscDebugRestart />
+            </button>
+          </div>
+        )}
       </div>
     </>
   );

@@ -20,7 +20,7 @@ const TeamStats = () => {
         setLoading(true);
 
         const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-allquiz",
+          "http://localhost:4000/api/quiz/get-quizForUser",
           { withCredentials: true }
         );
         const quizData = quizRes.data.quizzes || [];
@@ -112,21 +112,18 @@ const TeamStats = () => {
 
       <div className="team-stats-cont">
         <div className="quiz-dropdown-search">
-          <label className="quiz-label">
-            Type the Quiz Name to Search for Teams Stats:
-            <Select
-              options={quizOptions}
-              placeholder="Search or select a quiz..."
-              isSearchable
-              onChange={(option) => {
-                setSelectedQuiz(option.value);
-                setExpandedUsers({});
-                setExpandedTeams({});
-              }}
-              className="react-select-container select"
-              classNamePrefix="react-select"
-            />
-          </label>
+          <Select
+            options={quizOptions}
+            placeholder="Search or select a quiz..."
+            isSearchable
+            onChange={(option) => {
+              setSelectedQuiz(option.value);
+              setExpandedUsers({});
+              setExpandedTeams({});
+            }}
+            className="react-select-container select"
+            classNamePrefix="react-select"
+          />
 
           {selectedQuiz && (
             <h3 className="selected-quiz-name">
@@ -181,6 +178,10 @@ const TeamStats = () => {
                       isUserExpanded ? "expanded" : ""
                     }`}
                   >
+                    <h3 style={{ color: "#08316aff" }}>
+                      {" "}
+                      Sorted By Latest Attempt:
+                    </h3>
                     {userData.sessions.map((session) => {
                       const startedAt = session.startedAt
                         ? new Date(session.startedAt).toLocaleString()
@@ -188,6 +189,29 @@ const TeamStats = () => {
                       const endedAt = session.endedAt
                         ? new Date(session.endedAt).toLocaleString()
                         : "Not finished";
+
+                      {
+                        /* Compute scores for sorting */
+                      }
+                      const sortedTeams = [...session.teams].sort((a, b) => {
+                        const scoreA = a.roundWiseStats.reduce(
+                          (sum, r) => sum + r.pointsEarned,
+                          0
+                        );
+                        const scoreB = b.roundWiseStats.reduce(
+                          (sum, r) => sum + r.pointsEarned,
+                          0
+                        );
+                        return scoreB - scoreA; // Highest first
+                      });
+
+                      // Get highest score (FIRST item only to read the value)
+                      const highestScore = sortedTeams.length
+                        ? sortedTeams[0].roundWiseStats.reduce(
+                            (sum, r) => sum + r.pointsEarned,
+                            0
+                          )
+                        : 0;
 
                       return (
                         <div key={session.sessionId} className="session-block">
@@ -211,27 +235,58 @@ const TeamStats = () => {
                           </div>
 
                           {/* Teams under this session */}
-                          {session.teams.map((team) => {
+                          {/* Sort teams by total points (highest first) */}
+
+                          {/* Render teams */}
+                          {sortedTeams.map((team) => {
                             const teamKey = `${session.sessionId}-${team.teamId}`;
                             const isTeamExpanded = expandedTeams[teamKey];
+
+                            const teamScore = team.roundWiseStats.reduce(
+                              (t, r) => t + r.pointsEarned,
+                              0
+                            );
+                            const isWinner = teamScore === highestScore;
 
                             return (
                               <div
                                 key={team.teamId}
-                                className="team-collapse-card"
+                                className={`team-collapse-card`}
                               >
                                 {/* Team Header - Collapsible */}
                                 <div
-                                  className="team-collapse-header"
+                                  className={` ${
+                                    isWinner
+                                      ? "winner-team-collapse-header"
+                                      : "team-collapse-header"
+                                  }`}
                                   onClick={() => toggleTeam(teamKey)}
                                 >
                                   <div className="team-header-info">
-                                    <MdGroup className="team-icon" />
-                                    <h4 className="team-collapse-name">
+                                    <MdGroup
+                                      className={` ${
+                                        isWinner
+                                          ? "winner-team-icon"
+                                          : "team-icon"
+                                      }`}
+                                    />
+                                    <h4
+                                      className={` ${
+                                        isWinner
+                                          ? "winner-team-collapse-name"
+                                          : "team-collapse-name"
+                                      }`}
+                                    >
                                       {team.teamName}
                                     </h4>
                                   </div>
-                                  <div className="team-expand-icon">
+                                  <div
+                                    className={` ${
+                                      isWinner
+                                        ? "winner-team-expand-icon"
+                                        : "team-expand-icon"
+                                    }`}
+                                  >
                                     {isTeamExpanded ? (
                                       <MdExpandLess size={24} />
                                     ) : (
@@ -274,45 +329,50 @@ const TeamStats = () => {
                                       <FaChartLine /> Overall Summary:
                                     </h4>
                                     <div className="summary-values">
-                                      <span>
-                                        Rounds:{" "}
-                                        {team.roundWiseStats.length || 0}
-                                      </span>
-                                      <span>
-                                        Attempted:{" "}
-                                        {team.roundWiseStats.reduce(
-                                          (sum, r) => sum + r.attempted,
-                                          0
-                                        )}
-                                      </span>
-                                      <span>
-                                        Correct:{" "}
-                                        {team.roundWiseStats.reduce(
-                                          (sum, r) => sum + r.correct,
-                                          0
-                                        )}
-                                      </span>
-                                      <span>
-                                        Wrong:{" "}
-                                        {team.roundWiseStats.reduce(
-                                          (sum, r) => sum + r.wrong,
-                                          0
-                                        )}
-                                      </span>
-                                      <span>
-                                        Passed:{" "}
-                                        {team.roundWiseStats.reduce(
-                                          (sum, r) => sum + r.passed,
-                                          0
-                                        )}
-                                      </span>
-                                      <span>
-                                        Points:{" "}
-                                        {team.roundWiseStats.reduce(
-                                          (sum, r) => sum + r.pointsEarned,
-                                          0
-                                        )}
-                                      </span>
+                                      <div className="summary-left">
+                                        <span>
+                                          Rounds:{" "}
+                                          {team.roundWiseStats.length || 0}
+                                        </span>
+                                        <span>
+                                          Attempted:{" "}
+                                          {team.roundWiseStats.reduce(
+                                            (sum, r) => sum + r.attempted,
+                                            0
+                                          )}
+                                        </span>
+                                        <span>
+                                          Correct:{" "}
+                                          {team.roundWiseStats.reduce(
+                                            (sum, r) => sum + r.correct,
+                                            0
+                                          )}
+                                        </span>
+                                        <span>
+                                          Wrong:{" "}
+                                          {team.roundWiseStats.reduce(
+                                            (sum, r) => sum + r.wrong,
+                                            0
+                                          )}
+                                        </span>
+                                        <span>
+                                          Passed:{" "}
+                                          {team.roundWiseStats.reduce(
+                                            (sum, r) => sum + r.passed,
+                                            0
+                                          )}
+                                        </span>
+                                      </div>
+                                      <div className="summary-points">
+                                        <span>
+                                          Points:{" "}
+                                          {team.roundWiseStats.reduce(
+                                            (sum, r) => sum + r.pointsEarned,
+                                            0
+                                          )}{" "}
+                                          pts
+                                        </span>
+                                      </div>
                                     </div>
                                   </div>
                                 </div>

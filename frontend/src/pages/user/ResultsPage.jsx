@@ -223,11 +223,11 @@ const ResultsPage = () => {
                       {isWinner && (
                         <div className="winner-badge">
                           <FaCrown />
-                          <p> Winner!</p>
+                          <p> Winner!!!</p>
                         </div>
                       )}
                       <div className="team-title">
-                        <MdGroup className="team-icon" />
+                        <MdGroup className="team-icon-result-page" />
                         <div className="team-topic">
                           {team.name.toUpperCase()}
                         </div>
