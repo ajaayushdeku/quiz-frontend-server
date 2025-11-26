@@ -5,6 +5,7 @@ import { FaHandPeace, FaHandPointUp } from "react-icons/fa6";
 import { RiTeamFill } from "react-icons/ri";
 import { ImEvil2 } from "react-icons/im";
 import "../../styles/TeamDisplay.css";
+import { MdGroup } from "react-icons/md";
 
 const TeamDisplay = ({
   activeTeam,
@@ -44,7 +45,8 @@ const TeamDisplay = ({
               // textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
             }}
           >
-            <RiTeamFill /> Team {activeTeam?.name || "-"}
+            <MdGroup />
+            <div> Team {activeTeam?.name || "-"}</div>
           </h2>
           <div style={{ textAlign: "center" }}>
             <div className="quiz-team-details">

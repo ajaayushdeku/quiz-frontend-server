@@ -28,11 +28,8 @@
 
 .team-name {
   position: absolute;
-  top: 3.5rem;
+  top: 1.8rem;
   left: 15rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
   font-size: 2rem;
   font-weight: 800;
   color: rgb(207, 207, 207);
@@ -151,7 +148,10 @@
   }
 
   .team-name {
-    font-size: 1.2rem;
+    font-size: 1.4rem;
+    position: absolute;
+    top: 1.8rem;
+    left: 6rem;
   }
 
   .quiz-logo {
@@ -175,6 +175,9 @@
 
   .team-name {
     font-size: 1rem;
+    position: absolute;
+    top: 1.8rem;
+    left: 0.5rem;
   }
 
   .quiz-logo {
@@ -198,6 +201,9 @@
 @media (max-width: 480px) {
   .team-name {
     font-size: 0.8rem;
+    position: absolute;
+    top: 1.8rem;
+    left: 0rem;
   }
 
   .quiz-timer {
