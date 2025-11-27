@@ -202,8 +202,8 @@
 }
 
 .quiz-category {
-  position: absolute;
-  top: 15px;
+  position: relative;
+  top: 1rem;
   right: 15px;
   font-size: 1rem;
   font-weight: 700;

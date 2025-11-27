@@ -760,15 +760,16 @@ const SubjectRound = ({ onFinish, sessionId }) => {
           <div className="scores-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Current Team Scores</h3>
             <ul>
-              {teams.map((team) => (
-                <li key={team.id} className="team-score-item">
+              {teams.map((team, idx) => (
+                <div key={team.id}>
                   <span
-                    className="team-color-indicator"
-                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
-                  />
-                  <span className="team-name-view">{team.name}:</span>
+                    className="team-name-view"
+                    style={{ color: TEAM_COLORS[team.name] }}
+                  >
+                    {team.name.toUpperCase()}:
+                  </span>
                   <span className="team-points-view">{team.points} pts</span>
-                </li>
+                </div>
               ))}
             </ul>
             <button
@@ -803,30 +804,53 @@ const SubjectRound = ({ onFinish, sessionId }) => {
 
       {/* Show Correct Answer Section */}
       {showCorrectAnswer ? (
-        <div className="question-section">
-          {currentQuestion.category && (
+        <>
+          <div className="question-category-collection">
+            {/* {currentQuestion.category && (
             <div className="quiz-category">{currentQuestion.category}</div>
-          )}
+          )} */}
 
-          <QuestionCard
-            questionText={currentQuestion?.question ?? "No question loaded"}
-            displayedText={`Q. ${displayedText}`}
-            mediaType={currentQuestion.mediaType}
-            mediaUrl={currentQuestion.mediaUrl}
-            onMediaClick={handleMediaClick}
-            category={currentQuestion.category}
-          />
+            <QuestionCard
+              questionText={currentQuestion?.question ?? "No question loaded"}
+              displayedText={`${displayedText}`}
+              mediaType={currentQuestion.mediaType}
+              mediaUrl={currentQuestion.mediaUrl}
+              onMediaClick={handleMediaClick}
+              category={currentQuestion.category}
+            />
+          </div>
 
-          <div className="correct-answer-container">
-            <p>
-              ✓ Correct Answer:{" "}
-              <strong style={{ color: "#32be76ff" }}>
-                {getCorrectOptionText()}
-              </strong>
-            </p>
-            {currentQuestion?.shortAnswer && (
-              <p className="short-answer">{currentQuestion.shortAnswer}</p>
-            )}
+          <div
+            style={{
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem",
+              width: "100%",
+            }}
+          >
+            <div className="correct-answer-display">
+              <p>
+                ✓ Correct Answer:{" "}
+                <strong style={{ color: "#32be76ff" }}>
+                  {getCorrectOptionText()}
+                </strong>
+              </p>
+
+              {currentQuestion?.shortAnswer && (
+                <p
+                  style={{
+                    fontSize: "1rem",
+                    color: "#aaa",
+                    marginTop: "1rem",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {currentQuestion.shortAnswer}
+                </p>
+              )}
+            </div>
             <Button
               className="nxt-question-btn"
               onClick={handleNextAfterCorrectAnswer}
@@ -835,7 +859,7 @@ const SubjectRound = ({ onFinish, sessionId }) => {
               <FaArrowRight />
             </Button>
           </div>
-        </div>
+        </>
       ) : (
         <>
           {!quizCompleted ? (
@@ -892,23 +916,25 @@ const SubjectRound = ({ onFinish, sessionId }) => {
               )
             ) : (
               currentQuestion && (
-                <div className="question-section">
-                  {currentQuestion.category && (
-                    <div className="quiz-category">
-                      {currentQuestion.category}
-                    </div>
-                  )}
+                <>
+                  <div className="question-category-collection">
+                    {/* {currentQuestion.category && (
+                      <div className="quiz-category">
+                        {currentQuestion.category}
+                      </div>
+                    )} */}
 
-                  <QuestionCard
-                    questionText={
-                      currentQuestion?.question ?? "No question loaded"
-                    }
-                    displayedText={`Q. ${displayedText}`}
-                    mediaType={currentQuestion.mediaType}
-                    mediaUrl={currentQuestion.mediaUrl}
-                    onMediaClick={handleMediaClick}
-                    category={currentQuestion.category}
-                  />
+                    <QuestionCard
+                      questionText={
+                        currentQuestion?.question ?? "No question loaded"
+                      }
+                      displayedText={`${displayedText}`}
+                      mediaType={currentQuestion.mediaType}
+                      mediaUrl={currentQuestion.mediaUrl}
+                      onMediaClick={handleMediaClick}
+                      category={currentQuestion.category}
+                    />
+                  </div>
 
                   <OptionList
                     options={currentQuestion.options}
@@ -919,9 +945,15 @@ const SubjectRound = ({ onFinish, sessionId }) => {
                       activeRound?.rules?.enableTimer ? isRunning : false
                     }
                   />
-
                   {!optionSelected && (
-                    <div className="pass-button-container">
+                    <div
+                      className="pass-button-container"
+                      style={{
+                        position: "fixed",
+                        bottom: "1rem",
+                        left: "1rem",
+                      }}
+                    >
                       <Button
                         className="pass-question-btn"
                         onClick={() => {
@@ -940,7 +972,7 @@ const SubjectRound = ({ onFinish, sessionId }) => {
                       </Button>
                     </div>
                   )}
-                </div>
+                </>
               )
             )
           ) : (
