@@ -151,7 +151,7 @@ export default function ManageQuestions() {
                   <th>Category</th>
                   <th>Options</th>
                   <th>Correct Answer</th>
-                  <th>Media</th>
+                  {/* <th>Media</th> */}
                   <th className="text-center">Actions</th>
                 </tr>
               </thead>
@@ -240,7 +240,7 @@ export default function ManageQuestions() {
                       )}
                     </td>
 
-                    <td>
+                    {/* <td>
                       {editingId === q._id ? (
                         <div>
                           <input
@@ -264,15 +264,15 @@ export default function ManageQuestions() {
                             ))}
                         </div>
                       ) : q.media?.url ? (
-                        q.media.type === "file" ? (
+                        q.media.type === "image" ? (
                           <img src={q.media.url} alt="media" width="80" />
-                        ) : (
+                        ) : q.media.type === "video" ? (
                           <video src={q.media.url} width="120" controls />
-                        )
+                        ) : null
                       ) : (
                         "-"
                       )}
-                    </td>
+                    </td> */}
 
                     <td>
                       {editingId === q._id ? (

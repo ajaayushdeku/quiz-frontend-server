@@ -26,6 +26,7 @@ import { formatTime } from "../../utils/formatTime";
 import rulesConfig from "../../config/rulesConfig";
 import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
+import { FaArrowRight } from "react-icons/fa";
 
 const { settings } = rulesConfig.general_round;
 const TEAM_TIME_LIMIT = settings.teamTimeLimit;
@@ -61,6 +62,9 @@ const GeneralRound = ({ onFinish, sessionId }) => {
   const [optionSelected, setOptionSelected] = useState(false);
 
   const [showScoresModal, setShowScoresModal] = useState(false);
+
+  // Track if we should show correct answer
+  const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
   const location = useLocation();
   const { historyIds } = location.state || {}; // { teamId: historyId }
@@ -452,6 +456,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
       rules.passCondition === "wrongIfPassed"
     ) {
       if (!secondHand) {
+        // First pass - move to next team
         const nextTeam = passToNextTeam();
         setSecondHand(true);
         resetTimer(rules.passedTime || PASS_TIME_LIMIT);
@@ -459,15 +464,12 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         setPassIt(true);
         showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
       } else {
-        showToast(`( > O < ) Back to Team ${activeTeam?.name}!`);
+        // Second pass - show correct answer
+        showToast(`Both teams passed! Showing correct answer...`);
+        setShowCorrectAnswer(true); // Show correct answer
         setPassIt(false);
         setSecondHand(false);
-        if (isLastQuestion) setQuizCompleted(true);
-        else {
-          nextQuestion();
-          resetTimer(roundTime);
-          pauseTimer();
-        }
+        pauseTimer();
       }
     } else {
       const nextTeam = passToNextTeam();
@@ -478,6 +480,21 @@ const GeneralRound = ({ onFinish, sessionId }) => {
     }
 
     setQuestionDisplay(false);
+  };
+
+  // ---------------- Handle Next Question after showing correct answer ----------------
+  const handleNextAfterCorrectAnswer = () => {
+    setShowCorrectAnswer(false);
+
+    if (isLastQuestion) {
+      setQuizCompleted(true);
+    } else {
+      nextQuestion();
+      resetTimer(roundTime);
+      resetAnswer();
+      setScoreMessage("");
+      setQuestionDisplay(false);
+    }
   };
 
   // ---------------- Auto penalty on timeout ----------------
@@ -571,15 +588,17 @@ const GeneralRound = ({ onFinish, sessionId }) => {
             setPassIt(true);
             showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
           } else {
-            showToast(`( > O < ) Back to Team ${activeTeam?.name}!`);
+            showToast(`Both teams passed! Showing correct answer...`);
+            setShowCorrectAnswer(true); // Show correct answer
             setPassIt(false);
             setSecondHand(false);
-            if (isLastQuestion) setQuizCompleted(true);
-            else {
-              nextQuestion();
-              resetTimer(roundTime);
-              pauseTimer();
-            }
+            pauseTimer();
+            // if (isLastQuestion) setQuizCompleted(true);
+            // else {
+            //   nextQuestion();
+            //   resetTimer(roundTime);
+            //   pauseTimer();
+            // }
           }
         } else {
           const nextTeam = passToNextTeam();
@@ -642,6 +661,15 @@ const GeneralRound = ({ onFinish, sessionId }) => {
     );
   }
 
+  // Get the correct option text
+  const getCorrectOptionText = () => {
+    if (!currentQuestion) return "";
+    const correctOpt = currentQuestion.options.find(
+      (opt) => opt.id === currentQuestion.correctOptionId
+    );
+    return correctOpt ? correctOpt.text : "";
+  };
+
   // ---------------- Render ----------------
   return (
     <section className="quiz-container">
@@ -651,7 +679,6 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         </div>
       )}
 
-      {/* View Scores Button */}
       <button
         className="view-scores-btn detail-info"
         onClick={() => setShowScoresModal(true)}
@@ -664,10 +691,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           className="modal-overlay"
           onClick={() => setShowScoresModal(false)}
         >
-          <div
-            className="scores-modal"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
-          >
+          <div className="scores-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Current Team Scores</h3>
             <ul>
               {teams.map((team, idx) => (
@@ -712,91 +736,148 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         enableNegative={activeRound?.rules?.enableNegative || false}
       />
 
-      <>
-        {" "}
-        {!quizCompleted ? (
-          !questionDisplay ? (
-            !currentQuestion ? (
-              <div className="centered-control">
-                <p className="form-heading">Loading questions...</p>
-              </div>
-            ) : (
-              <div className="centered-control">
-                <Button
-                  className="start-question-btn"
-                  onClick={() => {
-                    setQuestionDisplay(true);
-                    if (activeRound?.rules?.enableTimer) {
-                      const timeLimit = secondHand
-                        ? PASS_TIME_LIMIT
-                        : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
-                      resetTimer(timeLimit);
-                      startTimer();
-                      setOptionSelected(false);
-                    }
+      {/* NEW: Show Correct Answer Section */}
+      {showCorrectAnswer ? (
+        <>
+          <QuestionCard
+            questionText={currentQuestion?.question ?? "No question loaded"}
+            displayedText={`${displayedText}`}
+            mediaType={currentQuestion.mediaType}
+            mediaUrl={currentQuestion.mediaUrl}
+            onMediaClick={handleMediaClick}
+          />
+
+          <div
+            style={{
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem",
+              width: "100%",
+            }}
+          >
+            <div className="correct-answer-display">
+              <p>
+                ✓ Correct Answer:{" "}
+                <strong style={{ color: "#32be76ff" }}>
+                  {getCorrectOptionText()}
+                </strong>
+              </p>
+
+              {currentQuestion?.shortAnswer && (
+                <p
+                  style={{
+                    fontSize: "1rem",
+                    color: "#aaa",
+                    marginTop: "1rem",
+                    fontStyle: "italic",
                   }}
                 >
-                  Show Question <BiShow className="icon" />
-                </Button>
-              </div>
-            )
-          ) : (
-            <>
-              {currentQuestion ? (
-                <>
-                  <QuestionCard
-                    questionText={
-                      currentQuestion?.question ?? "No question loaded"
-                    }
-                    displayedText={`Q. ${displayedText}`}
-                    mediaType={currentQuestion.mediaType}
-                    mediaUrl={currentQuestion.mediaUrl}
-                    onMediaClick={handleMediaClick}
-                  />
-                  <OptionList
-                    options={currentQuestion.options}
-                    selectedAnswer={selectedAnswer}
-                    correctAnswer={currentQuestion.correctOptionId}
-                    handleSelect={handleOptionSelection}
-                    isRunning={
-                      activeRound?.rules?.enableTimer ? isRunning : false
-                    }
-                  />
-                  {!optionSelected && (
-                    <div className="centered-control">
-                      <Button
-                        className="pass-question-btn"
-                        onClick={() => {
-                          if (!activeRound?.rules?.enablePass) return;
-                          if (
-                            teams[activeIndex]?.passesUsed >=
-                            activeRound.rules.passLimit
-                          )
-                            return;
-                          handlePass();
-                          resetTimer(PASS_TIME_LIMIT);
+                  {currentQuestion.shortAnswer}
+                </p>
+              )}
+            </div>
+            <Button
+              className="nxt-question-btn"
+              onClick={handleNextAfterCorrectAnswer}
+            >
+              <h3>NEXT QUESTION</h3>
+              <FaArrowRight />
+            </Button>
+          </div>
+        </>
+      ) : (
+        <>
+          {!quizCompleted ? (
+            !questionDisplay ? (
+              !currentQuestion ? (
+                <div className="centered-control">
+                  <p className="form-heading">Loading questions...</p>
+                </div>
+              ) : (
+                <div className="centered-control">
+                  <Button
+                    className="start-question-btn"
+                    onClick={() => {
+                      setQuestionDisplay(true);
+                      if (activeRound?.rules?.enableTimer) {
+                        const timeLimit = secondHand
+                          ? PASS_TIME_LIMIT
+                          : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
+                        resetTimer(timeLimit);
+                        startTimer();
+                        setOptionSelected(false);
+                      }
+                    }}
+                  >
+                    Show Question <BiShow className="icon" />
+                  </Button>
+                </div>
+              )
+            ) : (
+              <>
+                {currentQuestion ? (
+                  <>
+                    <QuestionCard
+                      questionText={
+                        currentQuestion?.question ?? "No question loaded"
+                      }
+                      displayedText={`${displayedText}`}
+                      mediaType={currentQuestion.mediaType}
+                      mediaUrl={currentQuestion.mediaUrl}
+                      onMediaClick={handleMediaClick}
+                    />
+                    <OptionList
+                      options={currentQuestion.options}
+                      selectedAnswer={selectedAnswer}
+                      correctAnswer={currentQuestion.correctOptionId}
+                      handleSelect={handleOptionSelection}
+                      isRunning={
+                        activeRound?.rules?.enableTimer ? isRunning : false
+                      }
+                    />
+                    {!optionSelected && (
+                      <div
+                        style={{
+                          position: "fixed",
+                          bottom: "1rem",
+                          left: "1rem",
                         }}
                       >
-                        <IoHandLeftOutline className="icon" /> Pass Question{" "}
-                        <IoHandRightOutline className="icon" />
-                      </Button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <p className="text-gray-400 mt-4">Loading questions...</p>
-              )}
-            </>
-          )
-        ) : (
-          <FinishDisplay
-            onFinish={onFinish}
-            message="General Round Finished!"
-            // historyIds={historyIds} // { teamId: historyId, ... }
-            teams={teams}
-          />
-        )}
-      </>
+                        <Button
+                          className="pass-question-btn"
+                          onClick={() => {
+                            if (!activeRound?.rules?.enablePass) return;
+                            if (
+                              teams[activeIndex]?.passesUsed >=
+                              activeRound.rules.passLimit
+                            )
+                              return;
+                            handlePass();
+                            resetTimer(PASS_TIME_LIMIT);
+                          }}
+                        >
+                          <IoHandLeftOutline className="icon" /> Pass Question{" "}
+                          <IoHandRightOutline className="icon" />
+                        </Button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <p className="text-gray-400 mt-4">Loading questions...</p>
+                )}
+              </>
+            )
+          ) : (
+            <FinishDisplay
+              onFinish={onFinish}
+              message="General Round Finished!"
+              teams={teams}
+            />
+          )}
+        </>
+      )}
 
       {activeRound?.rules?.enableTimer && (
         <TimerControls

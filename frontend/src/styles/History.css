@@ -335,7 +335,7 @@
 .round-tab {
   min-width: 200px;
   width: 25rem;
-  background: #6098e8;
+  background: linear-gradient(135deg, #6098e8 0%, #3c6fb5 100%);
   border-radius: 12px;
   padding: 1.2rem 1.8rem;
   flex-shrink: 0;
@@ -374,9 +374,13 @@
 
 /* ===== OVERALL SUMMARY ===== */
 .overall-summary {
-  background: linear-gradient(135deg, #e4c33f 0%, #d4b32f 100%);
+  /* background: linear-gradient(135deg, #e4c33f 0%, #d4b32f 100%);
   border-left: 4px solid #c4a93c;
-  border-bottom: 4px solid #c4a93c;
+  border-bottom: 4px solid #c4a93c; */
+
+  background: linear-gradient(135deg, #0dc575 0%, #137d4f 100%);
+  border-left: 4px solid #137d4f;
+  border-bottom: 4px solid #137d4f;
   padding: 1.2rem 1.5rem;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(228, 195, 63, 0.3);

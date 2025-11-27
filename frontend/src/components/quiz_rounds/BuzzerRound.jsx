@@ -584,7 +584,7 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
         ) : currentQuestion ? (
           <>
             <QuestionCard
-              displayedText={`Q${currentQuestionIndex + 1}. ${displayedText}`}
+              displayedText={`${currentQuestionIndex + 1}. ${displayedText}`}
               category={currentQuestion.category}
               mediaType={currentQuestion.mediaType}
               mediaUrl={currentQuestion.mediaUrl}
@@ -593,9 +593,12 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
 
             {showCorrectAnswer ? (
               <>
-                <div className="correct-answer-display">
+                <div
+                  className="correct-answer-display"
+                  style={{ marginBottom: "1rem" }}
+                >
                   <p>
-                    🎯 Correct Answer:{" "}
+                    ✓ Correct Answer:{" "}
                     <strong style={{ color: "#32be76ff" }}>
                       {correctAnswerValue}
                     </strong>
@@ -603,7 +606,7 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
                 </div>
                 <div>
                   <Button
-                    className="next-question-btn-dup"
+                    className="nxt-question-btn"
                     onClick={() => {
                       if (!isLastQuestion) {
                         nextQuestion();

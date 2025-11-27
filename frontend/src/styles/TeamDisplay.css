@@ -28,11 +28,22 @@
 
 .team-name {
   position: absolute;
-  top: 1.8rem;
-  left: 15rem;
-  font-size: 2rem;
+  top: 3rem;
+
+  /* 🔥 Auto center instead of left: XXrem */
+  left: 25%;
+  transform: translateX(-50%);
+
+  display: flex;
+  gap: 0.6rem;
+  justify-content: center;
+  align-items: center;
+
+  /* 🔥 Fully responsive text scaling */
+  font-size: clamp(1rem, 2vw, 2rem);
   font-weight: 800;
   color: rgb(207, 207, 207);
+  text-wrap: balance;
 }
 
 .quiz-timer {
@@ -66,10 +77,11 @@
 
 .quiz-logo {
   position: absolute;
-  right: 1rem;
+  top: -1rem;
+  left: 0rem;
   padding: 0.5rem;
   z-index: 200;
-  width: 10rem;
+  width: 8.5rem;
 }
 
 /* Team colors (can be applied via dynamic className) */
@@ -148,10 +160,8 @@
   }
 
   .team-name {
-    font-size: 1.4rem;
-    position: absolute;
-    top: 1.8rem;
-    left: 6rem;
+    top: 3.2rem;
+    font-size: clamp(1rem, 2.8vw, 1.6rem);
   }
 
   .quiz-logo {
@@ -174,10 +184,8 @@
   }
 
   .team-name {
-    font-size: 1rem;
-    position: absolute;
-    top: 1.8rem;
-    left: 0.5rem;
+    top: 4rem;
+    font-size: clamp(0.9rem, 3vw, 1.4rem);
   }
 
   .quiz-logo {
@@ -200,10 +208,8 @@
 
 @media (max-width: 480px) {
   .team-name {
-    font-size: 0.8rem;
-    position: absolute;
-    top: 1.8rem;
-    left: 0rem;
+    top: 2.2rem;
+    font-size: clamp(0.75rem, 3.6vw, 1.2rem);
   }
 
   .quiz-timer {

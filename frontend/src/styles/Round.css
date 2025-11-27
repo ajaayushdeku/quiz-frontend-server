@@ -332,3 +332,54 @@
     font-size: 0.9rem;
   }
 }
+
+/* ---------- custom checkbox ---------- */
+.custom-checkbox {
+  /* make it layout-stable and non-scaling by parent fonts */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+
+  /* size: scales nicely between min and max */
+  width: clamp(1.25rem, 2.2vw, 1.6rem); /* ~20px - 26px depending on screen */
+  height: clamp(1.25rem, 2.2vw, 1.6rem);
+
+  border-radius: 0.45rem; /* rounded box look */
+  border: 2px solid #787878; /* border color */
+  background-color: #fff;
+  transition: background-color 0.18s ease, transform 0.12s ease,
+    border-color 0.18s ease;
+  flex: 0 0 auto; /* keep fixed box size in flex containers */
+
+  /* alignment padding (keeps SVG centered) */
+  padding: 0.08rem;
+  margin-right: 0.6rem;
+}
+
+/* when used as a checked box */
+.custom-checkbox.checked {
+  background: linear-gradient(135deg, #08ce67ff, #06b85dff);
+  border-color: rgba(8, 206, 103, 0.95);
+  box-shadow: 0 2px 8px rgba(8, 206, 103, 0.14);
+}
+
+/* check icon inside */
+.custom-checkbox-icon {
+  width: 100%;
+  height: 100%;
+  fill: white;
+  pointer-events: none;
+  display: block;
+}
+
+/* small-screen tweak */
+@media (max-width: 480px) {
+  .custom-checkbox {
+    width: clamp(1rem, 4.2vw, 1.2rem);
+    height: clamp(1rem, 4.2vw, 1.2rem);
+  }
+}
+
+/* Accessibility: if you hide the native input, ensure labels are clickable */
+/* Example pattern: label > input[type="checkbox"] { display:none } label .custom-checkbox { ... } */

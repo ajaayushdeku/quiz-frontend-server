@@ -789,35 +789,45 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
           <>
             <QuestionCard
               questionText={currentQuestion?.question}
-              displayedText={`Q${questionCount + 1}. ${displayedText}`}
+              displayedText={`${questionCount + 1}. ${displayedText}`}
               mediaType={currentQuestion?.mediaType}
               mediaUrl={currentQuestion?.mediaUrl}
             />
-            <AnswerTextBox
-              value={answerInput}
-              onChange={handleInputChange}
-              onSubmit={() => handleAnswer(true)}
-              placeholder="Enter your answer"
-            />
+            {isRunning && (
+              <>
+                <AnswerTextBox
+                  value={answerInput}
+                  onChange={handleInputChange}
+                  onSubmit={() => handleAnswer(true)}
+                  placeholder="Enter your answer"
+                />
 
-            <div className="centered-control">
-              <Button
-                className="pass-question-btn"
-                onClick={() => {
-                  if (
-                    !finishQus &&
-                    !finalFinished &&
-                    roundStarted &&
-                    activeRound?.rules?.enablePass
-                  ) {
-                    passQuestion();
-                  }
-                }}
-              >
-                <IoHandLeftOutline className="icon" /> Pass Question{" "}
-                <IoHandRightOutline className="icon" />
-              </Button>
-            </div>
+                <div
+                  style={{
+                    position: "fixed",
+                    bottom: "1rem",
+                    left: "1rem",
+                  }}
+                >
+                  <Button
+                    className="pass-question-btn"
+                    onClick={() => {
+                      if (
+                        !finishQus &&
+                        !finalFinished &&
+                        roundStarted &&
+                        activeRound?.rules?.enablePass
+                      ) {
+                        passQuestion();
+                      }
+                    }}
+                  >
+                    <IoHandLeftOutline className="icon" /> Pass Question{" "}
+                    <IoHandRightOutline className="icon" />
+                  </Button>
+                </div>
+              </>
+            )}
 
             {activeRound?.rules?.enableTimer && (
               <TimerControls
@@ -874,7 +884,7 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
                       </span>
                     </p>
                     <p className="team-summary-answer">
-                      <span>🎯 Correct Answer:</span> <br />
+                      <span> ✓ Correct Answer:</span> <br />
                       {q.correctAnswer}
                     </p>
                     <p

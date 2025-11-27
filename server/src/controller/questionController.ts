@@ -69,14 +69,34 @@ export const createQuestion = async (
     }
 
     //  MEDIA
+    // let finalMedia = null;
+    // if (req.file) {
+    //   const file = req.file as any;
+    //   finalMedia = {
+    //     type: file.resource_type || "file",
+    //     url: file.path || file.secure_url,
+    //     publicId: file.filename || file.public_id,
+    //     resourceType: file.resource_type || "raw",
+    //   };
+    // }
+
+    //  MEDIA
     let finalMedia = null;
+
     if (req.file) {
       const file = req.file as any;
+      const url = file.path || file.secure_url;
+
+      // Detect file type based on extension
+      let detectedType = "file";
+      if (url?.match(/\.(jpg|jpeg|png|gif|webp)$/i)) detectedType = "image";
+      else if (url?.match(/\.(mp4|mov|webm|avi)$/i)) detectedType = "video";
+
       finalMedia = {
-        type: file.resource_type || "file",
-        url: file.path || file.secure_url,
+        type: detectedType, // <-- now image / video / file correctly stored
+        url,
         publicId: file.filename || file.public_id,
-        resourceType: file.resource_type || "raw",
+        resourceType: detectedType,
       };
     }
 

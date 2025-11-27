@@ -45,7 +45,7 @@ const TeamDisplay = ({
               // textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
             }}
           >
-            <MdGroup />
+            {/* <MdGroup /> */}
             <div> Team {activeTeam?.name || "-"}</div>
           </h2>
           <div style={{ textAlign: "center" }}>

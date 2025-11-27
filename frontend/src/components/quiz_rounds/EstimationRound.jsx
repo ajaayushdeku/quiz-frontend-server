@@ -292,74 +292,83 @@ const EstimationRound = ({ onFinish, sessionId }) => {
             </div>
           )
         ) : submitted ? (
-          <div className="detail-info result-container">
-            {/* <h3 className="result-title">Results:</h3> */}
-
-            {result?.correctAnswer !== undefined && (
-              <div className="correct-answer-display">
-                <p>
-                  🎯 Correct Answer:{" "}
-                  <strong style={{ color: "#32be76ff" }}>
-                    {result.correctAnswer}
-                  </strong>
-                </p>
-              </div>
-            )}
-
-            <div className="estimate-centered-control">
-              <Button className="next-question-btn" onClick={nextQuestion}>
-                <h3>NEXT QUESTION</h3>
-                <FaArrowRight />
-              </Button>
-
-              {result?.winner ? (
-                <div className="winner-list">
-                  <h4 className="winner-team">🏆 Closest Team(s) : </h4>
-                  {([result.winner] || []).map((w) => {
-                    const teamName =
-                      teams.find((t) => t.id === w.teamId)?.name || "Unknown";
-                    return (
-                      <div className="winner-team-list">
-                        <div>
-                          <strong className="winner-team">
-                            <MdGroup
-                              className="team-icon-result-page"
-                              style={{ color: "black" }}
-                            />
-                            <h3>{teamName.toUpperCase()}</h3>
-                          </strong>
-                          <p key={w.teamId} className="winner-item">
-                            <div className="estimation-winner-team-info">
-                              <div>
-                                Team's Answer: <h3> {w.givenAnswer}</h3>
-                              </div>
-                              {/* Difference from the Estimation:{" "} */}
-                              {/* <h3>{w.difference}</h3> */}
-                              <div
-                                style={{
-                                  paddingLeft: "2rem",
-                                  borderLeft: "2px solid #c9c9c9ff",
-                                }}
-                              >
-                                {" "}
-                                Points Earned: <h3> {w.pointsAwarded}</h3>
-                              </div>
-                            </div>
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
+          <>
+            {" "}
+            <QuestionCard
+              displayedText={`${currentQuestionIndex + 1}. ${
+                currentQuestion.text
+              }`}
+              mediaType={currentQuestion.mediaType}
+              mediaUrl={currentQuestion.mediaUrl}
+              onMediaClick={handleMediaClick}
+            />
+            <div className="detail-info">
+              {result?.correctAnswer !== undefined && (
+                <div className="correct-answer-display">
+                  <p>
+                    ✓ Correct Answer:{" "}
+                    <strong style={{ color: "#32be76ff" }}>
+                      {result.correctAnswer}
+                    </strong>
+                  </p>
                 </div>
-              ) : (
-                <p className="waiting-text">Waiting for remaining teams...</p>
               )}
+
+              <div className="estimate-centered-control">
+                <Button className="next-question-btn" onClick={nextQuestion}>
+                  <h3>NEXT QUESTION</h3>
+                  <FaArrowRight />
+                </Button>
+
+                {result?.winner ? (
+                  <div className="winner-list">
+                    <h4 className="winner-team">🏆 Closest Team(s) : </h4>
+                    {([result.winner] || []).map((w) => {
+                      const teamName =
+                        teams.find((t) => t.id === w.teamId)?.name || "Unknown";
+                      return (
+                        <div className="winner-team-list">
+                          <div>
+                            <strong className="winner-team">
+                              <MdGroup
+                                className="team-icon-result-page"
+                                style={{ color: "black" }}
+                              />
+                              <h3>{teamName.toUpperCase()}</h3>
+                            </strong>
+                            <p key={w.teamId} className="winner-item">
+                              <div className="estimation-winner-team-info">
+                                <div>
+                                  Team's Answer: <h3> {w.givenAnswer}</h3>
+                                </div>
+                                {/* Difference from the Estimation:{" "} */}
+                                {/* <h3>{w.difference}</h3> */}
+                                <div
+                                  style={{
+                                    paddingLeft: "2rem",
+                                    borderLeft: "2px solid #c9c9c9ff",
+                                  }}
+                                >
+                                  {" "}
+                                  Points Earned: <h3> {w.pointsAwarded}</h3>
+                                </div>
+                              </div>
+                            </p>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="waiting-text">Waiting for remaining teams...</p>
+                )}
+              </div>
             </div>
-          </div>
+          </>
         ) : (
           <>
             <QuestionCard
-              displayedText={`Q${currentQuestionIndex + 1}. ${
+              displayedText={`${currentQuestionIndex + 1}. ${
                 currentQuestion.text
               }`}
               mediaType={currentQuestion.mediaType}

@@ -49,7 +49,10 @@ export default function CreateQuiz() {
           "http://localhost:4000/api/question/get-questions",
           { withCredentials: true }
         );
-        setQuestions(res.data.data || []);
+        const sorted = res.data.data.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
+        setQuestions(sorted);
       } catch (err) {
         console.error(err);
         toast.error("Failed to fetch questions");
@@ -294,24 +297,11 @@ export default function CreateQuiz() {
   // --- CHECKBOX ---
   const Checkbox = ({ checked }) => (
     <span
-      style={{
-        width: 20,
-        height: 20,
-        border: "1px solid #000",
-        display: "inline-block",
-        marginRight: 8,
-        backgroundColor: checked ? "#08ce67ff" : "#fff",
-        borderRadius: 10,
-        position: "relative",
-      }}
+      className={`custom-checkbox ${checked ? "checked" : ""}`}
+      aria-hidden="true"
     >
       {checked && (
-        <svg
-          viewBox="0 0 24 24"
-          width="16"
-          height="16"
-          style={{ position: "absolute", top: 2, left: 2, fill: "white" }}
-        >
+        <svg viewBox="0 0 24 24" className="custom-checkbox-icon" aria-hidden>
           <path d="M20.285 6.709l-11.025 11.025-5.545-5.545 1.414-1.414 4.131 4.131 9.611-9.611z" />
         </svg>
       )}
@@ -978,7 +968,11 @@ export default function CreateQuiz() {
                     // Determine media type
                     let mediaTag = null;
                     if (q.media) {
-                      if (q.media.type === "file") {
+                      if (
+                        q.media.type === "file" ||
+                        q.media.type === "image" ||
+                        q.media.type === "video"
+                      ) {
                         mediaTag = <span className="qn-media-tag">Media</span>;
                       }
                     }
@@ -1008,10 +1002,7 @@ export default function CreateQuiz() {
                           style={{ display: "none" }}
                         />
                         <Checkbox checked={checked} />
-                        {q.text}{" "}
-                        <div className="qn-category">
-                          {q.category.toUpperCase()}
-                        </div>
+                        {q.text} <div className="qn-category">{q.category}</div>
                         {mediaTag && <div className="qn-media">{mediaTag}</div>}
                       </label>
                     );

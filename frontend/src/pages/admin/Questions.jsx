@@ -280,9 +280,9 @@ export default function QuestionForm() {
           <div className="media-preview">
             {file?.type.startsWith("image") ? (
               <img src={preview} alt="Preview" className="preview-image" />
-            ) : (
+            ) : file?.type.startsWith("video") ? (
               <video src={preview} controls className="preview-video" />
-            )}
+            ) : null}
             <button
               type="button"
               onClick={handleFileRemove}

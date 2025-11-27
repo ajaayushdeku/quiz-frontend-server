@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { FaPause, FaPlay } from "react-icons/fa";
+import { FaPause, FaPlay, FaStopCircle } from "react-icons/fa";
 import { VscDebugRestart } from "react-icons/vsc";
 import { IoChevronUp, IoChevronDown } from "react-icons/io5";
 
@@ -42,6 +42,14 @@ const PreBuzzTimerControls = ({
     setPreBuzzTime(20); // or import PreBuzzedTimer constant
     setIsRunning(true);
     setPreBuzzActive(true);
+  };
+
+  // NEW: Handle manual end of pre-buzz timer
+  const handleEndTimer = () => {
+    setPreBuzzTime(0);
+    setIsRunning(false);
+    setPreBuzzActive(false);
+    onPreBuzzEnd?.();
   };
 
   return (
@@ -87,6 +95,17 @@ const PreBuzzTimerControls = ({
             </button>
             <button onClick={handleRestart} className="time-controls-btn">
               <VscDebugRestart />
+            </button>
+            <button
+              onClick={handleEndTimer}
+              className="time-controls-btn"
+              style={{
+                backgroundColor: "#d61344ff",
+                border: "2px solid #ff0040",
+              }}
+              title="End Pre-Buzz Timer Now"
+            >
+              <FaStopCircle />
             </button>
           </div>
         )}

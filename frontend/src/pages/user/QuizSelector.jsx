@@ -124,7 +124,17 @@ const QuizSelector = () => {
       {/* Quiz Selection Section */}
       <section className="quiz-selection-section" ref={quizSectionRef}>
         <div className="section-header">
-          <h2 className="section-title">QUIZZES</h2>
+          <h2
+            className="section-title"
+            style={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <IoExtensionPuzzle style={{ marginRight: "1rem" }} />
+            QUIZZES
+          </h2>
         </div>
 
         {quizzes.length === 0 ? (
@@ -145,7 +155,11 @@ const QuizSelector = () => {
                     className="quiz-accordion-header"
                     onClick={() => toggleQuiz(quiz._id)}
                   >
-                    <h3 className="quiz-accordion-title">{quiz.name}</h3>
+                    <h3 className="quiz-accordion-title">
+                      {" "}
+                      <IoExtensionPuzzle style={{ marginRight: "1rem" }} />
+                      {quiz.name}
+                    </h3>
                     <IoChevronDown
                       className={`accordion-icon ${
                         expandedQuiz === quiz._id ? "rotated" : ""

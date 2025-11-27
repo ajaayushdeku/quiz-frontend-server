@@ -16,12 +16,14 @@ import dotenv from "dotenv";
 import path from "path";
 import cookieParser from "cookie-parser";
 import events from "events";
+import ttsRouter from "./routes/tts";
 events.EventEmitter.defaultMaxListeners = 20; // or higher
 
 const app = express();
 // Disable strict populate globally
 mongoose.set("strictPopulate", false);
 
+dotenv.config();
 app.use(express.json());
 //app.use(bodyParser.json());
 app.use(cookieParser());
@@ -48,6 +50,8 @@ app.use("/api/quizMaster", quizMasterRoutes);
 app.use("/api/history", history);
 app.use("/api/playquiz", playQuiz);
 
+app.use("/api/tts", ttsRouter);
+
 // test route in app.ts (temporarily)
 app.get("/api/test-cloudinary", (req, res) => {
   res.json({
@@ -60,5 +64,7 @@ app.post("/api/test-body", (req, res) => {
   console.log("Body received at /api/test-body:", req.body);
   res.json(req.body);
 });
+
+console.log("Open AI API key Secret in use:", process.env.OPENAI_API_KEY);
 
 export default app;
