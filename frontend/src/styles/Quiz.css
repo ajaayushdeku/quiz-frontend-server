@@ -446,7 +446,7 @@
   justify-content: center;
   gap: 1rem;
 
-  background: linear-gradient(135deg, #ffffff, #e3e3e3);
+  background: linear-gradient(135deg, #ffffff, #eae7e7);
   border: 2px dashed #ffffff;
   color: rgb(80, 79, 79);
   font-weight: bold;
@@ -454,7 +454,7 @@
   cursor: pointer;
   transition: all 0.28s ease;
   white-space: nowrap;
-
+  letter-spacing: 4px;
   /* 🔥 Responsive font size */
   font-size: clamp(0.9rem, 1.8vw, 1.4rem);
 }
@@ -462,7 +462,7 @@
 .start-question-btn {
   margin-top: 7rem;
   padding: 1.2rem 2rem;
-  border-radius: 1rem;
+  border-radius: 3rem;
 }
 
 .pass-question-btn {
@@ -505,6 +505,7 @@
   border-radius: 12px;
   background: rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(10px);
+  letter-spacing: 2px;
 }
 
 .time-controls-list {
@@ -879,7 +880,7 @@
   margin: 2rem auto;
   background: linear-gradient(135deg, #1b1b1b, #242424);
   box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
-  border: 2px dashed rgb(78, 78, 78);
+  border: 2px solid rgb(78, 78, 78);
   z-index: 20;
   position: relative;
 }
@@ -904,7 +905,7 @@
   font-size: 1.75rem;
   font-weight: 700;
   margin-bottom: 2rem;
-  letter-spacing: 0.5px;
+  letter-spacing: 3px;
 }
 
 .team-answer-grid {
@@ -1147,6 +1148,7 @@
   border: 2px dashed rgb(40, 134, 166);
   cursor: pointer;
   white-space: nowrap;
+  letter-spacing: 2px;
 }
 
 .category-btn:hover {
@@ -1170,6 +1172,7 @@
   color: rgb(243, 243, 243);
   cursor: not-allowed;
   white-space: nowrap;
+  letter-spacing: 2px;
 }
 
 .category-btn-empty:hover {
@@ -1743,87 +1746,6 @@
   }
 }
 
-/* Center container */
-.negative-pointing-wrapper {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-top: 0.5rem;
-}
-
-/* Badge styling */
-.negative-pointing-badge {
-  display: flex;
-  flex-direction: row;
-  justify-content: center;
-  align-items: center;
-  gap: 0.7rem;
-  background-color: #e23a3aff;
-  color: #ffffffff;
-  border: 2px solid #ffffffff;
-  padding: 0.2rem 1rem;
-  width: fit-content;
-  border-radius: 20px;
-  font-weight: 700;
-  font-size: 0.9rem;
-  text-align: center;
-}
-
-/* ============================= */
-/* 🖥️ Large Tablets & Small Desktops */
-/* ============================= */
-@media (max-width: 1024px) {
-  .negative-pointing-badge {
-    padding: 0.35rem 0.9rem;
-    font-size: 1rem;
-    border-radius: 18px;
-  }
-}
-
-/* ============================= */
-/* 📱 Tablets */
-/* ============================= */
-@media (max-width: 768px) {
-  .negative-pointing-badge {
-    padding: 0.32rem 0.85rem;
-    font-size: 0.95rem;
-    border-radius: 16px;
-  }
-}
-
-/* ============================= */
-/* 📱 Mobile landscape / big phones */
-/* ============================= */
-@media (max-width: 720px) {
-  .negative-pointing-badge {
-    padding: 0.3rem 0.8rem;
-    font-size: 0.8rem;
-    border-radius: 15px;
-  }
-}
-
-/* ============================= */
-/* 📱 Small mobile devices */
-/* ============================= */
-@media (max-width: 480px) {
-  .negative-pointing-badge {
-    padding: 0.28rem 0.75rem;
-    font-size: 0.7rem;
-    border-radius: 14px;
-  }
-}
-
-/* ============================= */
-/* 📱 Extra small devices */
-/* ============================= */
-@media (max-width: 360px) {
-  .negative-pointing-badge {
-    padding: 0.25rem 0.7rem;
-    font-size: 0.6rem;
-    border-radius: 12px;
-  }
-}
-
 /* ============================= */
 /* Speak Text Button */
 /* ============================= */
@@ -1844,6 +1766,7 @@
   cursor: pointer;
   transition: all 0.2s ease-in-out;
   margin-top: 1rem;
+  letter-spacing: 2px;
 }
 
 .speak-text-btn:hover {

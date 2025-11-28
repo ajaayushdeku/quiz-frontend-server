@@ -22,8 +22,26 @@ const TeamDisplay = ({
   highTimer = 60,
   enableNegative = false,
 }) => {
+  // Determine timer color class
+  const getTimerColor = () => {
+    if (timeRemaining <= lowTimer) return "#ff4d6d";
+    if (timeRemaining <= midTimer && timeRemaining > lowTimer) return "#ffd34d";
+    if (timeRemaining <= highTimer || timeRemaining >= highTimer)
+      return "#4d97ff";
+    return "white";
+  };
+
+  const getTimerBorderColor = () => {
+    if (timeRemaining <= lowTimer) return "2px solid #ff4d6d";
+    if (timeRemaining <= midTimer && timeRemaining > lowTimer)
+      return "2px dashed #ffd34d";
+    if (timeRemaining <= highTimer || timeRemaining >= highTimer)
+      return "2px dotted #4d97ff";
+    return "white";
+  };
+
   return (
-    <header className="quiz-header">
+    <header className="quiz-header detail-info">
       <div className="info-msg detail-info">
         {toastMessage}{" "}
         {enableNegative && (
@@ -42,43 +60,31 @@ const TeamDisplay = ({
             className="team-name detail-info"
             style={{
               color: TEAM_COLORS?.[activeTeam?.name],
-              // textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
+              border: `2px solid  ${TEAM_COLORS?.[activeTeam?.name]}`,
+              display: "flex",
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "center",
             }}
           >
-            {/* <MdGroup /> */}
+            <MdGroup style={{ marginRight: "0.5rem" }} />
             <div> Team {activeTeam?.name || "-"}</div>
           </h2>
+
           <div style={{ textAlign: "center" }}>
             <div className="quiz-team-details">
               {timeRemaining !== undefined && (
-                <div
-                  className="quiz-timer detail-info"
-                  style={{
-                    color:
-                      timeRemaining <= lowTimer
-                        ? "#ff4d6d"
-                        : timeRemaining <= midTimer && timeRemaining > lowTimer
-                        ? "#ffd34dff"
-                        : timeRemaining <= highTimer ||
-                          timeRemaining >= highTimer
-                        ? "#4d97ffff"
-                        : "white",
-
-                    // border: `5px dashed ${TEAM_COLORS?.[activeTeam]}`
-                    //
-                    border:
-                      timeRemaining <= lowTimer
-                        ? "5px dashed #ff4d6d"
-                        : timeRemaining <= midTimer && timeRemaining > lowTimer
-                        ? "5px dashed #ffd34dff"
-                        : timeRemaining <= highTimer ||
-                          timeRemaining >= highTimer
-                        ? "5px dashed #4d97ffff"
-                        : "5px dashed #cbcbcbff",
-                  }}
-                >
-                  ⏱ : {timeRemaining > 0 ? formatTime(timeRemaining) : "--"}
-                </div>
+                <>
+                  <div
+                    className="quiz-timer detail-info"
+                    style={{
+                      color: getTimerColor(),
+                      border: getTimerBorderColor(),
+                    }}
+                  >
+                    ⏱ {timeRemaining > 0 ? formatTime(timeRemaining) : "--"}
+                  </div>
+                </>
               )}
             </div>
 
@@ -101,33 +107,35 @@ const TeamDisplay = ({
           </div>
         </>
       ) : (
-        <div style={{ textAlign: "center" }}>
-          <div className="quiz-team-details">
-            <h2
-              className="team-name detail-info"
-              style={{
-                color: "white",
-                textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
-              }}
-            >
-              All Teams
-            </h2>
+        <>
+          <h2
+            className="team-name detail-info"
+            style={{
+              color: "white",
+              textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
+              border: `2px solid white`,
+            }}
+          >
+            All Teams
+          </h2>
+          <div style={{ textAlign: "center" }}>
+            <div className="quiz-team-details">
+              <div
+                className="quiz-timer detail-info"
+                style={{ color: "white", border: "2px solid  #d8d8d8ff" }}
+              >
+                ⏱ {formatTime(timeRemaining)}
+              </div>
+            </div>
 
-            <div
-              className="quiz-timer detail-info"
-              style={{ color: "white", border: "5px dashed  #d8d8d8ff" }}
-            >
-              ⏱ : {formatTime(timeRemaining)}
+            <div className="hand-notifier first-hand detail-info">
+              Write the answer on the team's respective text box.
             </div>
           </div>
-
-          <div className="hand-notifier first-hand detail-info">
-            Write the answer on the team's respective text box.
-          </div>
-        </div>
+        </>
       )}
 
-      <img src={logo} className="quiz-logo detail-info" alt="logo" />
+      {/* <img src={logo} className="quiz-logo detail-info" alt="logo" /> */}
     </header>
   );
 };

@@ -17,7 +17,7 @@ import { useUIHelpers } from "../../hooks/useUIHelpers";
 import { TbScoreboard } from "react-icons/tb";
 
 const COLORS = [
-  "#8d1734ff",
+  "#d61344ff",
   "#0ab9d4ff",
   "#32be76ff",
   "#e5d51eff",
@@ -240,19 +240,23 @@ const EstimationRound = ({ onFinish, sessionId }) => {
           className="modal-overlay"
           onClick={() => setShowScoresModal(false)}
         >
-          <div
-            className="scores-modal"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
-          >
+          <div className="scores-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Current Team Scores</h3>
             <ul>
               {teams.map((team, idx) => (
                 <div key={team.id}>
-                  <span
-                    className="team-color-indicator"
-                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
-                  ></span>
-                  <span className="team-name-view">{team.name}:</span>
+                  <span>
+                    <span className="team-color-indicator">
+                      <MdGroup style={{ color: TEAM_COLORS[team.name] }} />
+                    </span>
+
+                    <span
+                      className="team-name-view"
+                      style={{ color: TEAM_COLORS[team.name] }}
+                    >
+                      {team.name.toUpperCase()}:
+                    </span>
+                  </span>
                   <span className="team-points-view">{team.points} pts</span>
                 </div>
               ))}

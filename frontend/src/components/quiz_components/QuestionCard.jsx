@@ -6,7 +6,7 @@ const QuestionCard = ({ mediaType, mediaUrl, displayedText, category }) => {
   const [showModal, setShowModal] = useState(false);
   const { speakText, stopSpeaking, speaking, voices } = useTextSpeaker(
     "Google UK English Male",
-    "en-US"
+    "en-GB"
   );
 
   //   1 'Microsoft David - English (United States)' 'en-US' true true
@@ -45,7 +45,7 @@ const QuestionCard = ({ mediaType, mediaUrl, displayedText, category }) => {
               className={`speak-text-btn ${speaking ? "stop-speech" : ""}`}
               onClick={speakQuestion}
             >
-              {speaking ? "🔇 Stop" : "🔊 Speak"}
+              {speaking ? "🔇 Stop" : "🔊 Read Out the Question"}
             </button>
             {/* Media display */}
             <div className="media-container">

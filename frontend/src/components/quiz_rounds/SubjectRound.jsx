@@ -762,11 +762,16 @@ const SubjectRound = ({ onFinish, sessionId }) => {
             <ul>
               {teams.map((team, idx) => (
                 <div key={team.id}>
-                  <span
-                    className="team-name-view"
-                    style={{ color: TEAM_COLORS[team.name] }}
-                  >
-                    {team.name.toUpperCase()}:
+                  <span>
+                    <span className="team-color-indicator">
+                      <MdGroup style={{ color: TEAM_COLORS[team.name] }} />
+                    </span>
+                    <span
+                      className="team-name-view"
+                      style={{ color: TEAM_COLORS[team.name] }}
+                    >
+                      {team.name.toUpperCase()}:
+                    </span>
                   </span>
                   <span className="team-points-view">{team.points} pts</span>
                 </div>
@@ -866,7 +871,9 @@ const SubjectRound = ({ onFinish, sessionId }) => {
             !questionDisplay ? (
               !secondHand && !selectedCategory ? (
                 <div className="centered-control category-select">
-                  <p className="form-heading">Select a Category</p>
+                  <p className="form-heading" style={{ letterSpacing: "5px" }}>
+                    Select a Category
+                  </p>
                   <div className="category-options">
                     {availableCategories.map((cat) => {
                       const availableInCategory =

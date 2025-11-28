@@ -27,6 +27,7 @@ import rulesConfig from "../../config/rulesConfig";
 import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
 import { FaArrowRight } from "react-icons/fa";
+import { MdGroup } from "react-icons/md";
 
 const { settings } = rulesConfig.general_round;
 const TEAM_TIME_LIMIT = settings.teamTimeLimit;
@@ -696,11 +697,17 @@ const GeneralRound = ({ onFinish, sessionId }) => {
             <ul>
               {teams.map((team, idx) => (
                 <div key={team.id}>
-                  <span
-                    className="team-name-view"
-                    style={{ color: TEAM_COLORS[team.name] }}
-                  >
-                    {team.name.toUpperCase()}:
+                  <span>
+                    <span className="team-color-indicator">
+                      <MdGroup style={{ color: TEAM_COLORS[team.name] }} />
+                    </span>
+
+                    <span
+                      className="team-name-view"
+                      style={{ color: TEAM_COLORS[team.name] }}
+                    >
+                      {team.name.toUpperCase()}:
+                    </span>
                   </span>
                   <span className="team-points-view">{team.points} pts</span>
                 </div>

@@ -293,7 +293,7 @@
 }
 
 .select-quiz-btn:hover {
-  transform: translateX(5px);
+  transform: scale(1.1rem);
   box-shadow: 0 5px 20px rgba(96, 152, 232, 0.4);
 }
 

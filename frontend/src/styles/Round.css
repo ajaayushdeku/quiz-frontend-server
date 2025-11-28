@@ -28,6 +28,7 @@
   font-weight: 800;
   color: #ffffffcc;
   text-shadow: 0 0 10px #000;
+  letter-spacing: 20px;
 }
 
 .round-label {
@@ -38,8 +39,9 @@
   padding: 0.5rem 5rem;
   z-index: 200;
   color: #237fff;
-  text-shadow: 0 0 5px #000d83;
+  text-shadow: 0 0 5px #5465fe;
   animation: floatUpDown 2.5s ease-in-out infinite;
+  letter-spacing: 8px;
 }
 
 @keyframes floatUpDown {
@@ -57,6 +59,7 @@
   font-weight: 800;
   color: #ffffffcc;
   text-align: center;
+  letter-spacing: 8px;
 }
 
 /* ========================== */
@@ -80,7 +83,7 @@
   font-weight: 800;
   border-bottom: 3px solid rgba(255, 255, 255, 0.6);
   color: #ffffffcc;
-  letter-spacing: 2px;
+  letter-spacing: 8px;
   text-transform: uppercase;
 }
 
@@ -157,7 +160,7 @@
   font-weight: 800;
   color: #ffffffcc;
   text-shadow: 0 0 8px #000;
-  letter-spacing: 4px;
+  letter-spacing: 8px;
   text-transform: uppercase;
   user-select: none;
   opacity: 0.9;
@@ -168,25 +171,24 @@
   display: flex;
   flex-direction: column;
   align-items: center;
+  vertical-align: middle;
   justify-content: flex-start;
-  height: 80vh;
-  overflow-y: auto;
+  height: 70vh;
+  overflow-y: visible;
   overflow-x: hidden;
   gap: 2rem;
-  padding: 1rem;
+  padding: 1rem 2rem;
   scroll-behavior: smooth;
-  width: 30vw;
+  width: 45vw;
   position: relative;
-  top: 2rem;
-  border-top: 2px solid #ffffff60;
-  border-bottom: 2px solid #ffffff60;
+  top: 7rem;
 }
 
 /* Hide scrollbar */
-.round-card-lists::-webkit-scrollbar {
+/* .round-card-lists::-webkit-scrollbar {
   width: 0;
   height: 0;
-}
+} */
 .round-card-lists {
   -ms-overflow-style: none;
   scrollbar-width: none;
@@ -195,46 +197,102 @@
 /* Each Round Card */
 .round-card {
   width: 100%;
-  height: 100vh;
+  height: 40vh;
   padding: 2rem 2rem;
+  letter-spacing: 5px;
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
   text-align: center;
-  border: 2px dashed #ffffff60;
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.06);
-  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 1.5rem;
+  background: rgba(255, 255, 255, 0.05);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   cursor: pointer;
+  position: relative;
+  /* box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15); */
+}
+
+/* Animated gradient border effect */
+.round-card::before {
+  content: "";
+  position: absolute;
+  inset: -2px;
+  border-radius: 1.5rem;
+  padding: 2px;
+  background: linear-gradient(135deg, #828282, #949494, #ffffff);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.4s ease;
+}
+.round-card:hover::before {
+  opacity: 1;
 }
 
 .round-card:hover {
-  transform: scale(1.05);
-  background: rgba(255, 255, 255, 0.1);
-  /* box-shadow: 0 0 20px rgba(255, 255, 255, 0.15); */
+  transform: translateY(-8px) scale(1.02);
+  background: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 10px 18px rgba(255, 255, 255, 0.25);
 }
 
-/* Image + Round Info */
-.round-image-wrapper {
-  width: 5rem;
-  height: 5rem;
-  gap: 1.5rem;
-  margin-bottom: 0.5rem;
-  animation: zoomInOut 7s ease-in-out infinite;
+.round-card:active {
+  transform: translateY(-4px) scale(1);
+}
+
+/* Icon Wrapper - Modern Styling */
+.round-icon-wrapper {
+  width: 6rem;
+  height: 6rem;
+  margin-bottom: 1.5rem;
   display: flex;
-  flex-direction: row;
   justify-content: center;
   align-items: center;
-  color: #ffffffcc;
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-.round-image-wrapper img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  filter: grayscale(100) brightness(0) invert(1);
+/* Glowing effect on hover */
+.round-icon-wrapper::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: 1.25rem;
+  background: radial-gradient(
+    circle at center,
+    rgba(217, 217, 217, 0.3),
+    transparent 70%
+  );
+  opacity: 0;
+  transition: opacity 0.4s ease;
 }
+
+.round-card:hover .round-icon-wrapper {
+  transform: scale(1.1) rotate(5deg);
+  box-shadow: 0 8px 24px rgba(95, 92, 92, 0.3);
+}
+
+.round-card:hover .round-icon-wrapper::after {
+  opacity: 1;
+}
+
+.round-icon-wrapper svg {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 2px 8px rgba(0, 0, 0, 0.2));
+  transition: filter 0.3s ease;
+}
+
+/* .round-card:hover .round-icon-wrapper svg {
+  filter: drop-shadow(0 4px 30px currentColor);
+} */
 
 .round-number {
   font-size: 3rem;
@@ -282,12 +340,14 @@
     gap: 3rem;
   }
   .round-select-header {
+    margin-top: 5rem;
     font-size: 3.5rem;
   }
   .round-card-lists {
+    margin-top: -2rem;
     width: 80vw;
-    height: auto;
-    max-height: 70vh;
+    height: 80vh;
+    top: 0;
   }
   .round-card {
     height: auto;
@@ -307,7 +367,8 @@
   }
   .round-card-lists {
     width: 90vw;
-    max-height: 60vh;
+    height: 85vh;
+    top: 0;
   }
   .round-number {
     font-size: 1.8rem;
@@ -323,7 +384,8 @@
   }
   .round-card-lists {
     width: 95vw;
-    max-height: 50vh;
+    height: 50vh;
+    top: 0;
   }
   .round-number {
     font-size: 1.5rem;

@@ -45,7 +45,6 @@ const COLORS = [
 
 const RapidFireRound = ({ onFinish, sessionId }) => {
   const { quizId, roundId } = useParams();
-  console.log("quizId:", quizId, "roundId:", roundId);
 
   const [teams, setTeams] = useState([]);
   const [quesFetched, setQuesFetched] = useState([]);
@@ -722,10 +721,7 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
           className="modal-overlay"
           onClick={() => setShowScoresModal(false)}
         >
-          <div
-            className="scores-modal"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
-          >
+          <div className="scores-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Current Team Scores</h3>
             <ul>
               {teams.map((team, idx) => (
@@ -734,19 +730,15 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
                     <span className="team-color-indicator">
                       <MdGroup style={{ color: TEAM_COLORS[team.name] }} />
                     </span>
+
                     <span
                       className="team-name-view"
                       style={{ color: TEAM_COLORS[team.name] }}
                     >
-                      {team.name}:
+                      {team.name.toUpperCase()}:
                     </span>
                   </span>
-                  <span
-                    className="team-points-view"
-                    style={{ color: TEAM_COLORS[team.name] }}
-                  >
-                    {team.points} pts
-                  </span>
+                  <span className="team-points-view">{team.points} pts</span>
                 </div>
               ))}
             </ul>
@@ -765,12 +757,12 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
         timeRemaining={timeRemaining}
         TEAM_COLORS={TEAM_COLORS}
         formatTime={formatTime}
+        headMessage="Answer All the Questions under the time limit!"
         toastMessage={
           activeRound?.rules?.enablePass
             ? "Press 'Ctrl' to Pass to the Next Question"
             : "No passing allowed"
         }
-        headMessage="Answer All the Questions under the time limit!"
         lowTimer={roundTime / 3}
         midTimer={roundTime / 2}
         highTimer={roundTime}
@@ -851,7 +843,15 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
         />
       ) : (
         <div className="turn-finished-msg">
-          <h1>Team {activeTeam?.name} Finished!</h1>
+          <h1
+            style={{
+              color: "rgb(255, 215, 130)",
+              fontWeight: "bold",
+              letterSpacing: "5px",
+            }}
+          >
+            Team {activeTeam?.name} Finished!
+          </h1>
           <Button className="next-team-btn" onClick={handleNextTeam}>
             NEXT TEAM's TURN
           </Button>

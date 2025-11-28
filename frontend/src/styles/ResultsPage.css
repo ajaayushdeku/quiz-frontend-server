@@ -91,6 +91,7 @@
   text-transform: uppercase;
   letter-spacing: 1px;
   color: #f0f0f0;
+  letter-spacing: 6px;
   text-shadow: 1px 1px 4px rgba(0, 0, 0, 0.5);
 }
 
@@ -225,7 +226,6 @@
 }
 
 .finish-display-container {
-  margin-top: -10rem;
   padding: 1.5rem 4rem;
 }
 
@@ -246,6 +246,7 @@
   font-weight: 700;
   color: #f0f0f0;
   margin-bottom: 1.5rem;
+  letter-spacing: 6px;
 }
 
 .next-round-btn {
@@ -259,6 +260,7 @@
   font-weight: 700;
   cursor: pointer;
   transition: all 0.3s ease;
+  letter-spacing: 6px;
   /* margin-bottom: 2rem; */
 }
 
@@ -284,6 +286,7 @@
   gap: 2rem;
   justify-content: center;
   align-items: center;
+  letter-spacing: 6px;
   /* margin-bottom: 2rem; */
 }
 
@@ -302,6 +305,7 @@
   font-weight: 700;
   color: #bdbdbd;
   margin-bottom: 1rem;
+  letter-spacing: 5px;
 }
 
 .scoreboard-list {
@@ -309,6 +313,7 @@
   flex-direction: column;
   gap: 0.8rem;
   align-items: center;
+  letter-spacing: 3px;
 }
 
 /* General Card Styling */
@@ -524,13 +529,14 @@
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 200;
+  letter-spacing: 2.5px;
 }
 
 .back-btn:hover {
   background: #55555522;
   color: white;
   transform: scale(1.05);
-  border: 2px dashed #696a6b;
+  border: 2px dashed #b1b1b2;
 }
 
 .back-btn-icon {
@@ -597,7 +603,7 @@
   padding: 2rem;
   border-radius: 12px;
 
-  width: 40%;
+  width: 60%;
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
   text-align: center;
   animation: slideDown 0.3s ease;
@@ -620,6 +626,7 @@
   font-weight: 700;
   margin-bottom: 1rem;
   color: #fbfbfb;
+  letter-spacing: 5px;
 }
 
 /* ---------------- Team List ---------------- */
@@ -639,6 +646,7 @@
   border-radius: 6px;
   font-size: 1.5rem;
   transition: background 0.2s ease;
+  letter-spacing: 3px;
 }
 
 .scores-modal li:hover {

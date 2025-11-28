@@ -26,6 +26,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { formatTime } from "../../utils/formatTime";
 import { TbScoreboard } from "react-icons/tb";
 import PreBuzzTimerControls from "../quiz_components/PreBuzzTimerControls";
+import { MdGroup } from "react-icons/md";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
@@ -512,19 +513,23 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
           className="modal-overlay"
           onClick={() => setShowScoresModal(false)}
         >
-          <div
-            className="scores-modal"
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside
-          >
+          <div className="scores-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Current Team Scores</h3>
             <ul>
               {teams.map((team, idx) => (
                 <div key={team.id}>
-                  <span
-                    className="team-color-indicator"
-                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
-                  ></span>
-                  <span className="team-name-view">{team.name}:</span>
+                  <span>
+                    <span className="team-color-indicator">
+                      <MdGroup style={{ color: TEAM_COLORS[team.name] }} />
+                    </span>
+
+                    <span
+                      className="team-name-view"
+                      style={{ color: TEAM_COLORS[team.name] }}
+                    >
+                      {team.name.toUpperCase()}:
+                    </span>
+                  </span>
                   <span className="team-points-view">{team.points} pts</span>
                 </div>
               ))}
@@ -647,7 +652,7 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
               </>
             ) : null}
 
-            {!activeTeam && (
+            {!activeTeam && showCorrectAnswer === false && (
               <BuzzerButton
                 teams={teams}
                 teamColors={TEAM_COLORS}

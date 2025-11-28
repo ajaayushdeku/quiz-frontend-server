@@ -41,7 +41,7 @@
 .splash-text {
   font-size: 5.2rem;
   font-weight: 800;
-  letter-spacing: 1.5px;
+  letter-spacing: 10px;
   color: #c9c9c9;
   text-shadow: 0 0 15px rgba(121, 123, 123, 0.4);
 }
@@ -87,7 +87,7 @@
   text-transform: uppercase;
   color: #c9c9c9;
   text-shadow: 0 0 15px rgba(121, 123, 123, 0.4);
-  letter-spacing: 1.2px;
+  letter-spacing: 3px;
   margin-top: 1rem;
 }
 

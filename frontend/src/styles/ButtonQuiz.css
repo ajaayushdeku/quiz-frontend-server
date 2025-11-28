@@ -315,6 +315,7 @@
   text-transform: uppercase;
   white-space: nowrap;
   max-width: 95vw;
+  letter-spacing: 5px;
 }
 
 .next-question-btn {
@@ -358,6 +359,7 @@
   align-self: center;
   text-transform: uppercase;
   white-space: nowrap;
+  letter-spacing: 5px;
 }
 
 .nxt-question-btn:hover {
@@ -369,9 +371,8 @@
 }
 
 .next-team-btn {
-  padding: clamp(0.8rem, 1vw, 1rem) clamp(0.5rem, 1vw, 1rem);
-  width: clamp(200px, 17.5rem, 280px);
-  max-width: 95vw;
+  padding: 1rem 2rem;
+  width: fit-content;
   border-radius: 10rem;
   border: 2px solid white;
   background: #ffffff;
@@ -383,6 +384,7 @@
   align-self: center;
   text-transform: uppercase;
   white-space: nowrap;
+  letter-spacing: 5px;
 }
 
 .next-team-btn:hover {

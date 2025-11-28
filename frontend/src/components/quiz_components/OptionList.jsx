@@ -70,7 +70,7 @@ const OptionList = ({
         onClick={() => (speaking ? stopSpeaking() : readAllOptions())}
         style={{ position: "fixed", bottom: "1rem", right: "1rem" }}
       >
-        {speaking ? "🔇 Stop Reading" : "🔊 Read All Options"}
+        {speaking ? "🔇 Stop Reading" : "🔊 Read Out All Options"}
       </button>
     </>
   );
