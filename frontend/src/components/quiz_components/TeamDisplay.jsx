@@ -37,7 +37,7 @@ const TeamDisplay = ({
       return "2px dashed #ffd34d";
     if (timeRemaining <= highTimer || timeRemaining >= highTimer)
       return "2px dotted #4d97ff";
-    return "white";
+    return "2px solid white";
   };
 
   return (

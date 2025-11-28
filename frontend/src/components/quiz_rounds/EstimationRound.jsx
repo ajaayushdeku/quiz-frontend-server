@@ -214,9 +214,9 @@ const EstimationRound = ({ onFinish, sessionId }) => {
 
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
-    Array.from(details).forEach(
-      (el) => (el.style.display = quizCompleted ? "none" : "block")
-    );
+    Array.from(details).forEach((el) => {
+      el.style.display = finalFinished ? "none" : "block";
+    });
   }, [quizCompleted]);
 
   return (
