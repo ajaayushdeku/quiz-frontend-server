@@ -41,8 +41,8 @@ const TeamDisplay = ({
   };
 
   return (
-    <header className="quiz-header detail-info">
-      <div className="info-msg detail-info">
+    <header className="quiz-header">
+      <div className="info-msg">
         {toastMessage}{" "}
         {enableNegative && (
           <div className="negative-pointing-wrapper">
@@ -57,7 +57,7 @@ const TeamDisplay = ({
       {!estimationEnable ? (
         <>
           <h2
-            className="team-name detail-info"
+            className="team-name"
             style={{
               color: TEAM_COLORS?.[activeTeam?.name],
               border: `2px solid  ${TEAM_COLORS?.[activeTeam?.name]}`,
@@ -76,7 +76,7 @@ const TeamDisplay = ({
               {timeRemaining !== undefined && (
                 <>
                   <div
-                    className="quiz-timer detail-info"
+                    className="quiz-timer"
                     style={{
                       color: getTimerColor(),
                       border: getTimerBorderColor(),
@@ -91,8 +91,8 @@ const TeamDisplay = ({
             <div
               className={
                 secondHand
-                  ? "hand-notifier second-hand detail-info"
-                  : "hand-notifier first-hand detail-info"
+                  ? "hand-notifier second-hand"
+                  : "hand-notifier first-hand"
               }
             >
               {passEnable ? (
@@ -109,7 +109,7 @@ const TeamDisplay = ({
       ) : (
         <>
           <h2
-            className="team-name detail-info"
+            className="team-name"
             style={{
               color: "white",
               textShadow: `0 0 2.5px ${TEAM_COLORS?.[activeTeam]}, 0 0 2.5px ${TEAM_COLORS?.[activeTeam]}`,
@@ -121,14 +121,14 @@ const TeamDisplay = ({
           <div style={{ textAlign: "center" }}>
             <div className="quiz-team-details">
               <div
-                className="quiz-timer detail-info"
+                className="quiz-timer"
                 style={{ color: "white", border: "2px solid  #d8d8d8ff" }}
               >
                 ⏱ {formatTime(timeRemaining)}
               </div>
             </div>
 
-            <div className="hand-notifier first-hand detail-info">
+            <div className="hand-notifier first-hand">
               Write the answer on the team's respective text box.
             </div>
           </div>

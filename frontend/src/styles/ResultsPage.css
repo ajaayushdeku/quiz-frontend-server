@@ -696,6 +696,26 @@
   transform: translateY(-2px);
 }
 
+/* ======================= */
+/* Finished Message */
+/* ======================= */
+.finished-msg {
+  text-align: center;
+  margin: 2rem auto;
+  position: relative;
+  padding: 1rem;
+  z-index: 100;
+}
+
+.finished-msg h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+.finished-msg p {
+  font-size: 1.5rem;
+}
+
 /* ---------------- Responsive ---------------- */
 @media (max-width: 1280px) {
   .scores-modal {

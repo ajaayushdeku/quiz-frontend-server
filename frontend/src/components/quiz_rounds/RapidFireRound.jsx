@@ -752,22 +752,24 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
         </div>
       )}
 
-      <TeamDisplay
-        activeTeam={activeTeam}
-        timeRemaining={timeRemaining}
-        TEAM_COLORS={TEAM_COLORS}
-        formatTime={formatTime}
-        headMessage="Answer All the Questions under the time limit!"
-        toastMessage={
-          activeRound?.rules?.enablePass
-            ? "Press 'Ctrl' to Pass to the Next Question"
-            : "No passing allowed"
-        }
-        lowTimer={roundTime / 3}
-        midTimer={roundTime / 2}
-        highTimer={roundTime}
-        enableNegative={activeRound?.rules?.enableNegative || false}
-      />
+      {!finalFinished && (
+        <TeamDisplay
+          activeTeam={activeTeam}
+          timeRemaining={timeRemaining}
+          TEAM_COLORS={TEAM_COLORS}
+          formatTime={formatTime}
+          headMessage="Answer All the Questions under the time limit!"
+          toastMessage={
+            activeRound?.rules?.enablePass
+              ? "Press 'Ctrl' to Pass to the Next Question"
+              : "No passing allowed"
+          }
+          lowTimer={roundTime / 3}
+          midTimer={roundTime / 2}
+          highTimer={roundTime}
+          enableNegative={activeRound?.rules?.enableNegative || false}
+        />
+      )}
 
       {!roundStarted && !finalFinished ? (
         <div className="centered-control">
@@ -843,54 +845,81 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
         />
       ) : (
         <div className="turn-finished-msg">
-          <h1
-            style={{
-              color: "rgb(255, 215, 130)",
-              fontWeight: "bold",
-              letterSpacing: "5px",
-            }}
-          >
-            Team {activeTeam?.name} Finished!
+          <h1 className="turn-finished-team">
+            🎉 Team {activeTeam?.name} Finished!
           </h1>
+
           <Button className="next-team-btn" onClick={handleNextTeam}>
-            NEXT TEAM's TURN
+            NEXT TEAM
           </Button>
 
           {answeredQuestions.length > 0 && (
-            <div className="team-answer-summary">
+            <div className="team-answer-summary" style={{ marginTop: "2rem" }}>
               <h3
                 className="team-answer-title"
                 style={{
                   color: TEAM_COLORS[activeTeamName],
-                  fontWeight: "bold",
+                  borderBottom: `3px solid ${TEAM_COLORS[activeTeamName]}`,
                 }}
               >
-                Team {activeTeam?.name}'s Answer Summary:
+                Team {activeTeam?.name} — Answer Summary
               </h3>
+
               <div className="team-answer-grid">
                 {answeredQuestions.map((q, index) => (
-                  <div key={q.id} className="team-answer-card">
+                  <div
+                    key={q.id}
+                    className="team-answer-card"
+                    style={{
+                      border: `1.5px solid ${
+                        q.isCorrect ? "#59ff85" : "#ff6161"
+                      }`,
+                    }}
+                  >
                     <h4 className="team-answer-question">
-                      Q{index + 1}: {q.question}
+                      ❓ Q{index + 1}: {q.question}
                     </h4>
+
                     <p
                       className={`team-answer-status ${
                         q.isCorrect ? "correct" : "wrong"
                       }`}
+                      style={{
+                        color: q.isCorrect ? "#59ff85" : "#ff6161",
+                      }}
                     >
-                      <span>👤 Your Answer:</span> <br />
-                      <span className={q.isPassed ? "passed-answer" : ""}>
+                      <span style={{ opacity: 0.9 }}>👤 Your Answer:</span>{" "}
+                      <br />
+                      <span
+                        className={q.isPassed ? "passed-answer" : ""}
+                        style={{
+                          opacity: q.isPassed ? 0.5 : 1,
+                          fontStyle: q.isPassed ? "italic" : "normal",
+                        }}
+                      >
                         {q.userAnswer}
                       </span>
                     </p>
+
                     <p className="team-summary-answer">
-                      <span> ✓ Correct Answer:</span> <br />
+                      <span style={{ fontWeight: "600" }}>
+                        ✓ Correct Answer:
+                      </span>{" "}
+                      <br />
                       {q.correctAnswer}
                     </p>
+
                     <p
                       className={`team-answer-status ${
                         q.isCorrect ? "correct" : "wrong"
                       }`}
+                      style={{
+                        background: q.isPassed
+                          ? "rgba(200,200,200,0.15)"
+                          : q.isCorrect
+                          ? "rgba(95,255,135,0.15)"
+                          : "rgba(255,95,95,0.15)",
+                      }}
                     >
                       {q.isPassed
                         ? "⏩ Passed"

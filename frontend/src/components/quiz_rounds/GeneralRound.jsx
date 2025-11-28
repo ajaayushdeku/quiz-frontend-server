@@ -340,6 +340,19 @@ const GeneralRound = ({ onFinish, sessionId }) => {
 
         setScoreMessage(msg);
         showToast(msg);
+
+        if (secondHand && !isCorrect) {
+          // Answer is wrong on second-hand, show correct answer
+          setTimeout(() => {
+            setShowCorrectAnswer(true);
+            setSecondHand(false);
+            setPassIt(false);
+            setScoreMessage(""); // Clear the score message before showing correct answer
+          }, 2000); // Show wrong message for 2 seconds first
+
+          setOptionSelected(true);
+          return; // Don't proceed to next question yet
+        }
       }
     } catch (err) {
       console.error("Submission Error:", err?.response?.data || err);
@@ -486,6 +499,8 @@ const GeneralRound = ({ onFinish, sessionId }) => {
   // ---------------- Handle Next Question after showing correct answer ----------------
   const handleNextAfterCorrectAnswer = () => {
     setShowCorrectAnswer(false);
+    setSecondHand(false);
+    setPassIt(false);
 
     if (isLastQuestion) {
       setQuizCompleted(true);
@@ -589,7 +604,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
             setPassIt(true);
             showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
           } else {
-            showToast(`Both teams passed! Showing correct answer...`);
+            showToast(`Showing correct answer...`);
             setShowCorrectAnswer(true); // Show correct answer
             setPassIt(false);
             setSecondHand(false);
@@ -723,25 +738,27 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         </div>
       )}
 
-      <TeamDisplay
-        activeTeam={activeTeam}
-        secondHand={secondHand}
-        handLabel={handLabel}
-        timeRemaining={timeRemaining}
-        TEAM_COLORS={TEAM_COLORS}
-        formatTime={formatTime}
-        headMessage={"Choose one of the option to answer"}
-        toastMessage={
-          activeRound?.rules?.enablePass
-            ? " Press 'Ctrl' to Pass The Question"
-            : "No passing allowed"
-        }
-        passEnable={activeRound?.rules?.enablePass || false}
-        lowTimer={roundTime / 3}
-        midTimer={roundTime / 2}
-        highTimer={roundTime}
-        enableNegative={activeRound?.rules?.enableNegative || false}
-      />
+      {!quizCompleted && (
+        <TeamDisplay
+          activeTeam={activeTeam}
+          secondHand={secondHand}
+          handLabel={handLabel}
+          timeRemaining={timeRemaining}
+          TEAM_COLORS={TEAM_COLORS}
+          formatTime={formatTime}
+          headMessage={"Choose one of the option to answer"}
+          toastMessage={
+            activeRound?.rules?.enablePass
+              ? " Press 'Ctrl' to Pass The Question"
+              : "No passing allowed"
+          }
+          passEnable={activeRound?.rules?.enablePass || false}
+          lowTimer={roundTime / 3}
+          midTimer={roundTime / 2}
+          highTimer={roundTime}
+          enableNegative={activeRound?.rules?.enableNegative || false}
+        />
+      )}
 
       {/* NEW: Show Correct Answer Section */}
       {showCorrectAnswer ? (
@@ -766,7 +783,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           >
             <div className="correct-answer-display">
               <p>
-                ✓ Correct Answer:{" "}
+                ✓ Here is the Correct Answer:{" "}
                 <strong style={{ color: "#32be76ff" }}>
                   {getCorrectOptionText()}
                 </strong>

@@ -379,6 +379,19 @@ const SubjectRound = ({ onFinish, sessionId }) => {
 
         setScoreMessage(msg);
         showToast(msg);
+
+        if (secondHand && !isCorrect) {
+          // Answer is wrong on second-hand, show correct answer
+          setTimeout(() => {
+            setShowCorrectAnswer(true);
+            setSecondHand(false);
+            setPassIt(false);
+            setScoreMessage(""); // Clear the score message
+          }, 2000); // Show wrong message for 2 seconds first
+
+          setOptionSelected(true);
+          return; // Don't proceed to next question yet
+        }
       }
     } catch (err) {
       console.error("Submission Error:", err?.response?.data || err);
@@ -517,6 +530,8 @@ const SubjectRound = ({ onFinish, sessionId }) => {
   // NEW FUNCTION: Handle Next Question after showing correct answer
   const handleNextAfterCorrectAnswer = () => {
     setShowCorrectAnswer(false);
+    setSecondHand(false);
+    setPassIt(false);
 
     // Mark question as used
     markQuestionAsUsed(currentQuestion.id);
@@ -646,7 +661,7 @@ const SubjectRound = ({ onFinish, sessionId }) => {
               showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
             } else {
               // Second timeout - show correct answer
-              showToast(`Both teams timed out! Showing correct answer...`);
+              showToast(`Showing correct answer...`);
               setShowCorrectAnswer(true);
               setPassIt(false);
               setSecondHand(false);
@@ -787,25 +802,27 @@ const SubjectRound = ({ onFinish, sessionId }) => {
         </div>
       )}
 
-      <TeamDisplay
-        activeTeam={activeTeam}
-        secondHand={secondHand}
-        handLabel={handLabel}
-        timeRemaining={timeRemaining}
-        TEAM_COLORS={TEAM_COLORS}
-        formatTime={formatTime}
-        headMessage={"Choose one of the option to answer"}
-        toastMessage={
-          activeRound?.rules?.enablePass
-            ? " Press 'Ctrl' to Pass The Question"
-            : "No passing allowed"
-        }
-        passEnable={activeRound?.rules?.enablePass || false}
-        lowTimer={roundTime / 3}
-        midTimer={roundTime / 2}
-        highTimer={roundTime}
-        enableNegative={activeRound?.rules?.enableNegative || false}
-      />
+      {!quizCompleted && (
+        <TeamDisplay
+          activeTeam={activeTeam}
+          secondHand={secondHand}
+          handLabel={handLabel}
+          timeRemaining={timeRemaining}
+          TEAM_COLORS={TEAM_COLORS}
+          formatTime={formatTime}
+          headMessage={"Choose one of the option to answer"}
+          toastMessage={
+            activeRound?.rules?.enablePass
+              ? " Press 'Ctrl' to Pass The Question"
+              : "No passing allowed"
+          }
+          passEnable={activeRound?.rules?.enablePass || false}
+          lowTimer={roundTime / 3}
+          midTimer={roundTime / 2}
+          highTimer={roundTime}
+          enableNegative={activeRound?.rules?.enableNegative || false}
+        />
+      )}
 
       {/* Show Correct Answer Section */}
       {showCorrectAnswer ? (
@@ -837,7 +854,7 @@ const SubjectRound = ({ onFinish, sessionId }) => {
           >
             <div className="correct-answer-display">
               <p>
-                ✓ Correct Answer:{" "}
+                ✓ Here is the Correct Answer:{" "}
                 <strong style={{ color: "#32be76ff" }}>
                   {getCorrectOptionText()}
                 </strong>

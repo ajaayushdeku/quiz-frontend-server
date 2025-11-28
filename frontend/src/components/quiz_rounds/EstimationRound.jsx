@@ -215,7 +215,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
     Array.from(details).forEach((el) => {
-      el.style.display = finalFinished ? "none" : "block";
+      el.style.display = quizCompleted ? "none" : "block";
     });
   }, [quizCompleted]);
 
@@ -271,13 +271,15 @@ const EstimationRound = ({ onFinish, sessionId }) => {
         </div>
       )}
 
-      <TeamDisplay
-        teams={teams}
-        TEAM_COLORS={TEAM_COLORS}
-        toastMessage="Press 'Submit' to submit your answer"
-        estimationEnable={true}
-        timeRemaining={0}
-      />
+      {!quizCompleted && (
+        <TeamDisplay
+          teams={teams}
+          TEAM_COLORS={TEAM_COLORS}
+          toastMessage="Press 'Submit' to submit your answer"
+          estimationEnable={true}
+          timeRemaining={0}
+        />
+      )}
 
       {!quizCompleted ? (
         !showQuestion ? (
@@ -310,7 +312,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
               {result?.correctAnswer !== undefined && (
                 <div className="correct-answer-display">
                   <p>
-                    ✓ Correct Answer:{" "}
+                    ✓ Here is the Correct Answer:{" "}
                     <strong style={{ color: "#32be76ff" }}>
                       {result.correctAnswer}
                     </strong>

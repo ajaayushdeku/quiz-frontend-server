@@ -315,33 +315,6 @@
 }
 
 /* ======================= */
-/* Finished Message */
-/* ======================= */
-.finished-msg {
-  text-align: center;
-  margin: 2rem auto;
-  position: relative;
-  padding: 1rem;
-  z-index: 100;
-}
-
-.turn-finished-msg {
-  text-align: center;
-  margin: 0rem auto;
-  padding: 1rem;
-  width: 100%;
-}
-
-.finished-msg h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
-}
-
-.finished-msg p {
-  font-size: 1.5rem;
-}
-
-/* ======================= */
 /* Time Up Overlay Section */
 /* ======================= */
 .timeup-overlay,
@@ -870,8 +843,25 @@
 /* ======================= */
 /* Team Answer Sections */
 /* ======================= */
+.turn-finished-team {
+  color: rgb(255, 215, 130);
+  font-weight: 700;
+  letter-spacing: 6px;
+  font-size: 2.4rem;
+  text-shadow: 0 0 8px rgba(255, 215, 130, 0.6);
+  margin-bottom: 1rem;
+  text-align: "center";
+}
+
+.turn-finished-msg {
+  text-align: center;
+  margin: 0rem auto;
+  padding: 1rem;
+  width: 100%;
+}
+
 .team-answer-summary {
-  width: 90%;
+  width: 100%;
   max-width: 1000px;
   border-radius: 16px;
   /* overflow-y: auto; */
@@ -902,10 +892,14 @@
 .team-answer-title {
   text-align: center;
   color: #4ade80;
-  font-size: 1.75rem;
-  font-weight: 700;
-  margin-bottom: 2rem;
+
   letter-spacing: 3px;
+
+  font-weight: bold;
+  font-size: 1.6rem;
+  width: fit-content;
+  margin: 0 auto 1.5rem;
+  padding-bottom: 5px;
 }
 
 .team-answer-grid {
@@ -916,9 +910,6 @@
 }
 
 .team-answer-card {
-  background-color: #171717;
-  border-radius: 12px;
-  padding: 1.5rem;
   transition: all 0.3s ease;
   border: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
@@ -928,6 +919,11 @@
   gap: 1rem;
   width: 100%;
   box-sizing: border-box;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+  padding: 1.2rem;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(7px);
 }
 
 .team-answer-card:hover {
@@ -938,7 +934,7 @@
 .team-answer-question {
   font-size: 1.1rem;
   font-weight: 600;
-  color: #e5e5e5;
+  color: #fff;
   margin-bottom: 0.5rem;
   line-height: 1.5;
   min-height: 3rem;

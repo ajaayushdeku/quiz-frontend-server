@@ -544,18 +544,21 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
         </div>
       )}
 
-      <TeamDisplay
-        teams={teams}
-        TEAM_COLORS={TEAM_COLORS}
-        toastMessage="Press 'Buzzer' to Answer the Question"
-        timeRemaining={timeRemaining}
-        activeTeam={activeTeam}
-        headMessage="Answer Question within 10 seconds"
-        lowTimer={roundTime / 3}
-        midTimer={roundTime / 2}
-        highTimer={roundTime}
-        enableNegative={activeRound?.rules?.enableNegative || false}
-      />
+      {!quizCompleted && (
+        <TeamDisplay
+          teams={teams}
+          TEAM_COLORS={TEAM_COLORS}
+          toastMessage="Press 'Buzzer' to Answer the Question"
+          timeRemaining={timeRemaining}
+          activeTeam={activeTeam}
+          headMessage="Answer Question within 10 seconds"
+          lowTimer={roundTime / 3}
+          midTimer={roundTime / 2}
+          highTimer={roundTime}
+          enableNegative={activeRound?.rules?.enableNegative || false}
+        />
+      )}
+
       {preBuzzActive && (
         <>
           <div className="pre-buzz-timer">
@@ -603,7 +606,7 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
                   style={{ marginBottom: "1rem" }}
                 >
                   <p>
-                    ✓ Correct Answer:{" "}
+                    ✓ Here is the Correct Answer:{" "}
                     <strong style={{ color: "#32be76ff" }}>
                       {correctAnswerValue}
                     </strong>
