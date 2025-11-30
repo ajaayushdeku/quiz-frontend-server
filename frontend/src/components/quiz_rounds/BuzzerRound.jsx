@@ -122,46 +122,7 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
     showToast(`🔔 Team ${teamObj.name} pressed the buzzer!`);
   };
 
-  // -------------------- Pre-buzz timer --------------------
-  // useEffect(() => {
-  //   if (!preBuzzActive) return;
-
-  //   if (preBuzzTime <= 0) {
-  //     setPreBuzzActive(false);
-
-  //     // Start first team's turn from queue if available
-  //     if (teamQueue.length > 0) {
-  //       const [firstTeam, ...rest] = teamQueue;
-
-  //       // Set active team but DO NOT SHOW INPUT until AFTER this moment
-  //       setActiveTeam(firstTeam);
-  //       setBuzzerPressed(firstTeam.name);
-  //       setTeamQueue(rest);
-
-  //       // Reset team timer and start after pre-buzz ends
-  //       resetTimer(roundTime);
-
-  //       // startTimer();
-  //       setTimeout(() => {
-  //         startTimer(); // <--- Team timer now starts AFTER pre-buzz
-  //       }, 300);
-
-  //       showToast(`👉 Team ${firstTeam.name} now answers!`);
-  //     } else {
-  //       // No team buzzed → show correct answer
-  //       const correctOption = currentQuestion.options.find(
-  //         (opt) => opt.id === currentQuestion.correctOptionId
-  //       );
-  //       setCorrectAnswerValue(correctOption?.text || "");
-  //       setShowCorrectAnswer(true);
-  //     }
-  //     return;
-  //   }
-
-  //   const timer = setTimeout(() => setPreBuzzTime((t) => t - 1), 1000);
-  //   return () => clearTimeout(timer);
-  // }, [preBuzzTime, preBuzzActive, teamQueue, currentQuestion]);
-
+  // -------------------- Move to Next Team or Question --------------------
   const moveToNextTeamOrQuestion = () => {
     pauseTimer();
 
