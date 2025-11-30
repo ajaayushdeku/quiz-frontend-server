@@ -15,7 +15,7 @@ const TeamAnswerBoxes = ({
         <div
           key={team.id}
           className="estimate-card"
-          style={{ border: `2px solid ${teamColors[team.name] || "#333"}` }}
+          style={{ border: `3px solid ${teamColors[team.name] || "#333"}` }}
         >
           <label
             className="team-label"

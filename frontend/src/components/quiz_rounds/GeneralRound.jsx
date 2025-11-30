@@ -38,30 +38,21 @@ const GeneralRound = ({ onFinish, sessionId }) => {
 
   const { showToast } = useUIHelpers();
 
-  // const [quesFetched, setQuesFetched] = useState([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [questionDisplay, setQuestionDisplay] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
-  // const [teams, setTeams] = useState([]);
-  // const [activeRound, setActiveRound] = useState(null);
-  // const [roundPoints, setRoundPoints] = useState([]);
-  // const [roundTime, setRoundTime] = useState(TEAM_TIME_LIMIT);
-  // const [reduceBool, setReduceBool] = useState(false);
   const [scoreMessage, setScoreMessage] = useState();
-  // const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
   const [optionSelected, setOptionSelected] = useState(false);
-
-  const [showScoresModal, setShowScoresModal] = useState(false);
 
   // Track if we should show correct answer
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
+  const [showScoresModal, setShowScoresModal] = useState(false);
+
   const location = useLocation();
   const { historyIds } = location.state || {}; // { teamId: historyId }
 
-  // const [loading, setLoading] = useState(true);
-  // const [error, setError] = useState("");
   const queryParams = new URLSearchParams(location.search);
   const adminId = queryParams.get("adminId"); // this will be null if admin view
 

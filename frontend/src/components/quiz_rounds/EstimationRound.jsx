@@ -53,8 +53,6 @@ const EstimationRound = ({ onFinish, sessionId }) => {
     teams.map((team, i) => [team.name, COLORS[i % COLORS.length]])
   );
 
-  const port = process.env.PORT;
-
   // 🧩 Fetch Quiz and Questions
   useEffect(() => {
     const fetchData = async () => {
@@ -62,7 +60,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
       try {
         // Fetch single quiz by ID
         const quizRes = await axios.get(
-          `http://localhost:${port}/api/quiz/get-quizForUser`,
+          "http://localhost:4000/api/quiz/get-quizForUser",
           { withCredentials: true }
         );
 
@@ -88,7 +86,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
         if (!round) return;
 
         const questionRes = await axios.get(
-          `http://localhost:${port}/api/question/get-questions`,
+          "http://localhost:4000/api/question/get-questions",
           {
             withCredentials: true,
           }
@@ -149,7 +147,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
 
     try {
       const response = await axios.post(
-        `http://localhost:${port}/api/history/submit-ans`,
+        "http://localhost:4000/api/history/submit-ans",
         payload,
         { withCredentials: true }
       );

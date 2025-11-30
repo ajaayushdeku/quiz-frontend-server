@@ -115,7 +115,7 @@
 }
 
 /* Button */
-.btn-back {
+.error-btn-back {
   display: flex;
   flex-direction: row;
   justify-content: center;
@@ -124,22 +124,26 @@
   margin: 2rem;
   background-color: transparent;
   padding: 0.5rem 1rem;
-  color: #e9e9e9;
+  color: #3f3f3f;
+  background-color: #fbfbfb;
   border-radius: 2rem;
+  border: 2px solid #ffffff;
   font-size: 1.5rem;
   font-weight: bold;
   transition: all 0.3s ease;
   text-decoration: none;
+  letter-spacing: 2px;
 }
 
-.btn-back span {
+/* .error-btn-back h3 {
   font-size: 1.2rem;
   padding: 0.5rem 1rem;
-}
+} */
 
-.btn-back:hover {
-  background-color: #e9e9e9;
-  color: #2c3741;
+.error-btn-back:hover {
+  border: 2px solid #ffffff;
+  color: white;
+  background-color: #e9e9e912;
 }
 
 /* ============================= */
@@ -199,7 +203,7 @@
     font-size: 1rem;
   }
 
-  .btn-back {
+  .error-btn-back {
     font-size: 1.3rem;
     padding: 0.4rem 0.8rem;
   }
@@ -225,7 +229,7 @@
     text-align: center;
   }
 
-  .btn-back {
+  .error-btn-back {
     width: 100%;
     justify-content: center;
     font-size: 1.1rem;

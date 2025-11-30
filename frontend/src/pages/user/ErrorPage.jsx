@@ -28,10 +28,10 @@ const ErrorPage = () => {
             </div>
           </div>
           <NavLink to="/quizselect" className="nav-link">
-            <button className="btn-back show-result-btn">
+            <button className="error-btn-back ">
               {" "}
               <TiHome />
-              <div>Go Back to Home</div>
+              Go Back to Home
             </button>
           </NavLink>
         </div>
