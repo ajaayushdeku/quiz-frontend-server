@@ -179,7 +179,6 @@ const TeamStats = () => {
                     }`}
                   >
                     <h3 style={{ color: "#08316aff" }}>
-                      {" "}
                       Sorted By Latest Attempt:
                     </h3>
                     {userData.sessions.map((session) => {
@@ -233,6 +232,12 @@ const TeamStats = () => {
                               </div>
                             </div>
                           </div>
+
+                          <h3
+                            style={{ color: "#08316aff", marginBottom: "15px" }}
+                          >
+                            Teams:
+                          </h3>
 
                           {/* Teams under this session */}
                           {/* Sort teams by total points (highest first) */}

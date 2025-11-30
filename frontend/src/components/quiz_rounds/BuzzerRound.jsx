@@ -27,6 +27,7 @@ import { formatTime } from "../../utils/formatTime";
 import { TbScoreboard } from "react-icons/tb";
 import PreBuzzTimerControls from "../quiz_components/PreBuzzTimerControls";
 import { MdGroup } from "react-icons/md";
+import { useFetchQuizData } from "../../hooks/useFetchQuizData";
 
 const { settings } = rulesConfig.buzzer_round;
 const TIMER = settings.timerPerTeam || 10;
@@ -46,8 +47,8 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
   const { showToast } = useUIHelpers();
   const { quizId, roundId } = useParams();
 
-  const [quesFetched, setQuesFetched] = useState([]);
-  const [teams, setTeams] = useState([]);
+  // const [quesFetched, setQuesFetched] = useState([]);
+  // const [teams, setTeams] = useState([]);
   const [teamAnswer, setTeamAnswer] = useState("");
   const [questionAnswered, setQuestionAnswered] = useState(false);
   const [buzzerPressed, setBuzzerPressed] = useState(null);
@@ -58,10 +59,10 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
   const [correctAnswerValue, setCorrectAnswerValue] = useState("");
   const [roundPoints, setRoundPoints] = useState(settings.defaultPoints || 10);
   const [roundTime, setRoundTime] = useState(TIMER);
-  const [reduceBool, setReduceBool] = useState(false);
+  // const [reduceBool, setReduceBool] = useState(false);
   const [scoreMessage, setScoreMessage] = useState([]);
   const [activeTeam, setActiveTeam] = useState(null);
-  const [activeRound, setActiveRound] = useState(null);
+  // const [activeRound, setActiveRound] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [results, setResults] = useState(null);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
@@ -79,88 +80,17 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
   const normalize = (str) => str?.trim().toLowerCase() || "";
 
   // -------------------- Fetch Quiz & Questions --------------------
-  useEffect(() => {
-    const fetchQuizData = async () => {
-      try {
-        // Fetch single quiz by ID
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quizForUser",
-          { withCredentials: true }
-        );
+  const {
+    loading,
+    error,
+    teams,
+    setTeams,
+    activeRound,
+    quesFetched,
 
-        const allQuizzes = quizRes.data.quizzes || [];
-
-        console.log("All Quiz:", allQuizzes);
-
-        // Find the current quiz by quizId or roundId
-        const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
-        );
-
-        if (!currentQuiz) return;
-
-        setTeams(
-          (currentQuiz.teams || [])
-            .filter((t) => t && t._id)
-            .map((t, i) => ({
-              id: t._id,
-              name: t.name || `Team ${i + 1}`,
-              points: t.points || 0,
-            }))
-        );
-
-        const round = currentQuiz.rounds.find((r) => r._id === roundId);
-        if (!round) return;
-        setActiveRound(round);
-
-        setRoundPoints(round?.rules?.points || 10);
-        setRoundTime(TIMER);
-        if (round?.rules?.enableNegative) setReduceBool(true);
-
-        const questionRes = await axios.get(
-          "http://localhost:4000/api/question/get-questions",
-          { withCredentials: true }
-        );
-        const allQuestions = questionRes.data.data || [];
-        const filteredQuestions = allQuestions.filter((q) =>
-          round.questions.includes(q._id)
-        );
-
-        const formattedQuestions = filteredQuestions.map((q) => {
-          const mappedOptions = (q.options || []).map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx),
-            text: opt.text || "",
-            originalId: opt._id || null,
-          }));
-
-          const correctIndex = mappedOptions.findIndex(
-            (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
-          );
-          const correctOptionId =
-            correctIndex >= 0
-              ? mappedOptions[correctIndex].id
-              : mappedOptions[0]?.id || null;
-
-          return {
-            id: q._id,
-            question: q.text,
-            options: mappedOptions,
-            correctOptionId,
-            mediaType: q.media?.type || "none",
-            mediaUrl: q.media?.url || "",
-            shortAnswer: q.shortAnswer || null,
-          };
-        });
-
-        setQuesFetched(formattedQuestions);
-      } catch (err) {
-        console.error("❌ Fetch Error:", err);
-        showToast("Failed to fetch quiz data!");
-      }
-    };
-
-    if (quizId && roundId) fetchQuizData();
-  }, [quizId, roundId]);
+    reduceBool,
+    currentRoundNumber,
+  } = useFetchQuizData(quizId, roundId, showToast);
 
   const TEAM_COLORS = Object.fromEntries(
     teams.map((t, i) => [t.name, COLORS[i % COLORS.length]])
@@ -488,6 +418,26 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
     }
   };
 
+  if (loading) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p>Loading round info...</p>
+        </div>
+      </section>
+    );
+  }
+
+  if (error) {
+    return (
+      <section className="home-wrapper">
+        <div className="loading-screen">
+          <p className="error-message">{error}</p>
+        </div>
+      </section>
+    );
+  }
+
   return (
     <div className="quiz-container">
       {scoreMessage.length > 0 && (
@@ -638,19 +588,22 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
               </>
             ) : activeTeam ? (
               <>
-                <AnswerTextBox
-                  value={teamAnswer}
-                  onChange={(e) => setTeamAnswer(e.target.value)}
-                  onSubmit={handleSubmit}
-                  placeholder={`Answer by ${activeTeam.name}`}
-                  disabled={isSubmitting}
-                />
+                {isRunning && (
+                  <AnswerTextBox
+                    value={teamAnswer}
+                    onChange={(e) => setTeamAnswer(e.target.value)}
+                    onSubmit={handleSubmit}
+                    placeholder={`Answer by ${activeTeam.name}`}
+                    disabled={isSubmitting}
+                  />
+                )}
+
                 <TimerControls
                   isRunning={isRunning}
                   startTimer={startTimer}
                   pauseTimer={pauseTimer}
                   resetTimer={resetTimer}
-                  TEAM_TIME_LIMIT={preBuzzTime}
+                  TEAM_TIME_LIMIT={roundTime}
                 />
               </>
             ) : null}

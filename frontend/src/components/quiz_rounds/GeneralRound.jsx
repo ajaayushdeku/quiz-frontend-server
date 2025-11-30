@@ -28,37 +28,27 @@ import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
 import { FaArrowRight } from "react-icons/fa";
 import { MdGroup } from "react-icons/md";
+import { useFetchQuizData } from "../../hooks/useFetchQuizData";
 
 const { settings } = rulesConfig.general_round;
 const TEAM_TIME_LIMIT = settings.teamTimeLimit;
-
-const COLORS = [
-  "#d61344ff",
-  "#0ab9d4ff",
-  "#32be76ff",
-  "#e5d51eff",
-  "#ff9800ff",
-  "#9c27b0ff",
-  "#03a9f4ff",
-  "#ffc107ff",
-];
 
 const GeneralRound = ({ onFinish, sessionId }) => {
   const { quizId, roundId } = useParams();
 
   const { showToast } = useUIHelpers();
 
-  const [quesFetched, setQuesFetched] = useState([]);
+  // const [quesFetched, setQuesFetched] = useState([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [questionDisplay, setQuestionDisplay] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
-  const [teams, setTeams] = useState([]);
-  const [activeRound, setActiveRound] = useState(null);
-  const [roundPoints, setRoundPoints] = useState([]);
-  const [roundTime, setRoundTime] = useState(TEAM_TIME_LIMIT);
-  const [reduceBool, setReduceBool] = useState(false);
+  // const [teams, setTeams] = useState([]);
+  // const [activeRound, setActiveRound] = useState(null);
+  // const [roundPoints, setRoundPoints] = useState([]);
+  // const [roundTime, setRoundTime] = useState(TEAM_TIME_LIMIT);
+  // const [reduceBool, setReduceBool] = useState(false);
   const [scoreMessage, setScoreMessage] = useState();
-  const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
+  // const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
   const [optionSelected, setOptionSelected] = useState(false);
 
@@ -70,124 +60,26 @@ const GeneralRound = ({ onFinish, sessionId }) => {
   const location = useLocation();
   const { historyIds } = location.state || {}; // { teamId: historyId }
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState("");
   const queryParams = new URLSearchParams(location.search);
   const adminId = queryParams.get("adminId"); // this will be null if admin view
 
   // ---------------- Fetch Quiz Data ----------------
-  useEffect(() => {
-    const fetchQuizData = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        // Fetch single quiz by ID
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quizForUser",
-          { withCredentials: true }
-        );
-
-        const allQuizzes = quizRes.data.quizzes || [];
-
-        console.log("All Quiz:", allQuizzes);
-
-        // Find the current quiz by quizId or roundId
-        const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
-        );
-
-        if (!currentQuiz) return console.warn("Quiz not found");
-
-        // Format Teams
-        const formattedTeams = (currentQuiz.teams || []).map((team, index) => ({
-          id: team._id,
-          name: team.name || `Team ${index + 1}`,
-          points: team.points || 0,
-          // passesUsed: team.passesUsed || 0,
-        }));
-        setTeams(formattedTeams);
-
-        // Find Active Round
-        const round = currentQuiz.rounds.find((r) => r._id === roundId);
-        if (!round) return console.warn("Round not found");
-        setActiveRound(round);
-
-        setCurrentRoundNumber(
-          currentQuiz.rounds.findIndex((r) => r._id === roundId) + 1
-        );
-        setRoundPoints(round?.rules?.points || 10);
-        setRoundTime(round?.rules?.timeLimitValue || TEAM_TIME_LIMIT);
-        if (round?.rules?.enableNegative) setReduceBool(true);
-
-        // Fetch Questions
-        const questionRes = await axios.get(
-          "http://localhost:4000/api/question/get-questions",
-          { withCredentials: true }
-        );
-        const allQuestions = questionRes.data.data || [];
-
-        const filteredQuestions = allQuestions.filter((q) =>
-          round.questions.includes(q._id)
-        );
-
-        const formattedQuestions = filteredQuestions.map((q) => {
-          let optionsArray = [];
-          if (q.options?.length) {
-            optionsArray =
-              typeof q.options[0] === "string"
-                ? JSON.parse(q.options[0])
-                : q.options;
-          }
-
-          const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx), // a, b, c, ...
-            text: typeof opt === "string" ? opt : opt.text || "",
-            originalId: opt._id || null,
-          }));
-
-          // Determine correct option
-          const correctIndex = mappedOptions.findIndex(
-            (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
-          );
-          const correctOptionId =
-            correctIndex >= 0
-              ? mappedOptions[correctIndex].id
-              : mappedOptions[0]?.id || null;
-
-          return {
-            id: q._id,
-            question: q.text,
-            options: mappedOptions,
-            correctOptionId,
-            mediaType: q.media?.type || "none",
-            mediaUrl: q.media?.url || "",
-            shortAnswer: q.shortAnswer || null,
-          };
-        });
-
-        setQuesFetched(formattedQuestions);
-      } catch (error) {
-        console.error("Fetch Error:", error);
-        showToast("Failed to fetch quiz data!");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (quizId && roundId) fetchQuizData();
-  }, [quizId, roundId, adminId]);
-
-  // ---------------- Team Color Assignment ----------------
-  const generateTeamColors = (teams) => {
-    const teamColors = {};
-    teams.forEach((team, index) => {
-      const color = COLORS[index % COLORS.length];
-      teamColors[team.name || `Team${index + 1}`] = color;
-    });
-    return teamColors;
-  };
-  const TEAM_COLORS = generateTeamColors(teams);
+  const {
+    loading,
+    error,
+    teams,
+    setTeams,
+    activeRound,
+    quesFetched,
+    roundPoints,
+    roundTime,
+    setRoundTime,
+    reduceBool,
+    currentRoundNumber,
+    TEAM_COLORS,
+  } = useFetchQuizData(quizId, roundId, showToast);
 
   // ---------------- Hooks ----------------
   const { currentQuestion, nextQuestion, isLastQuestion } =
@@ -583,12 +475,12 @@ const GeneralRound = ({ onFinish, sessionId }) => {
 
       if (rules?.enableNegative) {
         goToNextTeam();
-        nextQuestion();
         setQuestionDisplay(false);
         resetTimer(roundTime);
         pauseTimer();
         resetAnswer();
         setScoreMessage("");
+        setShowCorrectAnswer(true);
         console.log("Timeout: moved to next team/question (no pass enabled)");
       } else {
         // Second-hand handling
@@ -609,12 +501,6 @@ const GeneralRound = ({ onFinish, sessionId }) => {
             setPassIt(false);
             setSecondHand(false);
             pauseTimer();
-            // if (isLastQuestion) setQuizCompleted(true);
-            // else {
-            //   nextQuestion();
-            //   resetTimer(roundTime);
-            //   pauseTimer();
-            // }
           }
         } else {
           const nextTeam = passToNextTeam();

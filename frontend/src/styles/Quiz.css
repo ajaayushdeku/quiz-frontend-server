@@ -1182,6 +1182,55 @@
   color: rgb(255, 255, 255);
 }
 
+/* ============================= */
+/* Speak Text Button */
+/* ============================= */
+.speak-text-btn {
+  position: fixed;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgb(5, 163, 137); /* green background */
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 0.3rem 0.5rem;
+  border: 2px solid rgb(248, 248, 248);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+  margin-top: 1rem;
+  letter-spacing: 2px;
+}
+
+.speak-text-btn:hover {
+  background-color: #ffffff;
+  color: rgb(5, 163, 137);
+  transform: scale(1.05);
+}
+
+.speak-text-btn:active {
+  transform: scale(0.98);
+}
+
+.speak-text-btn:disabled {
+  background-color: #9e9e9e;
+  cursor: not-allowed;
+}
+
+/* Optional: Add icon size adjustment */
+.speak-text-btn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+}
+
+.stop-speech {
+  background-color: rgb(218, 78, 18);
+  color: white;
+}
+
 /* ======================= */
 /* Responsive Breakpoints */
 /* ======================= */
@@ -1232,6 +1281,12 @@
 
   .winner-team {
     font-size: 1.2rem;
+  }
+
+  .speak-text-btn {
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 1px;
   }
 }
 
@@ -1449,6 +1504,12 @@
   .toast {
     font-size: 1rem;
     padding: 0.9rem 1.5rem;
+  }
+
+  .speak-text-btn {
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 1px;
   }
 }
 
@@ -1697,6 +1758,12 @@
   .admin-login-title {
     font-size: 1.5rem;
   }
+
+  .speak-text-btn {
+    font-size: 0.55rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
 }
 
 /* Extra Small Devices */
@@ -1740,53 +1807,10 @@
     padding: 6px 12px;
     font-size: 0.8rem;
   }
-}
 
-/* ============================= */
-/* Speak Text Button */
-/* ============================= */
-.speak-text-btn {
-  position: absolute;
-  right: 0.5rem;
-  bottom: 0.5rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-  background-color: rgb(5, 163, 137); /* green background */
-  color: #fff;
-  font-size: 0.9rem;
-  font-weight: 700;
-  padding: 0.3rem 0.5rem;
-  border: 2px solid rgb(248, 248, 248);
-  border-radius: 20px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  margin-top: 1rem;
-  letter-spacing: 2px;
-}
-
-.speak-text-btn:hover {
-  background-color: #ffffff;
-  color: rgb(5, 163, 137);
-  transform: scale(1.05);
-}
-
-.speak-text-btn:active {
-  transform: scale(0.98);
-}
-
-.speak-text-btn:disabled {
-  background-color: #9e9e9e;
-  cursor: not-allowed;
-}
-
-/* Optional: Add icon size adjustment */
-.speak-text-btn svg {
-  width: 1.2rem;
-  height: 1.2rem;
-}
-
-.stop-speech {
-  background-color: rgb(218, 78, 18);
-  color: white;
+  .speak-text-btn {
+    font-size: 0.5rem;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
 }

@@ -95,7 +95,7 @@ const FinishDisplay = ({ onFinish, message, teams: initialTeams = [] }) => {
       <div className="finish-display-container">
         <h1
           className="finish-message"
-          style={{ boxShadow: "0 4px 10px rgba(255,164,77,0.4)" }}
+          style={{ textShadow: "0 4px 10px rgba(255,164,77,0.4)" }}
         >
           🎉 {message}!
         </h1>

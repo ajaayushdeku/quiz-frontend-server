@@ -409,13 +409,6 @@ const EstimationRound = ({ onFinish, sessionId }) => {
           teams={teams}
         />
       )}
-      {/* 
-      {currentQuestionIndex >= questions.length && questions.length > 0 && (
-        <FinishDisplay
-          onFinish={onFinish}
-          message="Estimation Round Finished!"
-        />
-      )} */}
 
       {fullscreenMedia && (
         <div className="fullscreen-overlay" onClick={closeFullscreen}>

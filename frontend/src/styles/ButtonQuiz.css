@@ -265,8 +265,8 @@
   align-self: flex-start;
   width: clamp(55%, 60%, 250px);
   max-width: 100%;
-  background-color: #3185fa;
-  color: #ffffff;
+  background-color: #ffffff;
+  color: #595959;
   font-size: clamp(1.1rem, 1.3vw, 1.3rem);
   font-weight: 700;
   padding: clamp(6px, 0.8vw, 8px) clamp(15px, 2vw, 20px);
@@ -278,7 +278,9 @@
 }
 
 .submit-button:hover:not(:disabled) {
-  background-color: #1e6fd1;
+  border: 2px solid rgb(164, 164, 164);
+  background-color: #ffffff13;
+  color: #ffffff;
   transform: translateY(-2px);
 }
 
