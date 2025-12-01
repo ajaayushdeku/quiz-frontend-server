@@ -241,7 +241,6 @@ const TeamStats = () => {
 
                           {/* Teams under this session */}
                           {/* Sort teams by total points (highest first) */}
-
                           {/* Render teams */}
                           {sortedTeams.map((team) => {
                             const teamKey = `${session.sessionId}-${team.teamId}`;

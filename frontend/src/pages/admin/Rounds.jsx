@@ -495,6 +495,10 @@ export default function CreateQuiz() {
             ))}
             <button type="button" className="add-team-btn" onClick={addTeam}>
               <MdAddBox /> <h4>Add Team</h4>
+              <span className="add-team-btn-text">
+                The order of teams created here will be used as the order of
+                play throughout the quiz.
+              </span>
             </button>
             <div className="step-nav-buttons">
               <button

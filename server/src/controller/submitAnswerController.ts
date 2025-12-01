@@ -73,59 +73,64 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
 
     const questionObjectId = question._id as mongoose.Types.ObjectId;
 
-    // -----------------------
     // ESTIMATION ROUND LOGIC
-    // -----------------------
-    if (round.category === "estimation round") {
-      if (!answers || !Array.isArray(answers) || answers.length === 0)
-        return res
-          .status(400)
-          .json({ message: "Estimation round requires answers array" });
 
+    if (round.category === "estimation round") {
+      if (!answers || !Array.isArray(answers) || answers.length === 0) {
+        return res.status(400).json({
+          message: "Estimation round requires answers array",
+        });
+      }
+
+      // Collect valid submissions
       const submittedTeams: { teamId: string; numericAnswer: number }[] = [];
 
       for (const ans of answers) {
         if (!mongoose.Types.ObjectId.isValid(ans.teamId)) continue;
+
         const numericAnswer = Number(ans.givenAnswer);
         if (isNaN(numericAnswer)) continue;
+
         submittedTeams.push({ teamId: ans.teamId, numericAnswer });
       }
 
-      if (submittedTeams.length === 0)
-        return res
-          .status(400)
-          .json({ message: "No valid team submissions found" });
+      if (submittedTeams.length === 0) {
+        return res.status(400).json({
+          message: "No valid team submissions found",
+        });
+      }
 
       // Wait until all teams submit
       if (submittedTeams.length === quiz.teams.length) {
+        //  Determine winners (multiple winners allowed)
+
         const correctAnswerNum = Number(
           question.shortAnswer?.text ?? question.correctAnswer
         );
-        if (!submittedTeams[0]) {
-          return res
-            .status(400)
-            .json({ message: "No valid team submissions found" });
-        }
-        let closestTeamId = submittedTeams[0].teamId;
-        let closestAnswer = submittedTeams[0].numericAnswer;
-        let minDiff = Math.abs(correctAnswerNum - closestAnswer);
 
+        // Find the minimum difference
+        let minDiff = Infinity;
         for (const t of submittedTeams) {
           const diff = Math.abs(correctAnswerNum - t.numericAnswer);
           if (diff < minDiff) {
-            closestTeamId = t.teamId;
-            closestAnswer = t.numericAnswer;
             minDiff = diff;
           }
         }
 
+        // All teams with the same minDiff are winners
+        const winningTeams = submittedTeams.filter(
+          (t) => Math.abs(correctAnswerNum - t.numericAnswer) === minDiff
+        );
+
         const pointsToAward = Number(rules.points || 0);
 
+        //  Save Submit + Update Team Points + History
+
         for (const t of submittedTeams) {
-          const isWinner = t.teamId === closestTeamId;
+          const isWinner = winningTeams.some((w) => w.teamId === t.teamId);
           const points = isWinner ? pointsToAward : 0;
 
-          // Save Submit document
+          // Save or update Submit entry
           const existingSubmit = await Submit.findOne({
             quizId,
             roundId,
@@ -135,9 +140,11 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
 
           if (existingSubmit) {
             const oldPoints = existingSubmit.pointsEarned;
+
             existingSubmit.givenAnswer = t.numericAnswer;
             existingSubmit.pointsEarned = points;
             existingSubmit.isCorrect = isWinner;
+
             await existingSubmit.save();
 
             const team = await Team.findById(t.teamId);
@@ -164,15 +171,7 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
             }
           }
 
-          // Update QuizHistory under same session
-          let history = await QuizHistory.findOne({
-            quizId,
-            roundId,
-            teamId: t.teamId,
-            startedBy: user.id,
-            sessionId: session._id,
-            endedAt: { $exists: false },
-          });
+          //  Update QuizHistory
 
           const answerObj = {
             questionId: questionObjectId,
@@ -182,6 +181,15 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
             isCorrect: isWinner,
             isPassed: false,
           };
+
+          let history = await QuizHistory.findOne({
+            quizId,
+            roundId,
+            teamId: t.teamId,
+            startedBy: user.id,
+            sessionId: session._id,
+            endedAt: { $exists: false },
+          });
 
           if (!history) {
             await QuizHistory.create({
@@ -198,27 +206,32 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
             const idx = (history.answers as any[]).findIndex(
               (a) => a.questionId.toString() === questionObjectId.toString()
             );
+
             if (idx !== -1) {
               const oldPoints = (history.answers as any)[idx].pointsEarned;
               (history.answers as any)[idx] = answerObj;
+
               history.totalPoints = history.totalPoints - oldPoints + points;
             } else {
               (history.answers as any).push(answerObj);
               history.totalPoints += points;
             }
+
             await history.save();
           }
         }
+
+        //  Return winners (multiple winners supported)
 
         return res.status(200).json({
           message: "Estimation answers submitted and scored",
           sessionId: session._id,
           correctAnswer: correctAnswerNum,
-          winner: {
-            teamId: closestTeamId,
-            givenAnswer: closestAnswer,
+          winners: winningTeams.map((w) => ({
+            teamId: w.teamId,
+            givenAnswer: w.numericAnswer,
             pointsAwarded: pointsToAward,
-          },
+          })),
         });
       }
 
@@ -230,9 +243,8 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
       });
     }
 
-    // -----------------------
     // NORMAL ROUND LOGIC
-    // -----------------------
+
     if (!teamId || givenAnswer === undefined)
       return res
         .status(400)

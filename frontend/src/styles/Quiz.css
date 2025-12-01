@@ -874,12 +874,12 @@
 /* Winner List */
 /* ======================= */
 .winner-list {
-  border: 1px solid #000000;
+  /* border: 1px solid #000000; */
   border-radius: 1.2rem;
   padding: 20px 30px;
   margin: 20px auto;
   max-width: 600px;
-  width: 90%;
+  width: 100%;
   background: linear-gradient(135deg, #ffdf70, #ffbb33);
   box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
   color: #1a1a1a;
@@ -896,7 +896,7 @@
   align-items: center;
   justify-content: center;
   gap: 10px;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
   margin-bottom: 1.5rem;
   flex-wrap: wrap;
 }

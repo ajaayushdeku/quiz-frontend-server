@@ -195,6 +195,16 @@
   margin-right: 0.5rem;
 }
 
+.not-endedAt {
+  padding: 0.2rem 1rem;
+  border: 2px solid white;
+  border-radius: 20px;
+  background-color: rgb(211, 76, 76);
+  color: white;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
 /* ===== TEAM COLLAPSE CARD ===== */
 .team-collapse-card {
   background: #f0f4ff0b;
@@ -202,6 +212,7 @@
   overflow: hidden;
   margin-bottom: 1rem;
   /* border: 2px solid #c8d3f0; */
+  box-shadow: 0 4px 12px rgba(96, 152, 232, 0.15);
   transition: all 0.3s ease;
 }
 
@@ -224,7 +235,7 @@
 
 .team-collapse-header:hover {
   background: linear-gradient(135deg, #d4e3ff 0%, #c4d9ff 100%);
-  border-bottom-color: #6098e8;
+  /* border-bottom-color: #6098e8; */
 }
 
 .winner-team-collapse-header {
@@ -427,6 +438,10 @@
 
 /* ===== RESPONSIVE DESIGN ===== */
 @media (max-width: 768px) {
+  .team-stats-cont {
+    padding: 0.5rem 0rem;
+  }
+
   .section-heading {
     font-size: 1.3rem;
   }
@@ -435,8 +450,12 @@
     font-size: 1.3rem;
   }
 
+  .user-content h3 {
+    font-size: 1rem;
+  }
+
   .user-header {
-    padding: 1.2rem 1.5rem;
+    padding: 1rem 1.5rem;
   }
 
   .user-name {
@@ -453,6 +472,15 @@
     align-items: flex-start;
   }
 
+  .session-time {
+    font-size: 0.8rem;
+  }
+
+  .not-endedAt {
+    padding: 0.15rem 0.8rem;
+    font-size: 0.65rem;
+  }
+
   .team-collapse-header {
     padding: 1rem 1.2rem;
   }
@@ -461,10 +489,40 @@
     font-size: 1.2rem;
   }
 
+  .team-header-info {
+    gap: 0.5rem;
+  }
+
+  .team-header-info .team-icon,
+  .team-header-info .winner-team-icon {
+    font-size: 0.9rem;
+    width: 1.5rem;
+  }
+
+  .team-header-info .team-collapse-name,
+  .team-header-info .winner-team-collapse-name {
+    font-size: 1rem;
+  }
+
   .round-tab {
     min-width: 180px;
     width: 20rem;
-    padding: 1rem 1.5rem;
+    padding: 0.6rem 1rem;
+  }
+  .round-tab .round-topic {
+    font-size: 0.9rem;
+  }
+
+  .round-stats span {
+    font-size: 0.85rem;
+  }
+
+  .overall-summary {
+    padding: 0.6rem 1rem;
+  }
+
+  .overall-summary .summary-title {
+    font-size: 1rem;
   }
 
   .summary-values {
@@ -473,7 +531,13 @@
 
   .summary-values span {
     min-width: 100px;
-    font-size: 0.95rem;
+    font-size: 0.75rem;
+    padding: 0.2rem 0.5rem;
+    margin-right: 0.2rem;
+  }
+
+  .summary-points {
+    font-size: 1.2rem; /* larger font for points */
   }
 }
 
@@ -537,14 +601,4 @@
     font-size: 0.85rem;
     padding: 0.4rem 0.8rem;
   }
-}
-
-.not-endedAt {
-  padding: 0.2rem 1rem;
-  border: 2px solid white;
-  border-radius: 20px;
-  background-color: rgb(211, 76, 76);
-  color: white;
-  font-size: 0.8rem;
-  font-weight: 700;
 }

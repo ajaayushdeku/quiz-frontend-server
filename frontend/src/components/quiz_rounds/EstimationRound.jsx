@@ -122,16 +122,21 @@ const EstimationRound = ({ onFinish, sessionId }) => {
 
   // 📨 Submit all answers
   const handleSubmit = async () => {
-    if (!currentQuestion) return;
+    if (!currentQuestion) {
+      alert("No question available!");
+      return;
+    }
 
+    // Validate all teams have entered a valid number
     for (const t of teams) {
       const ans = teamAnswers[t.name];
-      if (!ans || isNaN(Number(ans))) {
+      if (!ans || ans.trim() === "" || isNaN(Number(ans))) {
         alert(`Team ${t.name} must enter a valid number!`);
         return;
       }
     }
 
+    // Build answers payload
     const answersPayload = teams.map((t) => ({
       teamId: t.id,
       givenAnswer: Number(teamAnswers[t.name]),
@@ -145,6 +150,8 @@ const EstimationRound = ({ onFinish, sessionId }) => {
       sessionId,
     };
 
+    console.log("📤 Submitting payload:", payload);
+
     try {
       const response = await axios.post(
         "http://localhost:4000/api/history/submit-ans",
@@ -152,32 +159,58 @@ const EstimationRound = ({ onFinish, sessionId }) => {
         { withCredentials: true }
       );
 
-      const { correctAnswer, winner, message } = response.data;
-      setResult({ correctAnswer, winner, message });
+      console.log("✅ Submit response:", response.data);
 
-      // Find winner team name
-      const winnerTeamName =
-        teams.find((t) => t.id === winner.teamId)?.name || "Unknown";
-      const pointsEarned = winner.pointsAwarded || 0;
+      const { correctAnswer, winners, message } = response.data;
 
-      setTeams((prevTeams) =>
-        prevTeams.map((t) =>
-          t.id === winner.teamId ? { ...t, points: t.points + pointsEarned } : t
-        )
-      );
+      // Handle multiple winners
+      if (winners && Array.isArray(winners) && winners.length > 0) {
+        setResult({ correctAnswer, winners, message });
 
-      console.log("Winner id:", winner.id);
+        // Update team points for all winners
+        setTeams((prevTeams) =>
+          prevTeams.map((team) => {
+            const winnerData = winners.find((w) => w.teamId === team.id);
+            if (winnerData) {
+              return {
+                ...team,
+                points: team.points + winnerData.pointsAwarded,
+              };
+            }
+            return team;
+          })
+        );
 
-      // Show toast notification
-      showToast(`🎯 Team ${winnerTeamName} is the Closest!`);
+        // Create toast messages for winners
+        if (winners.length === 1) {
+          const winnerTeamName =
+            teams.find((t) => t.id === winners[0].teamId)?.name || "Unknown";
+          showToast(`🎯 Team ${winnerTeamName} is the Closest!`);
+          setScoreMessage(
+            `🏆 ${winnerTeamName} wins! +${winners[0].pointsAwarded} points`
+          );
+        } else {
+          const winnerNames = winners
+            .map((w) => teams.find((t) => t.id === w.teamId)?.name || "Unknown")
+            .join(", ");
+          showToast(`🎯 Multiple Winners: ${winnerNames}!`);
+          setScoreMessage(
+            `🏆 Tie! Winners: ${winnerNames} (+${winners[0].pointsAwarded} points each)`
+          );
+        }
 
-      // Set score message
-      const scoreMsg = `🏆 ${winnerTeamName} wins! +${pointsEarned} points`;
-      setScoreMessage(scoreMsg);
-      setSubmitted(true);
+        setSubmitted(true);
+      } else {
+        console.error("❌ No winners in response");
+        alert("Error: No winners data received from server");
+      }
     } catch (err) {
       console.error("❌ Submit error:", err.response?.data || err.message);
-      alert("Failed to submit answers! Check console for details.");
+      alert(
+        `Failed to submit answers! ${
+          err.response?.data?.message || err.message
+        }`
+      );
     }
   };
 
@@ -299,7 +332,6 @@ const EstimationRound = ({ onFinish, sessionId }) => {
           )
         ) : submitted ? (
           <>
-            {" "}
             <QuestionCard
               displayedText={`${currentQuestionIndex + 1}. ${
                 currentQuestion.text
@@ -326,44 +358,58 @@ const EstimationRound = ({ onFinish, sessionId }) => {
                   <FaArrowRight />
                 </Button>
 
-                {result?.winner ? (
+                {result?.winners && result.winners.length > 0 ? (
                   <div className="winner-list">
-                    <h4 className="winner-team">🏆 Closest Team(s) : </h4>
-                    {([result.winner] || []).map((w) => {
-                      const teamName =
-                        teams.find((t) => t.id === w.teamId)?.name || "Unknown";
-                      return (
-                        <div className="winner-team-list">
-                          <div>
-                            <strong className="winner-team">
-                              <MdGroup
-                                className="team-icon-result-page"
-                                style={{ color: "black" }}
-                              />
-                              <h3>{teamName.toUpperCase()}</h3>
-                            </strong>
-                            <p key={w.teamId} className="winner-item">
-                              <div className="estimation-winner-team-info">
-                                <div>
-                                  Team's Answer: <h3> {w.givenAnswer}</h3>
-                                </div>
-                                {/* Difference from the Estimation:{" "} */}
-                                {/* <h3>{w.difference}</h3> */}
-                                <div
-                                  style={{
-                                    paddingLeft: "2rem",
-                                    borderLeft: "2px solid #c9c9c9ff",
-                                  }}
-                                >
-                                  {" "}
-                                  Points Earned: <h3> {w.pointsAwarded}</h3>
-                                </div>
-                              </div>
-                            </p>
-                          </div>
+                    <h4 className="winner-team">
+                      🏆 Closest Team{result.winners.length > 1 ? "s" : ""} :{" "}
+                    </h4>
+
+                    <strong className="winner-team">
+                      <MdGroup
+                        className="team-icon-result-page"
+                        style={{
+                          color: "black",
+                        }}
+                      />
+                      <h3>
+                        {" "}
+                        {result.winners
+                          .map((w) =>
+                            teams
+                              .find((t) => t.id === w.teamId)
+                              ?.name.toUpperCase()
+                          )
+                          .join(", ")}
+                      </h3>
+                    </strong>
+
+                    <p className="winner-item">
+                      <div className="estimation-winner-team-info">
+                        <div>
+                          Team's Answer:{" "}
+                          <h3> {result.winners[0].givenAnswer}</h3>
                         </div>
-                      );
-                    })}
+                        <div
+                          style={{
+                            padding: "0rem 2rem",
+                            borderLeft: "2px solid #c9c9c9ff",
+                            borderRight: "2px solid #c9c9c9ff",
+                          }}
+                        >
+                          Difference:{" "}
+                          <h3>
+                            {Math.abs(
+                              result.correctAnswer -
+                                result.winners[0].givenAnswer
+                            )}
+                          </h3>
+                        </div>
+                        <div>
+                          Points Earned:{" "}
+                          <h3> {result.winners[0].pointsAwarded}</h3>
+                        </div>
+                      </div>
+                    </p>
                   </div>
                 ) : (
                   <p className="waiting-text">Waiting for remaining teams...</p>
@@ -394,7 +440,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
             <div className="submit-btn-container">
               <Button
                 onClick={handleSubmit}
-                // disabled={!teamAnswers.length === teams.length}
+                disabled={submitted}
                 children="Submit"
                 className="submit-button"
               />
@@ -405,7 +451,6 @@ const EstimationRound = ({ onFinish, sessionId }) => {
         <FinishDisplay
           onFinish={onFinish}
           message="Estimation Round Finished!"
-          // historyIds={historyIds} // { teamId: historyId, ... }
           teams={teams}
         />
       )}

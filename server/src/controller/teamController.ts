@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import mongoose from "mongoose";
 import Team from "../models/team";
-import Quiz from "../models/createQuiz"; // ✅ Correct import
+import Quiz from "../models/createQuiz";
 
 interface AuthRequest extends Request {
   user?: {
@@ -11,9 +11,7 @@ interface AuthRequest extends Request {
   };
 }
 
-// ---------------------------------------------------------
-// ✅ Add team
-// ---------------------------------------------------------
+//ADD TEAM
 export const addTeam = async (req: AuthRequest, res: Response) => {
   try {
     const adminId = req.user?.id;
@@ -29,11 +27,9 @@ export const addTeam = async (req: AuthRequest, res: Response) => {
       return res.status(400).json({ message: "Valid quizId is required" });
     }
 
-    // Make sure quiz exists
     const quiz = await Quiz.findById(quizId);
     if (!quiz) return res.status(404).json({ message: "Quiz not found" });
 
-    // Create team
     const team = await Team.create({
       name: name.trim(),
       adminId,
@@ -41,7 +37,6 @@ export const addTeam = async (req: AuthRequest, res: Response) => {
       points: 0,
     });
 
-    // Add team to quiz (optional but recommended)
     await Quiz.findByIdAndUpdate(quizId, {
       $push: { teams: team._id },
       $inc: { numTeams: 1 },
@@ -60,15 +55,15 @@ export const addTeam = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// ---------------------------------------------------------
-// ✅ Get all teams for logged-in admin
-// ---------------------------------------------------------
+// GET ALL TEAMS FOR LOGGED-IN ADMIN
 export const getTeams = async (req: AuthRequest, res: Response) => {
   try {
     const adminId = req.user?.id;
     if (!adminId) return res.status(401).json({ message: "Unauthorized" });
 
-    const teams = await Team.find({ adminId }).populate("quizId", "name");
+    const teams = await Team.find({ adminId })
+      .populate("quizId", "name numRounds numTeams")
+      .sort({ createdAt: -1 });
 
     return res.status(200).json({
       message: "Teams fetched successfully",
@@ -83,9 +78,7 @@ export const getTeams = async (req: AuthRequest, res: Response) => {
   }
 };
 
-// ---------------------------------------------------------
-// ✅ Get teams by quizId
-// ---------------------------------------------------------
+// GET TEAMS BY QUIZ ID
 export const getTeamsByQuiz = async (req: Request, res: Response) => {
   try {
     const { quizId } = req.params;
@@ -109,10 +102,12 @@ export const getTeamsByQuiz = async (req: Request, res: Response) => {
   }
 };
 
-//Delete team
-
-export const deleteTeam = async (req: Request, res: Response) => {
+// DELETE TEAM
+export const deleteTeam = async (req: AuthRequest, res: Response) => {
   try {
+    const adminId = req.user?.id;
+    if (!adminId) return res.status(401).json({ message: "Unauthorized" });
+
     const { id } = req.params;
 
     if (!id || !mongoose.Types.ObjectId.isValid(id)) {
@@ -120,11 +115,18 @@ export const deleteTeam = async (req: Request, res: Response) => {
     }
 
     const team = await Team.findById(id);
+
     if (!team) {
       return res.status(404).json({ message: "Team not found" });
     }
 
-    // Remove from quiz
+    // Prevent deleting another admin’s team
+    if (team.adminId.toString() !== adminId) {
+      return res.status(403).json({
+        message: "Unauthorized to delete this team",
+      });
+    }
+
     await Quiz.findByIdAndUpdate(team.quizId, {
       $pull: { teams: team._id },
       $inc: { numTeams: -1 },
