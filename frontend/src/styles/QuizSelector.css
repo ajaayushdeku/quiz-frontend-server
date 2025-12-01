@@ -40,6 +40,24 @@
   animation: fadeInUp 1s ease-out;
 }
 
+.welcome-msg-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: -5rem;
+  font-size: clamp(1.2rem, 2vw, 2rem);
+}
+
+.welcome-msg {
+  background: linear-gradient(135deg, #ffffff 0%, #6098e8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: -2px;
+  font-size: clamp(1.2rem, 2vw, 2rem);
+}
+
 .hero-title {
   font-size: clamp(3rem, 8vw, 6rem);
   font-weight: 900;
@@ -144,7 +162,7 @@
   transform: translateX(-50%);
   width: 60%;
   height: 4px;
-  background: linear-gradient(180deg, transparent, #6098e8, transparent);
+  background: linear-gradient(90deg, transparent, #6098e8, transparent);
   border-radius: 2px;
 }
 
@@ -374,6 +392,14 @@
     padding: 1.5rem;
   }
 
+  .welcome-msg-container {
+    margin-bottom: -3rem;
+  }
+
+  .welcome-msg {
+    letter-spacing: -1px;
+  }
+
   .hero-title {
     letter-spacing: -1px;
   }
@@ -381,6 +407,11 @@
   .hero-cta {
     padding: 1rem 2rem;
     font-size: 1rem;
+  }
+
+  .admin-panel-btn {
+    padding: 0.7rem 1rem;
+    font-size: 0.8rem;
   }
 
   .quiz-selection-section {

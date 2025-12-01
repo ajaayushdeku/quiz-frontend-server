@@ -15,6 +15,7 @@ import { IoExtensionPuzzle } from "react-icons/io5";
 
 export default function AdminLayout() {
   const role = localStorage.getItem("role"); // "admin" | "user"
+  const name = localStorage.getItem("name");
 
   const menuItems = [
     role === "admin" && {
@@ -50,6 +51,18 @@ export default function AdminLayout() {
       <div className="dash-content">
         {/* Sidebar */}
         <div className={`side-menu ${collapsed ? "collapsed" : ""}`}>
+          {collapsed ? null : (
+            <p
+              style={{
+                position: "absolute",
+                bottom: "0rem",
+                fontWeight: "600",
+                margin: "0.5rem",
+              }}
+            >
+              Welcome {name}
+            </p>
+          )}
           <div className="side-menu-header">
             {collapsed ? (
               <div className="hamburger" onClick={toggleSidebar}>

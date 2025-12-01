@@ -15,7 +15,7 @@ const History = () => {
     // },
     {
       icon: <MdGroups className="card-icon" />,
-      title: "Quiz Histories",
+      title: "Teams Quiz Histories",
       description: "Check the stats of the teams involved in the quizzes.",
       path: "team-stats",
     },

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import Select from "react-select";
 import { MdGroup, MdExpandMore, MdExpandLess } from "react-icons/md";
-import { IoExtensionPuzzle } from "react-icons/io5";
+import { IoExtensionPuzzle, IoStatsChartSharp } from "react-icons/io5";
 import { FaUser, FaChartLine } from "react-icons/fa";
 import "../../../styles/History.css";
 
@@ -108,7 +108,18 @@ const TeamStats = () => {
 
   return (
     <div className="page-container white-theme">
-      <h2 className="section-heading">📊 All Quizzes Team Stats</h2>
+      <h2
+        className="section-heading"
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          gap: "1rem",
+        }}
+      >
+        <IoStatsChartSharp />
+        Teams Stats / Teams Quiz Histories
+      </h2>
 
       <div className="team-stats-cont">
         <div className="quiz-dropdown-search">
