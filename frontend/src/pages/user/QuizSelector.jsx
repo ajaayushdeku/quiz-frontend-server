@@ -28,6 +28,9 @@ const QuizSelector = () => {
   const queryParams = new URLSearchParams(location.search);
   const adminId = queryParams.get("adminId");
 
+  const role = localStorage.getItem("role"); // "admin" | "user"
+  const name = localStorage.getItem("name");
+
   useEffect(() => {
     const fetchQuizzes = async () => {
       try {
@@ -104,11 +107,12 @@ const QuizSelector = () => {
         <NavLink to={`/admin/dashboard`}>
           <button className="admin-panel-btn">
             <LayoutDashboard />
-            Admin Panel
+            {role === "admin" ? "Admin" : "User"} Panel
           </button>
         </NavLink>
 
         <div className="hero-content">
+          <h1>Welcome, {name} 👋</h1>
           <h1 className="hero-title">Get Ready. Get Set. Quiz!</h1>
           <p className="hero-description">
             Challenge yourself with our curated collection of quizzes. Test your

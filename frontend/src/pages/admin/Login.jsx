@@ -47,8 +47,11 @@ export default function AuthForm() {
         );
 
         setMessage("Login successful!");
-        const { role } = res.data.user;
+        const { role, name } = res.data.user;
 
+        // 📌 Save role for later use in sidebar/menu UI
+        localStorage.setItem("role", role);
+        localStorage.setItem("name", name);
         if (role === "admin") {
           navigate("/admin/dashboard");
         } else if (role === "user") {

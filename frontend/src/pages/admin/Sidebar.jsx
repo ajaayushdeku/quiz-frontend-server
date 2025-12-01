@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { NavLink, Outlet } from "react-router-dom";
+import { NavLink, Outlet, useParams } from "react-router-dom";
 import {
   MdDashboard,
   MdQuestionAnswer,
@@ -14,24 +14,32 @@ import { BsPersonFill } from "react-icons/bs";
 import { IoExtensionPuzzle } from "react-icons/io5";
 
 export default function AdminLayout() {
+  const role = localStorage.getItem("role"); // "admin" | "user"
+
   const menuItems = [
-    { name: "Dashboard", path: "/admin/dashboard", icon: <MdDashboard /> },
-    {
+    role === "admin" && {
+      name: "Dashboard",
+      path: "/admin/dashboard",
+      icon: <MdDashboard />,
+    },
+    role === "admin" && {
       name: "Create Questions",
       path: "/admin/questions",
       icon: <MdQuestionAnswer />,
     },
-    { name: "Create Quiz", path: "/admin/rounds", icon: <IoExtensionPuzzle /> },
-    {
+    role === "admin" && {
+      name: "Create Quiz",
+      path: "/admin/rounds",
+      icon: <IoExtensionPuzzle />,
+    },
+    role === "admin" && {
       name: "Create Quiz-Master",
       path: "/admin/create",
       icon: <BsPersonFill />,
     },
     { name: "History", path: "/admin/history", icon: <MdHistory /> },
-    // { name: "Teams", path: "/admin/teams", icon: <MdGroup /> },
-
     { name: "Start Quiz", path: "/quizselect", icon: <MdPlayCircleOutline /> },
-  ];
+  ].filter(Boolean); // ⬅ removes null items (for user access)
 
   const [collapsed, setCollapsed] = useState(false);
 
@@ -49,7 +57,7 @@ export default function AdminLayout() {
               </div>
             ) : (
               <h2 className="heading" onClick={toggleSidebar}>
-                Admin
+                {role === "admin" ? "Admin Panel" : "User Panel"}
               </h2>
             )}
           </div>
