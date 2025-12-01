@@ -508,7 +508,7 @@
 }
 
 .go-back-to-btn {
-  position: absolute;
+  position: fixed;
   left: 1rem;
   top: 1rem;
 }
@@ -517,10 +517,13 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  background: linear-gradient(135deg, #ffffff, #f7f1f1);
-  border: 2px dashed #ffffff;
-  /* text-shadow: 0 0 15px rgba(121, 123, 123, 0.4); */
-  color: rgb(52, 52, 52);
+  background: linear-gradient(135deg, #6098e8 0%, #4a7bc8 100%);
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 10px 30px rgba(96, 152, 232, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: rgb(255, 255, 255);
   font-size: 1rem;
   font-weight: 700;
   padding: 0.8rem 1rem;
@@ -529,14 +532,13 @@
   cursor: pointer;
   transition: all 0.3s ease;
   z-index: 200;
-  letter-spacing: 2.5px;
 }
 
 .back-btn:hover {
-  background: #55555522;
-  color: white;
-  transform: scale(1.05);
-  border: 2px dashed #b1b1b2;
+  transform: translateY(-3px);
+  /* box-shadow: 0 15px 40px rgba(96, 152, 232, 0.5); */
+  color: #000000;
+  background-color: linear-gradient(135deg, #e1e1e1 0%, #ccdbf3 100%);
 }
 
 .back-btn-icon {

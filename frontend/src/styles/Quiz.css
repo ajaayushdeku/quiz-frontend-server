@@ -935,14 +935,19 @@
   padding: 10px;
 }
 
+.winner-heading {
+  font-size: 1.8rem;
+  margin-bottom: 1rem;
+}
+
 .winner-team {
   display: flex;
   flex-direction: row;
   justify-content: center;
   align-items: center;
   gap: 1rem;
-  font-size: 1.3rem;
-  font-weight: 700;
+  font-size: 1.8rem;
+  font-weight: 800;
 }
 
 .team-icon {
@@ -981,7 +986,7 @@
 }
 
 .estimation-winner-team-info h3 {
-  font-size: 1.6rem;
+  font-size: 1.8rem;
   margin-bottom: 0.5rem;
   color: #ffdf70;
 }

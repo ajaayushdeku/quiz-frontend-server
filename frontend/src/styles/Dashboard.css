@@ -119,7 +119,7 @@ h4 {
 }
 
 .menu-link .link-text {
-  margin-left: 10px;
+  margin-left: 5px;
   transition: opacity 0.3s ease;
 }
 
@@ -137,6 +137,7 @@ h4 {
   color: #fff;
   border-left: 4px solid rgb(9, 193, 255);
   display: flex;
+  font-size: 1.1rem;
   align-items: center;
 }
 
@@ -912,6 +913,7 @@ button:hover {
   background: #fff;
   padding: 1.5rem;
   border-radius: 12px;
+  border: 2px solid #b6b7b960;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
   transition: transform 0.2s, box-shadow 0.2s;
   cursor: pointer;
@@ -971,6 +973,7 @@ button:hover {
   min-height: 80vh;
   padding: 30px;
   border-radius: 16px;
+  border: 2px solid #b6b7b960;
   box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 

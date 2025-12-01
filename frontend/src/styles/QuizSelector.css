@@ -80,33 +80,37 @@
   margin-right: auto;
 }
 
-.hero-cta,
-.admin-panel-btn {
+.hero-cta {
   padding: 1.2rem 3rem;
   font-size: 1.1rem;
+  border-radius: 50px;
+}
+
+.hero-cta,
+.admin-panel-btn {
   font-weight: 700;
   color: #fff;
   background: linear-gradient(135deg, #6098e8 0%, #4a7bc8 100%);
   border: none;
-  border-radius: 50px;
   cursor: pointer;
   transition: all 0.3s ease;
   /* box-shadow: 0 10px 30px rgba(96, 152, 232, 0.3); */
   text-transform: uppercase;
-  letter-spacing: 1px;
+  letter-spacing: 2px;
 }
 
 .admin-panel-btn {
-  position: absolute;
+  position: fixed;
   top: 1rem;
   left: 1rem;
-  padding: 1rem 2rem;
+  padding: 0.7rem 1.3rem;
   font-size: 0.9rem;
   font-weight: 700;
   display: flex;
   justify-content: center;
   align-items: center;
   gap: 0.6rem;
+  border-radius: 100px;
 }
 
 .hero-cta:hover,

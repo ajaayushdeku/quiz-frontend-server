@@ -82,7 +82,7 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
         });
       }
 
-      // Collect valid submissions
+      //  Collect valid submissions
       const submittedTeams: { teamId: string; numericAnswer: number }[] = [];
 
       for (const ans of answers) {
@@ -100,37 +100,42 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
         });
       }
 
-      // Wait until all teams submit
-      if (submittedTeams.length === quiz.teams.length) {
-        //  Determine winners (multiple winners allowed)
+      //  Wait until all teams submit
+      if (submittedTeams.length !== quiz.teams.length) {
+        return res.status(200).json({
+          message: "Estimation answers submitted, waiting for remaining teams",
+          sessionId: session._id,
+          teamsSubmitted: submittedTeams.length,
+          totalTeams: quiz.teams.length,
+        });
+      }
 
-        const correctAnswerNum = Number(
-          question.shortAnswer?.text ?? question.correctAnswer
-        );
+      //  Determine winners (ties allowed)
+      const correctAnswerNum = Number(
+        question.shortAnswer?.text ?? question.correctAnswer
+      );
 
-        // Find the minimum difference
-        let minDiff = Infinity;
-        for (const t of submittedTeams) {
-          const diff = Math.abs(correctAnswerNum - t.numericAnswer);
-          if (diff < minDiff) {
-            minDiff = diff;
-          }
-        }
+      // Find minimum difference
+      let minDiff = Infinity;
+      for (const t of submittedTeams) {
+        const diff = Math.abs(correctAnswerNum - t.numericAnswer);
+        if (diff < minDiff) minDiff = diff;
+      }
 
-        // All teams with the same minDiff are winners
-        const winningTeams = submittedTeams.filter(
-          (t) => Math.abs(correctAnswerNum - t.numericAnswer) === minDiff
-        );
+      // All teams with minDiff are winners
+      const winningTeams = submittedTeams.filter(
+        (t) => Math.abs(correctAnswerNum - t.numericAnswer) === minDiff
+      );
 
-        const pointsToAward = Number(rules.points || 0);
+      const pointsToAward = Number(rules.points || 0);
 
-        //  Save Submit + Update Team Points + History
-
-        for (const t of submittedTeams) {
+      // STEP 4: Process all teams in parallel
+      await Promise.all(
+        submittedTeams.map(async (t) => {
           const isWinner = winningTeams.some((w) => w.teamId === t.teamId);
           const points = isWinner ? pointsToAward : 0;
 
-          // Save or update Submit entry
+          // ---- A) Save or Update Submit ----
           const existingSubmit = await Submit.findOne({
             quizId,
             roundId,
@@ -138,20 +143,15 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
             questionId: questionObjectId,
           });
 
+          let oldPoints = 0;
+
           if (existingSubmit) {
-            const oldPoints = existingSubmit.pointsEarned;
+            oldPoints = existingSubmit.pointsEarned;
 
             existingSubmit.givenAnswer = t.numericAnswer;
             existingSubmit.pointsEarned = points;
             existingSubmit.isCorrect = isWinner;
-
             await existingSubmit.save();
-
-            const team = await Team.findById(t.teamId);
-            if (team) {
-              team.points = (team.points || 0) - oldPoints + points;
-              await team.save();
-            }
           } else {
             await Submit.create({
               quizId,
@@ -163,16 +163,20 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
               pointsEarned: points,
               isCorrect: isWinner,
             });
-
-            const team = await Team.findById(t.teamId);
-            if (team && points > 0) {
-              team.points = (team.points || 0) + points;
-              await team.save();
-            }
           }
 
-          //  Update QuizHistory
+          // Update Team Points
+          const team = await Team.findById(t.teamId);
 
+          if (team) {
+            if (isWinner) {
+              team.points = (team.points || 0) + pointsToAward;
+            }
+
+            await team.save();
+          }
+
+          // Update QuizHistory
           const answerObj = {
             questionId: questionObjectId,
             givenAnswer: t.numericAnswer,
@@ -203,43 +207,38 @@ export const submitAnswer = async (req: SubmitRequest, res: Response) => {
               startedAt: new Date(),
             });
           } else {
-            const idx = (history.answers as any[]).findIndex(
+            const idx = history.answers.findIndex(
               (a) => a.questionId.toString() === questionObjectId.toString()
             );
 
             if (idx !== -1) {
-              const oldPoints = (history.answers as any)[idx].pointsEarned;
-              (history.answers as any)[idx] = answerObj;
-
-              history.totalPoints = history.totalPoints - oldPoints + points;
+              const oldAnswer = history.answers[idx];
+              if (oldAnswer) {
+                const oldHistoryPoints = oldAnswer.pointsEarned;
+                history.answers[idx] = answerObj;
+                history.totalPoints =
+                  history.totalPoints - oldHistoryPoints + points;
+              }
             } else {
-              (history.answers as any).push(answerObj);
+              history.answers.push(answerObj);
               history.totalPoints += points;
             }
 
             await history.save();
           }
-        }
+        })
+      );
 
-        //  Return winners (multiple winners supported)
-
-        return res.status(200).json({
-          message: "Estimation answers submitted and scored",
-          sessionId: session._id,
-          correctAnswer: correctAnswerNum,
-          winners: winningTeams.map((w) => ({
-            teamId: w.teamId,
-            givenAnswer: w.numericAnswer,
-            pointsAwarded: pointsToAward,
-          })),
-        });
-      }
-
+      //  Return winners
       return res.status(200).json({
-        message: "Estimation answers submitted, waiting for remaining teams",
+        message: "Estimation answers submitted and scored",
         sessionId: session._id,
-        teamsSubmitted: submittedTeams.length,
-        totalTeams: quiz.teams.length,
+        correctAnswer: correctAnswerNum,
+        winners: winningTeams.map((w) => ({
+          teamId: w.teamId,
+          givenAnswer: w.numericAnswer,
+          pointsAwarded: pointsToAward,
+        })),
       });
     }
 

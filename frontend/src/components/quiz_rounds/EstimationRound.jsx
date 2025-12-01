@@ -360,9 +360,9 @@ const EstimationRound = ({ onFinish, sessionId }) => {
 
                 {result?.winners && result.winners.length > 0 ? (
                   <div className="winner-list">
-                    <h4 className="winner-team">
+                    <h2 className="winner-heading">
                       🏆 Closest Team{result.winners.length > 1 ? "s" : ""} :{" "}
-                    </h4>
+                    </h2>
 
                     <strong className="winner-team">
                       <MdGroup

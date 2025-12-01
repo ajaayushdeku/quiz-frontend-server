@@ -103,39 +103,6 @@ export default function ManageQuizMasters() {
 
       <h2 className="section-heading">Manage Quiz Masters</h2>
 
-      {/* Add Quiz Master */}
-      {/* <form onSubmit={createQuizMaster} className="form-card">
-        <h2 className="form-title">Add New Quiz Master</h2>
-
-        <div className="form-grid">
-          <input
-            type="text"
-            placeholder="Name"
-            value={form.name}
-            onChange={(e) => setForm({ ...form, name: e.target.value })}
-            className="form-input"
-          />
-          <input
-            type="email"
-            placeholder="Email"
-            value={form.email}
-            onChange={(e) => setForm({ ...form, email: e.target.value })}
-            className="form-input"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={form.password}
-            onChange={(e) => setForm({ ...form, password: e.target.value })}
-            className="form-input"
-          />
-
-          <button type="submit" disabled={creating} className="btn-primary">
-            {creating ? "Creating..." : "Create"}
-          </button>
-        </div>
-      </form> */}
-
       {/* Quiz Masters Table */}
       <div className="table-card">
         {loading ? (

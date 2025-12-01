@@ -60,7 +60,7 @@ export default function AdminLayout() {
                 margin: "0.5rem",
               }}
             >
-              Welcome {name}
+              Welcome {name} !
             </p>
           )}
           <div className="side-menu-header">
