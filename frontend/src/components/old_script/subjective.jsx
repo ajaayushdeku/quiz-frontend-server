@@ -28,171 +28,67 @@ import rulesConfig from "../../config/rulesConfig";
 import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
 import useShiftToShow from "../../hooks/useShiftToShow";
 import { TbScoreboard } from "react-icons/tb";
+import { MdGroup } from "react-icons/md";
+import { useFetchQuizData } from "../../hooks/useFetchQuizData";
 
 const { settings } = rulesConfig.general_round;
 const TEAM_TIME_LIMIT = settings.teamTimeLimit;
-
-const COLORS = [
-  "#d61344ff",
-  "#0ab9d4ff",
-  "#32be76ff",
-  "#e5d51eff",
-  "#ff9800ff",
-  "#9c27b0ff",
-  "#03a9f4ff",
-  "#ffc107ff",
-];
 
 const SubjectRound = ({ onFinish, sessionId }) => {
   const { quizId, roundId } = useParams();
 
   const { showToast } = useUIHelpers();
 
-  const [quesFetched, setQuesFetched] = useState([]);
+  // const [quesFetched, setQuesFetched] = useState([]);
   const [quizCompleted, setQuizCompleted] = useState(false);
   const [questionDisplay, setQuestionDisplay] = useState(false);
   const [fullscreenMedia, setFullscreenMedia] = useState(null);
-  const [teams, setTeams] = useState([]);
-  const [activeRound, setActiveRound] = useState(null);
-  const [roundPoints, setRoundPoints] = useState([]);
-  const [roundTime, setRoundTime] = useState(TEAM_TIME_LIMIT);
-  const [reduceBool, setReduceBool] = useState(false);
+  // const [teams, setTeams] = useState([]);
+  // const [activeRound, setActiveRound] = useState(null);
+  // const [roundPoints, setRoundPoints] = useState([]);
+  // const [roundTime, setRoundTime] = useState(TEAM_TIME_LIMIT);
+  // const [reduceBool, setReduceBool] = useState(false);
   const [scoreMessage, setScoreMessage] = useState();
-  const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
+  // const [currentRoundNumber, setCurrentRoundNumber] = useState(0);
   const [passIt, setPassIt] = useState(false);
 
   const [optionSelected, setOptionSelected] = useState(false);
 
   // Category selection state
   const [selectedCategory, setSelectedCategory] = useState(null);
-  const [availableCategories, setAvailableCategories] = useState([]);
+  // const [availableCategories, setAvailableCategories] = useState([]);
   const [usedQuestions, setUsedQuestions] = useState(new Set());
 
   const [showScoresModal, setShowScoresModal] = useState(false);
 
   // NEW STATE: Track if we should show correct answer
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
+  const [questionToShow, setQuestionToShow] = useState(null);
 
   const location = useLocation();
   const { historyIds } = location.state || {};
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // const [loading, setLoading] = useState(true);
+  // const [error, setError] = useState("");
   const queryParams = new URLSearchParams(location.search);
   const adminId = queryParams.get("adminId");
 
   // ---------------- Fetch Quiz Data ----------------
-  useEffect(() => {
-    const fetchQuizData = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const quizRes = await axios.get(
-          "http://localhost:4000/api/quiz/get-quizForUser",
-          { withCredentials: true }
-        );
-
-        const allQuizzes = quizRes.data.quizzes || [];
-
-        console.log("All Quiz:", allQuizzes);
-
-        const currentQuiz = allQuizzes.find(
-          (q) => q._id === quizId || q.rounds?.some((r) => r._id === roundId)
-        );
-
-        if (!currentQuiz) return console.warn("Quiz not found");
-
-        const formattedTeams = (currentQuiz.teams || []).map((team, index) => ({
-          id: team._id,
-          name: team.name || `Team ${index + 1}`,
-          points: team.points || 0,
-        }));
-        setTeams(formattedTeams);
-
-        const round = currentQuiz.rounds.find((r) => r._id === roundId);
-        if (!round) return console.warn("Round not found");
-        setActiveRound(round);
-
-        setCurrentRoundNumber(
-          currentQuiz.rounds.findIndex((r) => r._id === roundId) + 1
-        );
-        setRoundPoints(round?.rules?.points || 10);
-        setRoundTime(round?.rules?.timeLimitValue || TEAM_TIME_LIMIT);
-        if (round?.rules?.enableNegative) setReduceBool(true);
-
-        const questionRes = await axios.get(
-          "http://localhost:4000/api/question/get-questions",
-          { withCredentials: true }
-        );
-        const allQuestions = questionRes.data.data || [];
-
-        const filteredQuestions = allQuestions.filter((q) =>
-          round.questions.includes(q._id)
-        );
-
-        const formattedQuestions = filteredQuestions.map((q) => {
-          let optionsArray = [];
-          if (q.options?.length) {
-            optionsArray =
-              typeof q.options[0] === "string"
-                ? JSON.parse(q.options[0])
-                : q.options;
-          }
-
-          const mappedOptions = optionsArray.map((opt, idx) => ({
-            id: String.fromCharCode(97 + idx),
-            text: typeof opt === "string" ? opt : opt.text || "",
-            originalId: opt._id || null,
-          }));
-
-          const correctIndex = mappedOptions.findIndex(
-            (opt) => opt.originalId?.toString() === q.correctAnswer?.toString()
-          );
-          const correctOptionId =
-            correctIndex >= 0
-              ? mappedOptions[correctIndex].id
-              : mappedOptions[0]?.id || null;
-
-          return {
-            id: q._id,
-            question: q.text,
-            options: mappedOptions,
-            correctOptionId,
-            category: q.category || "",
-            mediaType: q.media?.type || "none",
-            mediaUrl: q.media?.url || "",
-            shortAnswer: q.shortAnswer || null,
-          };
-        });
-
-        setQuesFetched(formattedQuestions);
-
-        const categories = [
-          ...new Set(formattedQuestions.map((q) => q.category)),
-        ].filter(Boolean);
-        setAvailableCategories(categories);
-      } catch (error) {
-        console.error("Fetch Error:", error);
-        showToast("Failed to fetch quiz data!");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (quizId && roundId) fetchQuizData();
-  }, [quizId, roundId, adminId]);
-
-  // ---------------- Team Color Assignment ----------------
-  const generateTeamColors = (teams) => {
-    const teamColors = {};
-    teams.forEach((team, index) => {
-      const color = COLORS[index % COLORS.length];
-      teamColors[team.name || `Team${index + 1}`] = color;
-    });
-    return teamColors;
-  };
-  const TEAM_COLORS = generateTeamColors(teams);
+  const {
+    loading,
+    error,
+    teams,
+    setTeams,
+    activeRound,
+    quesFetched,
+    roundPoints,
+    roundTime,
+    setRoundTime,
+    reduceBool,
+    currentRoundNumber,
+    TEAM_COLORS,
+    availableCategories,
+  } = useFetchQuizData(quizId, roundId, showToast, true); // true = include categories
 
   // ---------------- Get available questions by category ----------------
   const getAvailableQuestionsByCategory = (category) => {
@@ -379,6 +275,19 @@ const SubjectRound = ({ onFinish, sessionId }) => {
 
         setScoreMessage(msg);
         showToast(msg);
+
+        if (secondHand && !isCorrect) {
+          // Answer is wrong on second-hand, show correct answer
+          setTimeout(() => {
+            setShowCorrectAnswer(true);
+            setSecondHand(false);
+            setPassIt(false);
+            setScoreMessage(""); // Clear the score message
+          }, 2000); // Show wrong message for 2 seconds first
+
+          setOptionSelected(true);
+          return; // Don't proceed to next question yet
+        }
       }
     } catch (err) {
       console.error("Submission Error:", err?.response?.data || err);
@@ -517,9 +426,14 @@ const SubjectRound = ({ onFinish, sessionId }) => {
   // NEW FUNCTION: Handle Next Question after showing correct answer
   const handleNextAfterCorrectAnswer = () => {
     setShowCorrectAnswer(false);
+    setSecondHand(false);
+    setPassIt(false);
+    setQuestionToShow(null); // Clear stored question
 
-    // Mark question as used
-    markQuestionAsUsed(currentQuestion.id);
+    // Mark question as used (if not already marked)
+    if (currentQuestion) {
+      markQuestionAsUsed(currentQuestion.id);
+    }
 
     // Check if ALL questions are now used
     const allUsed = usedQuestions.size + 1 >= quesFetched.length;
@@ -531,6 +445,7 @@ const SubjectRound = ({ onFinish, sessionId }) => {
     }
 
     // Reset category for next team
+
     setSelectedCategory(null);
     setLockedQuestion(null);
     resetTimer(roundTime);
@@ -594,17 +509,6 @@ const SubjectRound = ({ onFinish, sessionId }) => {
           } points for ${activeTeam.name}`;
           showToast(msg);
           setScoreMessage(msg);
-
-          setTeams((prevTeams) =>
-            prevTeams.map((team) =>
-              team.id === activeTeam.id
-                ? {
-                    ...team,
-                    points: team.points + (pointsEarned || -roundPoints),
-                  }
-                : team
-            )
-          );
         } catch (err) {
           console.error("Timeout penalty error:", err);
           showToast("Failed to submit timeout penalty!");
@@ -613,6 +517,9 @@ const SubjectRound = ({ onFinish, sessionId }) => {
         setQuestionDisplay(false);
 
         if (rules?.enableNegative) {
+          // STORE THE QUESTION BEFORE CLEARING
+          setQuestionToShow(currentQuestion);
+
           markQuestionAsUsed(currentQuestion.id);
 
           const allUsed = usedQuestions.size + 1 >= quesFetched.length;
@@ -624,13 +531,14 @@ const SubjectRound = ({ onFinish, sessionId }) => {
           }
 
           goToNextTeam();
-          setSelectedCategory(null);
-          setLockedQuestion(null);
-          setQuestionDisplay(false);
+          // setSelectedCategory(null);
+          // setLockedQuestion(null);
+          // setQuestionDisplay(false);
           resetTimer(roundTime);
           pauseTimer();
           resetAnswer();
           setScoreMessage("");
+          setShowCorrectAnswer(true);
           console.log("Timeout: moved to next team/question (no pass enabled)");
         } else {
           if (
@@ -645,8 +553,11 @@ const SubjectRound = ({ onFinish, sessionId }) => {
               setPassIt(true);
               showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
             } else {
+              // STORE THE QUESTION BEFORE SHOWING ANSWER
+              setQuestionToShow(currentQuestion);
+
               // Second timeout - show correct answer
-              showToast(`Both teams timed out! Showing correct answer...`);
+              showToast(`Showing correct answer...`);
               setShowCorrectAnswer(true);
               setPassIt(false);
               setSecondHand(false);
@@ -700,6 +611,7 @@ const SubjectRound = ({ onFinish, sessionId }) => {
   const handleMediaClick = (url) => setFullscreenMedia(url);
   const closeFullscreen = () => setFullscreenMedia(null);
 
+  // ---------------- Hide detail-info when quiz completed ----------------
   useEffect(() => {
     const details = document.getElementsByClassName("detail-info");
     Array.from(details).forEach((el) => {
@@ -729,10 +641,9 @@ const SubjectRound = ({ onFinish, sessionId }) => {
 
   // Get the correct option text
   const getCorrectOptionText = () => {
-    if (!currentQuestion) return "";
-    const correctOpt = currentQuestion.options.find(
-      (opt) => opt.id === currentQuestion.correctOptionId
-    );
+    const q = questionToShow || currentQuestion;
+    if (!q) return "";
+    const correctOpt = q.options.find((opt) => opt.id === q.correctOptionId);
     return correctOpt ? correctOpt.text : "";
   };
 
@@ -760,15 +671,21 @@ const SubjectRound = ({ onFinish, sessionId }) => {
           <div className="scores-modal" onClick={(e) => e.stopPropagation()}>
             <h3>Current Team Scores</h3>
             <ul>
-              {teams.map((team) => (
-                <li key={team.id} className="team-score-item">
-                  <span
-                    className="team-color-indicator"
-                    style={{ backgroundColor: TEAM_COLORS[team.name] }}
-                  />
-                  <span className="team-name-view">{team.name}:</span>
+              {teams.map((team, idx) => (
+                <div key={team.id}>
+                  <span>
+                    <span className="team-color-indicator">
+                      <MdGroup style={{ color: TEAM_COLORS[team.name] }} />
+                    </span>
+                    <span
+                      className="team-name-view"
+                      style={{ color: TEAM_COLORS[team.name] }}
+                    >
+                      {team.name.toUpperCase()}:
+                    </span>
+                  </span>
                   <span className="team-points-view">{team.points} pts</span>
-                </li>
+                </div>
               ))}
             </ul>
             <button
@@ -781,52 +698,88 @@ const SubjectRound = ({ onFinish, sessionId }) => {
         </div>
       )}
 
-      <TeamDisplay
-        activeTeam={activeTeam}
-        secondHand={secondHand}
-        handLabel={handLabel}
-        timeRemaining={timeRemaining}
-        TEAM_COLORS={TEAM_COLORS}
-        formatTime={formatTime}
-        headMessage={"Choose one of the option to answer"}
-        toastMessage={
-          activeRound?.rules?.enablePass
-            ? " Press 'Ctrl' to Pass The Question"
-            : "No passing allowed"
-        }
-        passEnable={activeRound?.rules?.enablePass || false}
-        lowTimer={roundTime / 3}
-        midTimer={roundTime / 2}
-        highTimer={roundTime}
-        enableNegative={activeRound?.rules?.enableNegative || false}
-      />
+      {!quizCompleted && (
+        <TeamDisplay
+          activeTeam={activeTeam}
+          secondHand={secondHand}
+          handLabel={handLabel}
+          timeRemaining={timeRemaining}
+          TEAM_COLORS={TEAM_COLORS}
+          formatTime={formatTime}
+          headMessage={"Choose one of the option to answer"}
+          toastMessage={
+            activeRound?.rules?.enablePass
+              ? " Press 'Ctrl' to Pass The Question"
+              : "No passing allowed"
+          }
+          passEnable={activeRound?.rules?.enablePass || false}
+          lowTimer={roundTime / 3}
+          midTimer={roundTime / 2}
+          highTimer={roundTime}
+          enableNegative={activeRound?.rules?.enableNegative || false}
+        />
+      )}
 
       {/* Show Correct Answer Section */}
       {showCorrectAnswer ? (
-        <div className="question-section">
-          {currentQuestion.category && (
-            <div className="quiz-category">{currentQuestion.category}</div>
-          )}
+        <>
+          <div className="question-category-collection">
+            <QuestionCard
+              questionText={
+                questionToShow?.question ??
+                currentQuestion?.question ??
+                "No question loaded"
+              }
+              displayedText={
+                questionToShow?.question ?? currentQuestion?.question ?? ""
+              }
+              mediaType={
+                questionToShow?.mediaType ??
+                currentQuestion?.mediaType ??
+                "none"
+              }
+              mediaUrl={
+                questionToShow?.mediaUrl ?? currentQuestion?.mediaUrl ?? ""
+              }
+              onMediaClick={handleMediaClick}
+              category={
+                questionToShow?.category ?? currentQuestion?.category ?? ""
+              }
+            />
+          </div>
 
-          <QuestionCard
-            questionText={currentQuestion?.question ?? "No question loaded"}
-            displayedText={`Q. ${displayedText}`}
-            mediaType={currentQuestion.mediaType}
-            mediaUrl={currentQuestion.mediaUrl}
-            onMediaClick={handleMediaClick}
-            category={currentQuestion.category}
-          />
+          <div
+            style={{
+              textAlign: "center",
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: "1rem",
+              width: "100%",
+            }}
+          >
+            <div className="correct-answer-display">
+              <p>
+                ✓ Here is the Correct Answer:{" "}
+                <strong style={{ color: "#32be76ff" }}>
+                  {getCorrectOptionText()}
+                </strong>
+              </p>
 
-          <div className="correct-answer-container">
-            <p>
-              ✓ Correct Answer:{" "}
-              <strong style={{ color: "#32be76ff" }}>
-                {getCorrectOptionText()}
-              </strong>
-            </p>
-            {currentQuestion?.shortAnswer && (
-              <p className="short-answer">{currentQuestion.shortAnswer}</p>
-            )}
+              {(questionToShow?.shortAnswer ||
+                currentQuestion?.shortAnswer) && (
+                <p
+                  style={{
+                    fontSize: "1rem",
+                    color: "#aaa",
+                    marginTop: "1rem",
+                    fontStyle: "italic",
+                  }}
+                >
+                  {questionToShow?.shortAnswer || currentQuestion?.shortAnswer}
+                </p>
+              )}
+            </div>
             <Button
               className="nxt-question-btn"
               onClick={handleNextAfterCorrectAnswer}
@@ -835,14 +788,16 @@ const SubjectRound = ({ onFinish, sessionId }) => {
               <FaArrowRight />
             </Button>
           </div>
-        </div>
+        </>
       ) : (
         <>
           {!quizCompleted ? (
             !questionDisplay ? (
               !secondHand && !selectedCategory ? (
                 <div className="centered-control category-select">
-                  <p className="form-heading">Select a Category</p>
+                  <p className="form-heading" style={{ letterSpacing: "5px" }}>
+                    Select a Category
+                  </p>
                   <div className="category-options">
                     {availableCategories.map((cat) => {
                       const availableInCategory =
@@ -892,23 +847,25 @@ const SubjectRound = ({ onFinish, sessionId }) => {
               )
             ) : (
               currentQuestion && (
-                <div className="question-section">
-                  {currentQuestion.category && (
-                    <div className="quiz-category">
-                      {currentQuestion.category}
-                    </div>
-                  )}
+                <>
+                  <div className="question-category-collection">
+                    {/* {currentQuestion.category && (
+                      <div className="quiz-category">
+                        {currentQuestion.category}
+                      </div>
+                    )} */}
 
-                  <QuestionCard
-                    questionText={
-                      currentQuestion?.question ?? "No question loaded"
-                    }
-                    displayedText={`Q. ${displayedText}`}
-                    mediaType={currentQuestion.mediaType}
-                    mediaUrl={currentQuestion.mediaUrl}
-                    onMediaClick={handleMediaClick}
-                    category={currentQuestion.category}
-                  />
+                    <QuestionCard
+                      questionText={
+                        currentQuestion?.question ?? "No question loaded"
+                      }
+                      displayedText={`${displayedText}`}
+                      mediaType={currentQuestion.mediaType}
+                      mediaUrl={currentQuestion.mediaUrl}
+                      onMediaClick={handleMediaClick}
+                      category={currentQuestion.category}
+                    />
+                  </div>
 
                   <OptionList
                     options={currentQuestion.options}
@@ -919,9 +876,15 @@ const SubjectRound = ({ onFinish, sessionId }) => {
                       activeRound?.rules?.enableTimer ? isRunning : false
                     }
                   />
-
                   {!optionSelected && (
-                    <div className="pass-button-container">
+                    <div
+                      className="pass-button-container"
+                      style={{
+                        position: "fixed",
+                        bottom: "1rem",
+                        left: "1rem",
+                      }}
+                    >
                       <Button
                         className="pass-question-btn"
                         onClick={() => {
@@ -940,7 +903,7 @@ const SubjectRound = ({ onFinish, sessionId }) => {
                       </Button>
                     </div>
                   )}
-                </div>
+                </>
               )
             )
           ) : (

@@ -48,6 +48,12 @@ const GeneralRound = ({ onFinish, sessionId }) => {
   // Track if we should show correct answer
   const [showCorrectAnswer, setShowCorrectAnswer] = useState(false);
 
+  // NEW: Track teams that have passed for current question
+  const [passedTeams, setPassedTeams] = useState([]);
+
+  // NEW: Track the original team that started the question (for turn order)
+  const [originalTeamIndex, setOriginalTeamIndex] = useState(null);
+
   const [showScoresModal, setShowScoresModal] = useState(false);
 
   const location = useLocation();
@@ -83,6 +89,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
     goToNextTeam,
     passToNextTeam,
     setSecondHand,
+    setActiveIndex, // We'll need this to restore turn order
   } = useTeamQueue({
     totalTeams: teams.length,
     teams: teams,
@@ -108,23 +115,15 @@ const GeneralRound = ({ onFinish, sessionId }) => {
 
   const { displayedText } = useTypewriter(currentQuestion?.question || "", 20);
 
-  const handLabel = secondHand ? "Second-hand Question" : "First-hand Question";
+  const handLabel =
+    passedTeams.length > 0
+      ? `Passed Question (${passedTeams.length} passes)`
+      : "First-hand Question";
 
   // ---------------- Auto pass on timeout ----------------
   useEffect(() => {
-    // if (!activeRound?.rules?.enablePass) return;
     if (!isRunning && timeRemaining === 0 && activeRound?.rules?.enablePass)
       handlePass();
-
-    // if (!activeRound?.rules?.enablePass && !isRunning && timeRemaining === 0) {
-    //   goToNextTeam();
-    //   nextQuestion();
-    //   setQuestionDisplay(false);
-    //   resetTimer(roundTime);
-    //   resetAnswer();
-    //   setScoreMessage("");
-    //   console.log("IF no pass and timeout, mov to next team:");
-    // }
   }, [isRunning, timeRemaining, activeRound]);
 
   // ---------------- Submit to backend ----------------
@@ -193,13 +192,15 @@ const GeneralRound = ({ onFinish, sessionId }) => {
     selectAnswer(optionId);
     pauseTimer();
 
+    // Determine if this answer counts as a passed answer
+    const isPassedAnswer = passedTeams.length > 0;
+
     try {
       const result = await submitAnswerToBackend({
         teamId: activeTeam.id,
         questionId: currentQuestion.id,
         givenAnswer,
-        isPassed: passIt ? true : false,
-        // isPassed: false,
+        isPassed: isPassedAnswer,
       });
 
       if (result) {
@@ -224,17 +225,13 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         setScoreMessage(msg);
         showToast(msg);
 
-        if (secondHand && !isCorrect) {
-          // Answer is wrong on second-hand, show correct answer
+        // If answer is wrong and there are still teams that haven't tried
+        if (!isCorrect && passedTeams.length < teams.length - 1) {
           setTimeout(() => {
             setShowCorrectAnswer(true);
-            setSecondHand(false);
-            setPassIt(false);
-            setScoreMessage(""); // Clear the score message before showing correct answer
-          }, 2000); // Show wrong message for 2 seconds first
-
+          }, 2000);
           setOptionSelected(true);
-          return; // Don't proceed to next question yet
+          return;
         }
       }
     } catch (err) {
@@ -242,10 +239,20 @@ const GeneralRound = ({ onFinish, sessionId }) => {
       showToast("Failed to submit answer!");
     }
 
-    // Move to next team / next question
+    // Move to next question with proper turn order
     setTimeout(() => {
-      if (!secondHand) goToNextTeam();
-      else setSecondHand(false);
+      // Reset to the next team in normal turn order (after original team)
+      if (originalTeamIndex !== null) {
+        const nextNormalIndex = (originalTeamIndex + 1) % teams.length;
+        setActiveIndex(nextNormalIndex);
+      } else {
+        goToNextTeam();
+      }
+
+      // Reset pass-related state
+      setPassedTeams([]);
+      setOriginalTeamIndex(null);
+      setPassIt(false);
 
       if (isLastQuestion) setQuizCompleted(true);
       else {
@@ -253,7 +260,6 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         resetTimer(roundTime);
         resetAnswer();
         setScoreMessage("");
-        setPassIt(false);
       }
 
       setQuestionDisplay(false);
@@ -278,18 +284,21 @@ const GeneralRound = ({ onFinish, sessionId }) => {
       return;
     }
 
-    // if (rules.passLimit && teams[activeIndex]?.passesUsed >= rules.passLimit) {
-    //   setPassIt(false);
-    //   showToast(`⚠️ Team ${activeTeam?.name} has reached the pass limit!`);
-    //   return;
-    // }
+    // Store original team index on first pass
+    if (passedTeams.length === 0) {
+      setOriginalTeamIndex(activeIndex);
+      setPassIt(true);
+    }
 
-    // const passResult = await submitAnswerToBackend({
-    //   teamId: activeTeam.id,
-    //   questionId: currentQuestion.id,
-    //   givenAnswer: null,
-    //   isPassed: true,
-    // });
+    // Check if current team already passed
+    if (passedTeams.includes(activeTeam.id)) {
+      showToast("⚠️ This team has already passed this question!");
+      return;
+    }
+
+    // Add current team to passed teams list
+    const newPassedTeams = [...passedTeams, activeTeam.id];
+    setPassedTeams(newPassedTeams);
 
     const correctOption = currentQuestion.options.find(
       (opt) => opt.id === currentQuestion.correctOptionId
@@ -300,7 +309,6 @@ const GeneralRound = ({ onFinish, sessionId }) => {
     );
     let answerId = wrongOption ? wrongOption.originalId : -1;
 
-    // Use originalId for submission
     const givenAnswer = answerId;
     if (!givenAnswer) {
       return;
@@ -315,7 +323,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
       });
 
       if (passResult) {
-        const { pointsEarned, isCorrect } = passResult;
+        const { pointsEarned } = passResult;
 
         setTeams((prevTeams) =>
           prevTeams.map((t) =>
@@ -325,7 +333,6 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           )
         );
 
-        // Only show negative points if both enableNegative AND enablePass are true
         const msg =
           rules.enableNegative && pointsEarned < 0
             ? `⏩ Question passed! ${pointsEarned} points`
@@ -339,50 +346,38 @@ const GeneralRound = ({ onFinish, sessionId }) => {
       showToast("Failed to submit answer!");
     }
 
-    // setTeams((prevTeams) =>
-    //   prevTeams.map((team) =>
-    //     team.id === activeTeam.id
-    //       ? { ...team, passesUsed: (team.passesUsed || 0) + 1 }
-    //       : team
-    //   )
-    // );
-
-    // Second-hand handling
-    if (
-      rules.passCondition === "onceToNextTeam" ||
-      rules.passCondition === "wrongIfPassed"
-    ) {
-      if (!secondHand) {
-        // First pass - move to next team
-        const nextTeam = passToNextTeam();
-        setSecondHand(true);
-        resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-        pauseTimer();
-        setPassIt(true);
-        showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
-      } else {
-        // Second pass - show correct answer
-        showToast(`Both teams passed! Showing correct answer...`);
-        setShowCorrectAnswer(true); // Show correct answer
-        setPassIt(false);
-        setSecondHand(false);
-        pauseTimer();
-      }
-    } else {
-      const nextTeam = passToNextTeam();
-      setRoundTime(PASS_TIME_LIMIT);
-      resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-      startTimer();
-      showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
+    // Check if all teams have passed
+    if (newPassedTeams.length >= teams.length) {
+      showToast(`All teams passed! Showing correct answer...`);
+      setShowCorrectAnswer(true);
+      setPassIt(false);
+      pauseTimer();
+      setQuestionDisplay(false);
+      return;
     }
 
+    // Move to next team
+    const nextTeam = passToNextTeam();
+    resetTimer(rules.passedTime || PASS_TIME_LIMIT);
+    pauseTimer();
+    showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
     setQuestionDisplay(false);
   };
 
   // ---------------- Handle Next Question after showing correct answer ----------------
   const handleNextAfterCorrectAnswer = () => {
     setShowCorrectAnswer(false);
-    setSecondHand(false);
+    setPassedTeams([]);
+
+    // Restore normal turn order
+    if (originalTeamIndex !== null) {
+      const nextNormalIndex = (originalTeamIndex + 1) % teams.length;
+      setActiveIndex(nextNormalIndex);
+      setOriginalTeamIndex(null);
+    } else {
+      goToNextTeam();
+    }
+
     setPassIt(false);
 
     if (isLastQuestion) {
@@ -400,7 +395,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
   useEffect(() => {
     const handleTimeout = async () => {
       if (!activeTeam || !currentQuestion) return;
-      if (!questionDisplay) return; // Only handle timeout if question is displayed
+      if (!questionDisplay) return;
 
       const rules = activeRound?.rules || {};
 
@@ -413,13 +408,11 @@ const GeneralRound = ({ onFinish, sessionId }) => {
       );
       let answerId = wrongOption ? wrongOption.originalId : -1;
 
-      // Use originalId for submission
       const givenAnswer = answerId;
       if (!givenAnswer) {
         return;
       }
 
-      // Only trigger if timer is zero and negative scoring is enabled
       if (
         reduceBool &&
         activeRound?.rules?.enableTimer &&
@@ -431,18 +424,15 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           const result = await submitAnswerToBackend({
             teamId: activeTeam.id,
             questionId: currentQuestion.id,
-            givenAnswer: "No Answer, Time Out", // negative/timeout
+            givenAnswer: "No Answer, Time Out",
             isPassed: false,
           });
 
           if (!result) return;
 
-          // const { pointsEarned } = result;
-
           const pointsEarned =
             result?.pointsEarned || (reduceBool ? -roundPoints : 0);
 
-          // Update points
           setTeams((prevTeams) =>
             prevTeams.map((team) =>
               team.id === activeTeam.id
@@ -460,7 +450,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           console.error("Timeout penalty error:", err);
           showToast("Failed to submit timeout penalty!");
         } finally {
-          setScoreMessage(""); // reset after showing
+          setScoreMessage("");
         }
       }
 
@@ -474,32 +464,8 @@ const GeneralRound = ({ onFinish, sessionId }) => {
         setShowCorrectAnswer(true);
         console.log("Timeout: moved to next team/question (no pass enabled)");
       } else {
-        // Second-hand handling
-        if (
-          rules.passCondition === "onceToNextTeam" ||
-          rules.passCondition === "wrongIfPassed"
-        ) {
-          if (!secondHand) {
-            const nextTeam = passToNextTeam();
-            setSecondHand(true);
-            resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-            pauseTimer();
-            setPassIt(true);
-            showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
-          } else {
-            showToast(`Showing correct answer...`);
-            setShowCorrectAnswer(true); // Show correct answer
-            setPassIt(false);
-            setSecondHand(false);
-            pauseTimer();
-          }
-        } else {
-          const nextTeam = passToNextTeam();
-          setRoundTime(PASS_TIME_LIMIT);
-          resetTimer(rules.passedTime || PASS_TIME_LIMIT);
-          startTimer();
-          showToast(`( O _ O ) Passed to Team ${nextTeam?.name} 😐`);
-        }
+        // Auto-pass on timeout
+        handlePass();
       }
 
       setQuestionDisplay(false);
@@ -511,10 +477,9 @@ const GeneralRound = ({ onFinish, sessionId }) => {
   // ---------------- Keyboard Shortcuts ----------------
   useCtrlKeyPass(() => {
     if (!activeRound?.rules?.enablePass) return;
-    // if (teams[activeIndex]?.passesUsed >= activeRound.rules.passLimit) return;
     handlePass();
     resetTimer(PASS_TIME_LIMIT);
-  }, [activeTeam, secondHand, currentQuestion, questionDisplay, activeRound]);
+  }, [activeTeam, currentQuestion, questionDisplay, activeRound, passedTeams]);
 
   useShiftToShow(() => {
     if (!questionDisplay) {
@@ -618,7 +583,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
       {!quizCompleted && (
         <TeamDisplay
           activeTeam={activeTeam}
-          secondHand={secondHand}
+          secondHand={passedTeams.length > 0}
           handLabel={handLabel}
           timeRemaining={timeRemaining}
           TEAM_COLORS={TEAM_COLORS}
@@ -703,9 +668,11 @@ const GeneralRound = ({ onFinish, sessionId }) => {
                     onClick={() => {
                       setQuestionDisplay(true);
                       if (activeRound?.rules?.enableTimer) {
-                        const timeLimit = secondHand
-                          ? PASS_TIME_LIMIT
-                          : activeRound.rules.timeLimitValue || TEAM_TIME_LIMIT;
+                        const timeLimit =
+                          passedTeams.length > 0
+                            ? PASS_TIME_LIMIT
+                            : activeRound.rules.timeLimitValue ||
+                              TEAM_TIME_LIMIT;
                         resetTimer(timeLimit);
                         startTimer();
                         setOptionSelected(false);
@@ -750,14 +717,10 @@ const GeneralRound = ({ onFinish, sessionId }) => {
                           className="pass-question-btn"
                           onClick={() => {
                             if (!activeRound?.rules?.enablePass) return;
-                            if (
-                              teams[activeIndex]?.passesUsed >=
-                              activeRound.rules.passLimit
-                            )
-                              return;
                             handlePass();
                             resetTimer(PASS_TIME_LIMIT);
                           }}
+                          disabled={passedTeams.includes(activeTeam?.id)}
                         >
                           <IoHandLeftOutline className="icon" /> Pass Question{" "}
                           <IoHandRightOutline className="icon" />
@@ -786,7 +749,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           startTimer={startTimer}
           pauseTimer={pauseTimer}
           resetTimer={resetTimer}
-          secondHand={secondHand}
+          secondHand={passedTeams.length > 0}
           TEAM_TIME_LIMIT={roundTime}
           PASS_TIME_LIMIT={PASS_TIME_LIMIT}
         />

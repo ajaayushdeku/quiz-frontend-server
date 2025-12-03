@@ -779,7 +779,7 @@ export default function CreateQuiz() {
                                 round.category.toLowerCase()
                               ) && (
                                 <option value="onceToNextTeam">
-                                  Once To Next Team
+                                  Pass Through All Teams
                                 </option>
                               )}
 
