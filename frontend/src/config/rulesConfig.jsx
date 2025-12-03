@@ -13,19 +13,17 @@ const rulesConfig = {
       reverseOrderAfterFirstHand: true,
     },
     info: [
-      "Each team receives an equal number of first-hand questions, based on the value entered in the Number of Questions field in the Question Info section.",
+      "Each team receives an equal number of first-hand questions based on the value you enter in the 'Number of Questions' field.",
 
-      "If Enable Timer is turned on, each question must be answered within the time specified in the Time Limit field.",
+      "Teams earn points for answering correctly, based on the Points per Question setting.",
 
-      "Teams earn points for correct answers based on the Points per Question value.",
+      "If Enable Pass is turned on, a question can be passed through all teams one by one.",
 
-      "If Enable Pass is enabled, a question may be passed only once. The Pass Limit field controls the total number of passes allowed throughout the round, preventing unlimited passing.",
+      "When a team receives a passed question, they get a pass timer and earn pass points for answering correctly.",
 
-      "When a question is passed to another team, the receiving team gets a pass timer (as set in the Enable Pass section) and earns passed points for a correct response.",
+      "If Enable Negative is turned on, points are deducted for wrong answers or when the timer runs out.",
 
-      "If Enable Negative is enabled, points will be deducted for each wrong answer or if the timer runs out, based on the Negative Points field.",
-
-      "Enable Pass and Enable Negative cannot be used at the same time.",
+      "Enable Pass and Enable Negative cannot be enabled at the same time.",
     ],
   },
 
@@ -43,23 +41,21 @@ const rulesConfig = {
       reverseOrderAfterFirstHand: true,
     },
     info: [
-      "This round includes professional category sections such as English, Nepali, Technology/IT, History, Biology, Maths, Physics, Chemistry.",
+      "This round includes categories such as English, Technology/IT, History, Biology, Maths, Physics, Chemistry, and more.",
 
-      "Before each first-hand question, a category selection panel will appear. Selecting a category will display a question from that category. (Categories shown depend on the types of questions chosen for this round.)",
+      "Before each first-hand question, a category selection panel appears. The chosen category determines the question displayed.",
 
-      "Each team receives an equal number of first-hand questions, based on the value entered in the Number of Questions field in the Question Info section.",
+      "Each team receives an equal number of first-hand questions based on the 'Number of Questions' value.",
 
-      "If Enable Timer is turned on, each question must be answered within the time specified in the Time Limit field.",
+      "Teams earn points for correct answers based on the Points per Question setting.",
 
-      "Teams earn points for correct answers based on the Points per Question value.",
+      "If Enable Pass is turned on, the question can be passed through all teams.",
 
-      "If Enable Pass is enabled, a question may be passed only once. The Pass Limit field controls the total number of passes allowed throughout the round, preventing unlimited passing.",
+      "Passed questions give the receiving team a pass timer and pass points when answered correctly.",
 
-      "When a question is passed to another team, the receiving team gets a pass timer (as set in the Enable Pass section) and earns passed points for a correct response.",
+      "Wrong answers or timeouts deduct points if Enable Negative is turned on.",
 
-      "If Enable Negative is enabled, points will be deducted for each wrong answer or if the timer runs out, based on the Negative Points field.",
-
-      "Enable Pass and Enable Negative cannot be used at the same time.",
+      "Enable Pass and Enable Negative cannot be enabled at the same time.",
     ],
   },
 
@@ -73,11 +69,11 @@ const rulesConfig = {
       pointsPerClosest: 5,
     },
     info: [
-      "This round consists of a set number of estimation questions, based on the value entered in the Number of Questions field in the Question Info section.",
+      "This round contains several estimation questions based on the 'Number of Questions' value.",
 
-      "There is no negative pointing",
+      "There is no negative scoring in this round.",
 
-      "The team whose estimation is closest to the correct answer earns points, determined by the Points per Question value in the Question Info section.",
+      "The team whose answer is closest to the correct value earns points based on the Points per Question setting.",
     ],
   },
 
@@ -90,17 +86,17 @@ const rulesConfig = {
       autoMoveOnPass: true,
     },
     info: [
-      "Each team is given a fixed amount of time (based on the Time Limit field) to answer a set number of questions, as specified in the Number of Questions field in the Question Info section.",
+      "Each team receives a fixed amount of time (Time Limit) to answer a set number of questions.",
 
-      "In this round, the Time Limit represents the total time allocated for the entire series of questions assigned to a single team.",
+      "The Time Limit applies to the entire collection of questions assigned to that team.",
 
-      "A team will not receive the next question until they answer or pass the current one (if Enable Pass is turned on).",
+      "A team cannot move to the next question until they answer or pass the current one (if Enable Pass is on).",
 
-      "Here, Enable Pass does not pass the question to another team. It simply allows skipping the current question and moving to the next.",
+      "Enable Pass in this round does not give questions to other teams — it only skips the current question.",
 
-      "If Enable Negative is enabled, points will be deducted for each wrong answer or if the timer runs out, based on the Negative Points field.",
+      "Wrong answers or timeouts deduct points if Enable Negative is turned on.",
 
-      "Enable Pass and Enable Negative cannot be used at the same time.",
+      "Enable Pass and Enable Negative cannot be enabled at the same time.",
     ],
   },
 
@@ -115,27 +111,27 @@ const rulesConfig = {
       queueMultipleBuzzers: true,
     },
     info: [
-      "A specific number of questions (based on the Number of Questions field in the Question Info section) will be asked, and all teams must attempt to answer them one after another.",
+      "A fixed number of questions will be asked to all teams.",
 
-      "Each team is assigned an alphabet key to use as their buzzer. Teams may press their assigned key or click the on-screen buzzer displayed with their team name. The assigned key is determined by the order in which the teams were created in Step 2 of the quiz setup",
+      "Each team receives an alphabet key to use as their buzzer, based on the order in which the teams were created.",
 
-      "Teams must press their buzzer within a 60-second window named as Pre-Buzz Timer.",
+      "Teams have a 60-second Pre-Buzz Timer to press their buzzer.",
 
       "If no team buzzes, the question is skipped.",
 
-      "If only some teams buzz, only those teams get to answer, in the exact order in which they pressed their buzzer.",
+      "If only some teams buzz, only those teams can answer, and in the exact order they buzzed.",
 
-      "The Pre-Buzz timer starts when Show Question is pressed.",
+      "The Pre-Buzz Timer starts when 'Show Question' is pressed.",
 
-      "The team that presses the buzzer first gets the first chance to answer.",
+      "Each team gets 15 seconds to answer after buzzing.",
 
-      "A correct answer awards points (based on the Points per Question value).",
+      "The team that buzzes first gets the first chance to answer.",
 
-      "A wrong answer deducts points (based on the Negative Points field) if Enable Negative is on.",
+      "Correct answers award points based on the Points per Question setting.",
 
-      "Remaining silent after buzzing also deducts negative points if negative scoring is enabled. If not enabled, no points are deducted when the timer runs out or the team stays silent.",
+      "Wrong answers deduct points if Enable Negative is turned on.",
 
-      "After buzzing, each team has 15 seconds to answer the question.",
+      "Remaining silent after buzzing also deducts negative points if negative marking is enabled.",
     ],
   },
 };

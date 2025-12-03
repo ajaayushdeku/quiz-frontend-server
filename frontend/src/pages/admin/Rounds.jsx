@@ -569,16 +569,22 @@ export default function CreateQuiz() {
                 </label>
 
                 <label className="quiz-label input-title">
-                  <div className="info-cont">Round Information :</div>
-                  <textarea
-                    value={
-                      rulesConfig[categoryMap[round.category]]?.info
-                        .map((line) => `• ${line}`)
-                        .join("\n\n") || ""
-                    }
-                    readOnly
-                    className="quiz-input-info select"
-                  ></textarea>
+                  <div className="info-cont">
+                    <FaInfoCircle />
+                    Round Information:
+                  </div>
+
+                  <div className="quiz-info-box">
+                    <textarea
+                      value={
+                        rulesConfig[categoryMap[round.category]]?.info
+                          .map((line) => `• ${line}`)
+                          .join("\n\n") || ""
+                      }
+                      readOnly
+                      className="quiz-input-info select"
+                    ></textarea>
+                  </div>
                 </label>
 
                 {/* Rules */}
