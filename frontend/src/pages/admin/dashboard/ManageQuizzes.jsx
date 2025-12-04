@@ -113,11 +113,12 @@ export default function ManageQuizzes() {
                         <ul className="sub-list">
                           {quiz.rounds.map((r, idx) => (
                             <li key={idx} className="sub-list-items">
-                              {r.name || `Round ${idx + 1}`} (
+                              {r.name || `Round ${idx + 1}`}
+                              {/* (
                               {r?.rules?.points && (
                                 <span> {r?.rules?.points} pts</span>
                               )}{" "}
-                              per question )
+                              per question ) */}
                             </li>
                           ))}
                         </ul>

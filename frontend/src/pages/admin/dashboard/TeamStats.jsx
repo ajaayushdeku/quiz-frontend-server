@@ -107,7 +107,7 @@ const TeamStats = () => {
   });
 
   return (
-    <div className="page-container white-theme">
+    <div className="page-container">
       <h2
         className="section-heading"
         style={{
@@ -189,7 +189,7 @@ const TeamStats = () => {
                       isUserExpanded ? "expanded" : ""
                     }`}
                   >
-                    <h3 style={{ color: "#08316aff" }}>
+                    <h3 style={{ color: "#4888e1" }}>
                       Sorted By Latest Attempt:
                     </h3>
                     {userData.sessions.map((session) => {
@@ -245,7 +245,7 @@ const TeamStats = () => {
                           </div>
 
                           <h3
-                            style={{ color: "#08316aff", marginBottom: "15px" }}
+                            style={{ color: "#4888e1", marginBottom: "15px" }}
                           >
                             Teams:
                           </h3>

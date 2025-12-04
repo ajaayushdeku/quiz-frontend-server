@@ -5,6 +5,7 @@ import toast, { Toaster } from "react-hot-toast";
 import "../../styles/Dashboard.css";
 import "../../styles/Quiz.css";
 import { BsQuestionOctagonFill } from "react-icons/bs";
+import { FaQuestionCircle } from "react-icons/fa";
 
 export default function QuestionForm() {
   const [formData, setFormData] = useState({
@@ -149,7 +150,7 @@ export default function QuestionForm() {
     <section className="dashboard-container">
       <Toaster position="top-right" />
       <div className="dashboard-header">
-        <BsQuestionOctagonFill className="header-icon" />
+        <FaQuestionCircle className="dashboard-header-icon" />
         <h4 className="form-heading">Add Question</h4>
       </div>
 

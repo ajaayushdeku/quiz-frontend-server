@@ -661,7 +661,7 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
           headMessage="Answer All the Questions under the time limit!"
           toastMessage={
             activeRound?.rules?.enablePass
-              ? "Press 'Ctrl' to Pass to the Next Question"
+              ? "Press ⬇︎ key to Pass to the Next Question"
               : "No passing allowed"
           }
           lowTimer={roundTime / 3}

@@ -591,7 +591,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
           headMessage={"Choose one of the option to answer"}
           toastMessage={
             activeRound?.rules?.enablePass
-              ? " Press 'Ctrl' to Pass The Question"
+              ? "Press ⬇︎ key to Pass the Question."
               : "No passing allowed"
           }
           passEnable={activeRound?.rules?.enablePass || false}

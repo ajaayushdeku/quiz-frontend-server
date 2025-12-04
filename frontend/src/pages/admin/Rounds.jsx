@@ -8,6 +8,8 @@ import { Footprints, FootprintsIcon, StepBackIcon } from "lucide-react";
 import { FaArrowLeft, FaArrowRight } from "react-icons/fa";
 import rulesConfig from "../../config/rulesConfig";
 import { FaInfoCircle } from "react-icons/fa";
+import { FaUsers, FaLayerGroup } from "react-icons/fa";
+import { IoExtensionPuzzle } from "react-icons/io5";
 
 export default function CreateQuiz() {
   const [step, setStep] = useState(1);
@@ -40,6 +42,9 @@ export default function CreateQuiz() {
   const [questions, setQuestions] = useState([]);
   const [usedQuestions, setUsedQuestions] = useState([]);
   const [loading, setLoading] = useState(false);
+
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [mediaFilter, setMediaFilter] = useState("all");
 
   // Fetch all questions
   useEffect(() => {
@@ -417,25 +422,31 @@ export default function CreateQuiz() {
     "buzzer round": "buzzer_round",
   };
 
+  const steps = [
+    { id: 1, icon: <MdQuiz /> },
+    { id: 2, icon: <FaUsers /> },
+    { id: 3, icon: <FaLayerGroup /> },
+  ];
+
   return (
     <section className="dashboard-container">
       <Toaster position="top-center" />
 
       <div className="dashboard-header">
-        <MdQuiz className="header-icon" />
+        <IoExtensionPuzzle className="dashboard-header-icon" />
         <h2 className="form-heading">Create New Quiz</h2>
       </div>
 
       <div className="step-navigation">
-        {[1, 2, 3].map((s) => (
+        {steps.map((s) => (
           <div
-            key={s}
-            className={`step-item ${step === s ? "active-step" : ""}`}
-            style={{ color: step === s ? "#2887a7ff" : "#ccc" }}
-            onClick={() => setStep(s)}
+            key={s.id}
+            className={`step-item ${step === s.id ? "active-step" : ""}`}
+            style={{ color: step === s.id ? "#4888e1" : "#ccc" }}
+            onClick={() => setStep(s.id)}
           >
-            <Footprints />
-            <div> Step {s}</div>
+            {s.icon}
+            <div>Step {s.id}</div>
           </div>
         ))}
       </div>
@@ -948,6 +959,7 @@ export default function CreateQuiz() {
                     onChange={(e) =>
                       handleRegulationChange(index, e.target.value)
                     }
+                    placeholder="Enter the Rules/Regulation for the Round"
                     className="quiz-input"
                   />
                 </label>
@@ -957,66 +969,107 @@ export default function CreateQuiz() {
                   Select Questions:
                 </label>
 
+                <div className="filter-row">
+                  <select
+                    value={categoryFilter}
+                    onChange={(e) => setCategoryFilter(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="all">All Categories</option>
+                    {[
+                      ...new Set(
+                        getFilteredQuestions(round.category).map(
+                          (q) => q.category
+                        )
+                      ),
+                    ].map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+
+                  <select
+                    value={mediaFilter}
+                    onChange={(e) => setMediaFilter(e.target.value)}
+                    className="filter-select"
+                  >
+                    <option value="all">All</option>
+                    <option value="with">With Media</option>
+                    <option value="without">Without Media</option>
+                  </select>
+                </div>
+
                 <div className="question-round-container">
-                  {getFilteredQuestions(round.category).map((q) => {
-                    const selectedInOtherRound =
-                      usedQuestions.includes(q._id) &&
-                      !round.questions.includes(q._id);
+                  {getFilteredQuestions(round.category)
+                    // 📌 Apply Category filter
+                    .filter((q) => {
+                      if (categoryFilter === "all") return true;
+                      return q.category === categoryFilter;
+                    })
+                    // 📌 Apply Media filter
+                    .filter((q) => {
+                      if (mediaFilter === "all") return true;
+                      if (mediaFilter === "with") return !!q.media;
+                      if (mediaFilter === "without") return !q.media;
+                      return true;
+                    })
+                    .map((q) => {
+                      const selectedInOtherRound =
+                        usedQuestions.includes(q._id) &&
+                        !round.questions.includes(q._id);
 
-                    const checked = round.questions.includes(q._id);
+                      const checked = round.questions.includes(q._id);
 
-                    // Determine if selection limit reached
-                    const isForEachTeam =
-                      round.rules.assignQuestionType === "forEachTeam";
-                    const maxSelectable = isForEachTeam
-                      ? teams.length * round.rules.numberOfQuestion
-                      : round.rules.numberOfQuestion;
+                      // Determine max selectable limit
+                      const isForEachTeam =
+                        round.rules.assignQuestionType === "forEachTeam";
+                      const maxSelectable = isForEachTeam
+                        ? teams.length * round.rules.numberOfQuestion
+                        : round.rules.numberOfQuestion;
 
-                    const limitReached =
-                      !checked && round.questions.length >= maxSelectable;
+                      const limitReached =
+                        !checked && round.questions.length >= maxSelectable;
 
-                    // Determine media type
-                    let mediaTag = null;
-                    if (q.media) {
-                      if (
-                        q.media.type === "file" ||
-                        q.media.type === "image" ||
-                        q.media.type === "video"
-                      ) {
+                      // Media tag
+                      let mediaTag = null;
+                      if (q.media) {
                         mediaTag = <span className="qn-media-tag">Media</span>;
                       }
-                    }
 
-                    return (
-                      <label
-                        key={q._id}
-                        className={`question-item ${
-                          selectedInOtherRound ? "disabled" : ""
-                        }`}
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          opacity: selectedInOtherRound ? 0.5 : 1,
-                          marginBottom: 5,
-                          cursor: selectedInOtherRound
-                            ? "not-allowed"
-                            : "pointer",
-                          color: checked ? "#08ce67ff" : "#1f1f1fff",
-                        }}
-                      >
-                        <input
-                          type="checkbox"
-                          disabled={selectedInOtherRound}
-                          checked={checked}
-                          onChange={() => handleQuestionSelect(index, q._id)}
-                          style={{ display: "none" }}
-                        />
-                        <Checkbox checked={checked} />
-                        {q.text} <div className="qn-category">{q.category}</div>
-                        {mediaTag && <div className="qn-media">{mediaTag}</div>}
-                      </label>
-                    );
-                  })}
+                      return (
+                        <label
+                          key={q._id}
+                          className={`question-item ${
+                            selectedInOtherRound ? "disabled" : ""
+                          }`}
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            opacity: selectedInOtherRound ? 0.5 : 1,
+                            marginBottom: 5,
+                            cursor: selectedInOtherRound
+                              ? "not-allowed"
+                              : "pointer",
+                            color: checked ? "#08ce67ff" : "#1f1f1fff",
+                          }}
+                        >
+                          <input
+                            type="checkbox"
+                            disabled={selectedInOtherRound}
+                            checked={checked}
+                            onChange={() => handleQuestionSelect(index, q._id)}
+                            style={{ display: "none" }}
+                          />
+                          <Checkbox checked={checked} />
+                          <div className="qn-text"> {q.text}</div>
+                          <div className="qn-category">{q.category}</div>
+                          {mediaTag && (
+                            <div className="qn-media">{mediaTag}</div>
+                          )}
+                        </label>
+                      );
+                    })}
                 </div>
               </div>
             ))}

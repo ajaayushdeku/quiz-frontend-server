@@ -62,7 +62,7 @@ export default function AdminCreateUser() {
   return (
     <section className="dashboard-container">
       <div className="dashboard-header">
-        <BsPersonFill className="header-icon" />
+        <BsPersonFill className="dashboard-header-icon" />
         <h4 className="form-heading">Create Quiz-Master</h4>
       </div>
 

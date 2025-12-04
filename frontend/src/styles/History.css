@@ -18,7 +18,7 @@
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 30px;
-  color: #333333;
+  color: #ffffff;
   font-weight: 800;
 }
 
@@ -41,8 +41,8 @@
 }
 
 .selected-quiz-name {
-  color: #30507c;
-  font-size: 1.8rem;
+  color: #4888e1;
+  font-size: 2.2rem;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -154,7 +154,7 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.5s ease, padding 0.5s ease;
-  background: #f9fbff;
+  background: #1e1e1e;
 }
 
 .user-content.expanded {
@@ -164,7 +164,7 @@
 
 /* ===== SESSION BLOCK ===== */
 .session-block {
-  background: #f9fbff;
+  background: #1e1e1e;
   border-bottom: 2px dashed rgb(122, 122, 122);
   padding: 1rem;
   margin-bottom: 1.5rem;
@@ -229,6 +229,7 @@
   padding: 0.5rem 1.5rem;
   background: linear-gradient(135deg, #e4ecff 0%, #d4e3ff 100%);
   cursor: pointer;
+  color: #4888e1;
   transition: all 0.3s ease;
   border-bottom: 2px solid transparent;
 }
@@ -249,6 +250,7 @@
     rgb(224, 197, 85) 100%
   );
   color: black;
+
   cursor: pointer;
   transition: all 0.3s ease;
   border-bottom: 2px solid transparent;
@@ -286,7 +288,7 @@
 .team-collapse-name {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #063e8d;
+  color: #032351;
   margin: 0;
 }
 
@@ -394,7 +396,7 @@
   border-bottom: 4px solid #137d4f;
   padding: 1.2rem 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(228, 195, 63, 0.3);
+  box-shadow: 0 4px 12px rgba(25, 255, 136, 0.3);
   margin-top: 15px;
 }
 
