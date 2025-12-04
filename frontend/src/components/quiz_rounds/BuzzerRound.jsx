@@ -10,7 +10,7 @@ import { useTypewriter } from "../../hooks/useTypewriter";
 import { useTimer } from "../../hooks/useTimer";
 import { useQuestionManager } from "../../hooks/useQuestionManager";
 import { useUIHelpers } from "../../hooks/useUIHelpers";
-import useShiftToShow from "../../hooks/useShiftToShow";
+import useUpArrowToShow from "../../hooks/useUpArrowToShow";
 
 import rulesConfig from "../../config/rulesConfig";
 import Button from "../common/Button";
@@ -338,7 +338,7 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
   }, [questionDisplay]);
 
   // -------------- SHIFT to show the question ---------------
-  useShiftToShow(() => {
+  useUpArrowToShow(() => {
     if (!questionDisplay) setQuestionDisplay(true);
   }, [questionDisplay]);
 

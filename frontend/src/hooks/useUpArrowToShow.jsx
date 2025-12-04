@@ -1,10 +1,10 @@
 import { useEffect } from "react";
 
-const useCtrlKeyPass = (callback, deps = []) => {
+const useUpArrowToShow = (callback, deps = []) => {
   useEffect(() => {
     const onKey = (e) => {
-      if (e.ctrlKey && !e.repeat) {
-        // Ctrl key pressed
+      // Trigger when Space is pressed
+      if (e.code === "ArrowUp" && !e.repeat) {
         e.preventDefault();
         callback();
       }
@@ -15,4 +15,4 @@ const useCtrlKeyPass = (callback, deps = []) => {
   }, deps);
 };
 
-export default useCtrlKeyPass;
+export default useUpArrowToShow;

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FaPlay, FaPause } from "react-icons/fa";
 import { VscDebugRestart } from "react-icons/vsc";
 import { IoChevronDown, IoChevronUp } from "react-icons/io5";
@@ -14,6 +14,23 @@ const TimerControls = ({
   PASS_TIME_LIMIT,
 }) => {
   const [open, setOpen] = useState(true); // 🔻 toggle state
+
+  // 🔥 F5 Keyboard Shortcut: Toggle Start/Pause
+  useEffect(() => {
+    const handleKey = (e) => {
+      if (e.key === "F5") {
+        e.preventDefault(); // stop page reload
+
+        if (isRunning) pauseTimer();
+        else startTimer();
+
+        console.log("F5 key is pressed");
+      }
+    };
+
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [isRunning, startTimer, pauseTimer]);
 
   return (
     <div className="time-controls detail-info">

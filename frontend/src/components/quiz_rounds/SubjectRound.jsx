@@ -25,8 +25,8 @@ import TimerControls from "../quiz_components/TimerControls";
 
 import { formatTime } from "../../utils/formatTime";
 import rulesConfig from "../../config/rulesConfig";
-import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
-import useShiftToShow from "../../hooks/useShiftToShow";
+import useDownArrowPass from "../../hooks/useDownArrowPass";
+import useUpArrowToShow from "../../hooks/useUpArrowToShow";
 import { TbScoreboard } from "react-icons/tb";
 import { MdGroup } from "react-icons/md";
 import { useFetchQuizData } from "../../hooks/useFetchQuizData";
@@ -568,12 +568,12 @@ const SubjectRound = ({ onFinish, sessionId }) => {
   ]);
 
   // ---------------- Keyboard Shortcuts ----------------
-  useCtrlKeyPass(() => {
+  useDownArrowPass(() => {
     if (!activeRound?.rules?.enablePass) return;
     handlePass();
   }, [activeTeam, currentQuestion, questionDisplay, activeRound, passedTeams]);
 
-  useShiftToShow(() => {
+  useUpArrowToShow(() => {
     if (!questionDisplay && selectedCategory && !showCorrectAnswer) {
       setQuestionDisplay(true);
       startTimer();

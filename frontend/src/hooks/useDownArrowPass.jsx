@@ -1,9 +1,9 @@
 import { useEffect } from "react";
 
-const useShiftToShow = (callback, deps = []) => {
+const useDownArrowPass = (callback, deps = []) => {
   useEffect(() => {
     const onKey = (e) => {
-      if (e.shiftKey) {
+      if (e.key === "ArrowDown" && !e.repeat) {
         e.preventDefault();
         callback();
       }
@@ -14,4 +14,4 @@ const useShiftToShow = (callback, deps = []) => {
   }, deps);
 };
 
-export default useShiftToShow;
+export default useDownArrowPass;

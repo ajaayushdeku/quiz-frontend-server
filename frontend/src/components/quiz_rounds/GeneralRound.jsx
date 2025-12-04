@@ -24,8 +24,8 @@ import TimerControls from "../quiz_components/TimerControls";
 
 import { formatTime } from "../../utils/formatTime";
 import rulesConfig from "../../config/rulesConfig";
-import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
-import useShiftToShow from "../../hooks/useShiftToShow";
+import useDownArrowPass from "../../hooks/useDownArrowPass";
+import useUpArrowToShow from "../../hooks/useUpArrowToShow";
 import { FaArrowRight } from "react-icons/fa";
 import { MdGroup } from "react-icons/md";
 import { useFetchQuizData } from "../../hooks/useFetchQuizData";
@@ -117,7 +117,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
 
   const handLabel =
     passedTeams.length > 0
-      ? `Passed Question (${passedTeams.length} passes)`
+      ? `Passed Question (${passedTeams.length} pass)`
       : "First-hand Question";
 
   // ---------------- Auto pass on timeout ----------------
@@ -475,13 +475,13 @@ const GeneralRound = ({ onFinish, sessionId }) => {
   }, [timeRemaining, activeTeam, currentQuestion, reduceBool]);
 
   // ---------------- Keyboard Shortcuts ----------------
-  useCtrlKeyPass(() => {
+  useDownArrowPass(() => {
     if (!activeRound?.rules?.enablePass) return;
     handlePass();
     resetTimer(PASS_TIME_LIMIT);
   }, [activeTeam, currentQuestion, questionDisplay, activeRound, passedTeams]);
 
-  useShiftToShow(() => {
+  useUpArrowToShow(() => {
     if (!questionDisplay) {
       setQuestionDisplay(true);
       startTimer();

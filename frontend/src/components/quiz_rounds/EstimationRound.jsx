@@ -11,7 +11,7 @@ import TeamAnswerBoxes from "../quiz_components/TeamAnswerBoxes";
 import FinishDisplay from "../common/FinishDisplay";
 import axios from "axios";
 import { useLocation, useParams } from "react-router-dom";
-import useShiftToShow from "../../hooks/useShiftToShow";
+import useUpArrowToShow from "../../hooks/useUpArrowToShow";
 import { MdGroup } from "react-icons/md";
 import { useUIHelpers } from "../../hooks/useUIHelpers";
 import { TbScoreboard } from "react-icons/tb";
@@ -235,7 +235,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
   });
 
   //---------------- SHIFT key to show the question ----------------
-  useShiftToShow(() => {
+  useUpArrowToShow(() => {
     if (!showQuestion) {
       setShowQuestion(true);
     }

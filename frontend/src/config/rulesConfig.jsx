@@ -21,7 +21,9 @@ const rulesConfig = {
 
       "When a team receives a passed question, they get a pass timer and earn pass points for answering correctly.",
 
-      "If Enable Negative is turned on, points are deducted for wrong answers or when the timer runs out.",
+      "If a question is passed by all teams, the correct answer will be revealed with no points awarded. Additionally, if a team selects an incorrect option, the correct answer will be shown, and the next question will go to the next team in the queue.",
+
+      "Wrong answers or timeouts deduct points if Enable Negative is turned on.",
 
       "Enable Pass and Enable Negative cannot be enabled at the same time.",
     ],
@@ -51,7 +53,9 @@ const rulesConfig = {
 
       "If Enable Pass is turned on, the question can be passed through all teams.",
 
-      "Passed questions give the receiving team a pass timer and pass points when answered correctly.",
+      "When a team receives a passed question, they get a pass timer and earn pass points for answering correctly.",
+
+      "If a question is passed by all teams, the correct answer will be revealed with no points awarded. Additionally, if a team selects an incorrect option, the correct answer will be shown, and the next question will go to the next team in the queue.",
 
       "Wrong answers or timeouts deduct points if Enable Negative is turned on.",
 

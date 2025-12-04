@@ -13,8 +13,8 @@ import { useUIHelpers } from "../../hooks/useUIHelpers";
 import { useQuestionManager } from "../../hooks/useQuestionManager";
 import { useTypewriter } from "../../hooks/useTypewriter";
 import { useTeamQueue } from "../../hooks/useTeamQueue";
-import useCtrlKeyPass from "../../hooks/useCtrlKeyPass";
-import useShiftToShow from "../../hooks/useShiftToShow";
+import useDownArrowPass from "../../hooks/useDownArrowPass";
+import useUpArrowToShow from "../../hooks/useUpArrowToShow";
 
 import rulesConfig from "../../config/rulesConfig";
 import { formatTime } from "../../utils/formatTime";
@@ -541,7 +541,7 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
   };
 
   // ---------------- Keyboard Shortcuts ----------------
-  useCtrlKeyPass(() => {
+  useDownArrowPass(() => {
     if (
       !finishQus &&
       !finalFinished &&
@@ -552,7 +552,7 @@ const RapidFireRound = ({ onFinish, sessionId }) => {
     }
   }, [currentQuestion, finishQus, finalFinished, roundStarted, activeRound]);
 
-  useShiftToShow(() => {
+  useUpArrowToShow(() => {
     if (!roundStarted) startRound();
   }, [roundStarted, activeTeam]);
 
