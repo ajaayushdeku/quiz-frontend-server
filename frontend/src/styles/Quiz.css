@@ -421,7 +421,7 @@
 
   background: linear-gradient(135deg, #ffffff, #eae7e7);
   border: 2px dashed #ffffff;
-  color: rgb(80, 79, 79);
+  color: rgb(0, 0, 0);
   font-weight: bold;
 
   cursor: pointer;
@@ -436,6 +436,7 @@
   margin-top: 7rem;
   padding: 1.2rem 2rem;
   border-radius: 3rem;
+  font-size: 1.8rem;
 }
 
 .pass-question-btn {
@@ -446,11 +447,13 @@
 
 /* Hover Effects */
 .start-question-btn:hover,
-.pass-question-btn:hover {
-  background: #55555522;
+.pass-question-btn:hover,
+.start-question-btn:hover .icon,
+.pass-question-btn:hover .icon {
+  background: #55555500;
   color: white;
   transform: scale(1.07);
-  border-color: #6e6e6e;
+  border-color: #ffffff;
 }
 
 /* Click Animation */
@@ -463,6 +466,7 @@
 .start-question-btn .icon,
 .pass-question-btn .icon {
   font-size: clamp(1.4rem, 2vw, 1.9rem);
+  color: rgb(80, 79, 79);
 }
 
 /* ======================= */

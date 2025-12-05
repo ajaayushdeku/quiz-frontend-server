@@ -67,7 +67,7 @@ const TeamDisplay = ({
               justifyContent: "center",
             }}
           >
-            <MdGroup style={{ marginRight: "0.5rem" }} />
+            {/* <MdGroup style={{ marginRight: "0.5rem" }} /> */}
             <div> Team {activeTeam?.name || "-"}</div>
           </h2>
 

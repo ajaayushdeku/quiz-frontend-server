@@ -24,7 +24,7 @@
 .round-number-container h1 {
   font-size: 18rem;
   font-weight: 800;
-  color: #ffffffcc;
+  color: #ffffff;
   text-shadow: 0 0 10px #000;
   letter-spacing: 20px;
 }
@@ -53,9 +53,9 @@
 }
 
 .round-title-container p {
-  font-size: 3rem;
+  font-size: 3.5rem;
   font-weight: 800;
-  color: #ffffffcc;
+  color: #ffffff;
   text-align: center;
   letter-spacing: 8px;
 }
@@ -79,8 +79,8 @@
   padding: 0.5rem 3rem;
   font-size: 3rem;
   font-weight: 800;
-  border-bottom: 3px solid rgba(255, 255, 255, 0.6);
-  color: #ffffffcc;
+  border-bottom: 3px solid rgb(255, 255, 255);
+  color: #ffffff;
   letter-spacing: 8px;
   text-transform: uppercase;
 }
@@ -94,7 +94,7 @@
   border: 1px solid rgba(255, 255, 255, 0.25);
   box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
   backdrop-filter: blur(12px);
-  color: #ffffffcc;
+  color: #ffffff;
   font-size: 1.5rem;
   line-height: 1.8;
   overflow-y: auto;
@@ -149,14 +149,14 @@
   gap: 10rem;
   font-size: 2rem;
   text-align: center;
-  color: #ffffffcc;
+  color: #ffffff;
 }
 
 /* Left: Header Section */
 .round-select-header {
   font-size: 5rem;
   font-weight: 800;
-  color: #ffffffcc;
+  color: #ffffff;
   text-shadow: 0 0 8px #000;
   letter-spacing: 8px;
   text-transform: uppercase;
@@ -301,7 +301,7 @@
 .round-title {
   font-size: 1.5rem;
   font-weight: 700;
-  color: #ffffffcc;
+  color: #ffffff;
 }
 
 /* Subtle image animation */

@@ -6,16 +6,27 @@ import "../../styles/ResultsPage.css";
 import { MdGroup } from "react-icons/md";
 import { GiFinishLine } from "react-icons/gi";
 import { FaCrown } from "react-icons/fa";
-import { RiArrowGoBackFill } from "react-icons/ri";
 import { IoExtensionPuzzle } from "react-icons/io5";
 
 const ResultsPage = () => {
   const { quizId } = useParams();
   const location = useLocation();
-  const sessionId = location.state?.sessionId; // get sessionId passed from Home or RoundSelect
+  const sessionId = location.state?.sessionId;
+
   const [teams, setTeams] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showScores, setShowScores] = useState(false);
+
+  // PODIUM COLORS (loop automatically for unlimited ranks)
+  const podiumColors = [
+    " #fce458",
+    "silver",
+    "#cd7f32", // bronze
+    "#4a90e2",
+    "#50c878",
+    "#9b59b6",
+    "#ff6f61",
+  ];
 
   useEffect(() => {
     const fetchQuizTeams = async () => {
@@ -67,7 +78,27 @@ const ResultsPage = () => {
   if (loading)
     return <div className="finish-loading">Loading final scores...</div>;
 
-  const maxPoints = Math.max(...teams.map((t) => t.points));
+  // =====================================================
+  // DYNAMIC PODIUM SYSTEM (handles ties + unlimited teams)
+  // =====================================================
+
+  // 1. Sort highest → lowest
+  const sorted = [...teams].sort((a, b) => b.points - a.points);
+
+  // 2. Group by equal points (ties)
+  const groupedByPoints = [];
+  sorted.forEach((team) => {
+    const last = groupedByPoints[groupedByPoints.length - 1];
+    if (!last || last.points !== team.points) {
+      groupedByPoints.push({ points: team.points, teams: [team] });
+    } else {
+      last.teams.push(team);
+    }
+  });
+
+  // 3. Dynamic podium height scaling
+  const maxHeight = 140;
+  const gap = 25;
 
   return (
     <section className="results-page">
@@ -86,40 +117,56 @@ const ResultsPage = () => {
             <img src={logo} alt="Right Logo" className="scoreboard-logo" />
           </div>
 
-          <p className="scoreboard-subtitle">Final Team's Scores:</p>
+          {/* ---------- PODIUM TITLE ---------- */}
+          <p className="scoreboard-subtitle">Podium</p>
 
-          <div className="scoreboard-list">
-            {teams.length > 0 ? (
-              teams
-                .sort((a, b) => b.points - a.points)
-                .map((team) => {
-                  const isWinner = team.points === maxPoints && maxPoints > 0;
-                  return (
+          {/* ---------- DYNAMIC PODIUM ---------- */}
+          <div className="dynamic-podium-container">
+            {groupedByPoints.map((group, rankIndex) => {
+              const height = maxHeight - rankIndex * gap;
+              const color = podiumColors[rankIndex % podiumColors.length];
+
+              return (
+                <div className="podium-rank-group" key={rankIndex}>
+                  {group.teams.map((team) => (
                     <div
                       key={team.id}
-                      className={`scoreboard-card ${
-                        isWinner ? "winner-card" : ""
-                      }`}
+                      className="podium-block"
+                      style={{ height: height + 70 }}
                     >
-                      {isWinner && (
-                        <div className="winner-badge">
-                          <FaCrown />
-                          <p> Winner!!!</p>
-                        </div>
-                      )}
-                      <div className="team-title">
-                        <MdGroup className="team-icon-result-page" />
-                        <div className="team-topic">
-                          {team.name.toUpperCase()}
-                        </div>
+                      {rankIndex === 0 && <FaCrown className="podium-crown" />}
+
+                      <h3>{team.name}</h3>
+                      <p className="points">{team.points} pts</p>
+
+                      <div
+                        className="podium-step"
+                        style={{
+                          height,
+                          background: color,
+                        }}
+                      >
+                        {rankIndex + 1}
                       </div>
-                      <div className="team-points">{team.points}</div>
                     </div>
-                  );
-                })
-            ) : (
-              <p className="no-team-data">No team data available.</p>
-            )}
+                  ))}
+                </div>
+              );
+            })}
+          </div>
+
+          {/* ---------- ALL TEAMS LIST ---------- */}
+          <p className="scoreboard-subtitle">All Teams</p>
+
+          <div className="scoreboard-list">
+            {sorted.map((team) => (
+              <div key={team.id} className="scoreboard-card">
+                <div className="team-title">
+                  <div className="team-topic">{team.name.toUpperCase()}</div>
+                </div>
+                <div className="team-points">{team.points}</div>
+              </div>
+            ))}
           </div>
         </div>
       ) : (

@@ -42,7 +42,7 @@
   font-size: 5.2rem;
   font-weight: 800;
   letter-spacing: 10px;
-  color: #c9c9c9;
+  color: #ffffff;
   text-shadow: 0 0 15px rgba(121, 123, 123, 0.4);
 }
 
@@ -85,7 +85,7 @@
   font-size: 2.4rem;
   font-weight: 800;
   text-transform: uppercase;
-  color: #c9c9c9;
+  color: #ffffff;
   text-shadow: 0 0 15px rgba(121, 123, 123, 0.4);
   letter-spacing: 3px;
   margin-top: 1rem;
@@ -105,7 +105,7 @@
   background: linear-gradient(135deg, #ffffff, #e3e3e3);
   border: 2px dashed #ffffff;
   /* text-shadow: 0 0 15px rgba(121, 123, 123, 0.4); */
-  color: rgb(52, 52, 52);
+  color: rgb(0, 0, 0);
   font-size: 1.4rem;
   font-weight: 700;
   padding: 0.8rem 2.5rem;
@@ -120,7 +120,7 @@
   background: #55555522;
   color: white;
   transform: scale(1.05);
-  border: 2px dashed #696a6b;
+  border: 2px dashed #ffffff;
 }
 
 /* ==========================
@@ -128,7 +128,7 @@
 ========================== */
 .loading-screen {
   text-align: center;
-  color: #ccc;
+  color: #ffffff;
   font-size: 1.2rem;
   animation: fadeIn 1s ease-in-out;
 }

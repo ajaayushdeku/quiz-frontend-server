@@ -126,9 +126,8 @@ const FinishDisplay = ({ onFinish, message, teams: initialTeams = [] }) => {
                       </div>
                     )}
                     <div className="team-title">
-                      <MdGroup className="team-icon-result-page" />
                       <div className="team-topic">
-                        {team.name.toUpperCase()}
+                        Team {team.name.toUpperCase()}
                       </div>
                     </div>
                     <div className="team-points">{team.points}</div>
