@@ -442,7 +442,7 @@ export default function CreateQuiz() {
           <div
             key={s.id}
             className={`step-item ${step === s.id ? "active-step" : ""}`}
-            style={{ color: step === s.id ? "#4888e1" : "#ccc" }}
+            style={{ color: step === s.id ? "#4888e1" : "#ffffffff" }}
             onClick={() => setStep(s.id)}
           >
             {s.icon}

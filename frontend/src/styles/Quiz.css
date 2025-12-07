@@ -586,23 +586,25 @@
 }
 
 .primary-btn {
-  background: #4caf50;
-  color: white;
+  background: #ffffff;
+  color: rgb(0, 0, 0);
 }
 
 .primary-btn:hover {
-  background: #45a049;
+  background: #23aabe;
+  color: white;
   transform: scale(1.02);
 }
 
 .secondary-btn {
-  background: #555;
-  color: white;
+  background: #ffffff;
+  color: rgb(0, 0, 0);
 }
 
 .secondary-btn:hover {
-  background: #666;
+  background: #1e1e1e;
   transform: scale(1.02);
+  color: white;
 }
 
 .category {

@@ -39,7 +39,7 @@ h4 {
 .heading {
   font-size: clamp(1.2rem, 4vw, 1.75rem);
   font-weight: 700;
-  color: #f7f7f7;
+  color: #ffffff;
   transition: opacity 0.3s ease;
   margin: auto;
   transition: all 0.3s ease-in-out;
@@ -195,7 +195,7 @@ button:hover {
   transform: translateY(-1px);
 }
 
-.primary-btn {
+/* .primary-btn {
   background: rgb(40, 134, 166);
   color: #fff;
   font-weight: 700;
@@ -205,7 +205,7 @@ button:hover {
   background: #f1f1f1;
   color: #333;
   font-weight: 600;
-}
+} */
 
 .btn-primary {
   background-color: #4f46e5;
@@ -405,7 +405,7 @@ button:hover {
 
 .add-team-btn {
   background-color: transparent;
-  color: rgb(40, 134, 166);
+  color: rgb(17, 168, 218);
   display: flex;
   gap: 0.5rem;
   align-items: center;
@@ -416,7 +416,7 @@ button:hover {
   border-radius: 6px;
   cursor: pointer;
   transition: transform 0.2s ease;
-  font-size: clamp(0.9rem, 2.5vw, 1.1rem);
+  font-size: clamp(1.3rem, 2.5vw, 1.1rem);
   font-weight: 600;
 }
 
@@ -726,7 +726,7 @@ button:hover {
   justify-content: center;
   align-items: center;
   gap: 0.5rem;
-  font-size: clamp(1rem, 2.5vw, 1.2rem);
+  font-size: clamp(1.5rem, 2.5vw, 1.2rem);
   padding: clamp(0.75rem, 2vw, 1rem) clamp(1.5rem, 3vw, 2rem);
   background: linear-gradient(135deg, #3185fa, rgb(50, 108, 190));
   color: #ffffff;
@@ -738,7 +738,7 @@ button:hover {
 .add-question-btn:hover {
   background: linear-gradient(135deg, rgb(50, 108, 190), #3185fa);
   transform: scale(1.05);
-  color: #0f0f0f;
+  color: #000000;
 }
 
 .create-quiz-btn {
@@ -758,7 +758,7 @@ button:hover {
 .create-quiz-btn:hover {
   background: linear-gradient(135deg, rgb(50, 108, 190), #3185fa);
   transform: scale(1.05);
-  color: #0f0f0f;
+  color: #000000;
 }
 
 .create-question-btn {

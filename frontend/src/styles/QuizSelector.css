@@ -117,7 +117,7 @@
 .admin-panel-btn:hover {
   transform: translateY(-3px);
   /* box-shadow: 0 15px 40px rgba(96, 152, 232, 0.5); */
-  color: #373839;
+  color: #000000;
   background-color: linear-gradient(135deg, #e1e1e1 0%, #ccdbf3 100%);
 }
 
