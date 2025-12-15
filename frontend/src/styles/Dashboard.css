@@ -669,6 +669,10 @@ button:hover {
   background-color: rgba(230, 224, 224, 0.1);
 }
 
+.select-options {
+  background-color: #3d3c3c;
+}
+
 /* File & Media */
 .file-input {
   cursor: pointer;

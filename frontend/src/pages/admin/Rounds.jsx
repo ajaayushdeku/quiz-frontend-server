@@ -569,7 +569,7 @@ export default function CreateQuiz() {
                     onChange={(e) =>
                       handleRoundChange(index, "category", e.target.value)
                     }
-                    className="quiz-input select"
+                    className="quiz-input select filter-select"
                   >
                     <option value="general round">General Round</option>
                     <option value="subject round">Subject Round</option>
@@ -656,7 +656,7 @@ export default function CreateQuiz() {
                                   e.target.value
                                 )
                               }
-                              className="quiz-input-d select"
+                              className="quiz-input-d select filter-select"
                             >
                               {getTimerTypeOptions(round.category)
                                 .onlyAllQuestions ? (
@@ -788,7 +788,7 @@ export default function CreateQuiz() {
                                   );
                                 }
                               }}
-                              className="quiz-input-d select"
+                              className="quiz-input-d select filter-select"
                             >
                               <option value="noPass">No Pass</option>
                               {/* SHOW BASED ON CATEGORY */}
@@ -807,7 +807,7 @@ export default function CreateQuiz() {
                                 </option>
                               )}
 
-                              {/* <option value="wrongIfPassed">
+                              {/* <option value="wrongIfPassed"  className="select-options">
                                 Wrong If Passed
                               </option> */}
                             </select>
@@ -902,7 +902,7 @@ export default function CreateQuiz() {
                             e.target.value
                           )
                         }
-                        className="quiz-input-d select"
+                        className="quiz-input-d select filter-select"
                       >
                         {getAssignQuestionOptions(round.category)
                           .showForAll && (

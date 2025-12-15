@@ -174,7 +174,7 @@ export default function QuestionForm() {
           <select
             value={formData.type}
             onChange={handleTypeChange}
-            className="quiz-input select"
+            className="quiz-input select filter-select"
           >
             <option value="multiple-choice">
               Multiple Choice ( For General, Subjective, Rapid Fire, Buzzer
@@ -217,7 +217,7 @@ export default function QuestionForm() {
                     correctAnswer: e.target.value,
                   }))
                 }
-                className="quiz-input select"
+                className="quiz-input select filter-select"
                 required
               >
                 <option value="">Select Correct Option</option>
@@ -254,7 +254,7 @@ export default function QuestionForm() {
             name="category"
             value={formData.category}
             onChange={handleChange}
-            className="quiz-input select"
+            className="quiz-input select filter-select"
             required
           >
             <option value="">Select Category</option>
