@@ -8,6 +8,8 @@ import { BsQuestionOctagonFill } from "react-icons/bs";
 import { FaQuestionCircle } from "react-icons/fa";
 
 export default function QuestionForm() {
+  const [loading, setLoading] = useState(false);
+
   const [formData, setFormData] = useState({
     text: "",
     type: "multiple-choice",
@@ -75,6 +77,8 @@ export default function QuestionForm() {
   // Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return; // prevent double click
+    setLoading(true);
 
     try {
       const payload = new FormData();
@@ -125,6 +129,8 @@ export default function QuestionForm() {
       toast.error(
         err.response?.data?.message || "❌ Failed to add question. Try again."
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -294,8 +300,12 @@ export default function QuestionForm() {
           </div>
         )}
 
-        <button type="submit" className="primary-btn add-question-btn">
-          Add Question
+        <button
+          type="submit"
+          className="primary-btn add-question-btn"
+          disabled={loading}
+        >
+          {loading ? "Adding Question..." : "Add Question"}
         </button>
       </form>
     </section>
