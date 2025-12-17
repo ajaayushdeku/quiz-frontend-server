@@ -421,7 +421,7 @@
 
   background: linear-gradient(135deg, #ffffff, #eae7e7);
   border: 2px dashed #ffffff;
-  color: rgb(0, 0, 0);
+  color: #000000;
   font-weight: bold;
 
   cursor: pointer;

@@ -152,7 +152,7 @@ export default function ManageQuestions() {
                   <th>Options</th>
                   <th>Correct Answer</th>
                   {/* <th>Media</th> */}
-                  <th className="text-center">Actions</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>

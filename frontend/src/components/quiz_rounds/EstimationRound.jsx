@@ -354,7 +354,7 @@ const EstimationRound = ({ onFinish, sessionId }) => {
 
               <div className="estimate-centered-control">
                 <Button className="next-question-btn" onClick={nextQuestion}>
-                  <h3>NEXT QUESTION</h3>
+                  NEXT QUESTION
                   <FaArrowRight />
                 </Button>
 

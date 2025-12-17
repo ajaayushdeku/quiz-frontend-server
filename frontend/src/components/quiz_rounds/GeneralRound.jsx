@@ -648,7 +648,7 @@ const GeneralRound = ({ onFinish, sessionId }) => {
               className="nxt-question-btn"
               onClick={handleNextAfterCorrectAnswer}
             >
-              <h3>NEXT QUESTION</h3>
+              NEXT QUESTION
               <FaArrowRight />
             </Button>
           </div>

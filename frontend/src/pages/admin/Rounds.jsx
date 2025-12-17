@@ -442,7 +442,7 @@ export default function CreateQuiz() {
           <div
             key={s.id}
             className={`step-item ${step === s.id ? "active-step" : ""}`}
-            style={{ color: step === s.id ? "#4888e1" : "#ffffffff" }}
+            style={{ color: step === s.id ? "#4888e1" : "var(--text-primary)" }}
             onClick={() => setStep(s.id)}
           >
             {s.icon}
@@ -470,7 +470,7 @@ export default function CreateQuiz() {
               {" "}
               <button
                 type="button"
-                className="primary-btn next-btn "
+                className="primary-btn create-round-next-btn "
                 onClick={() => setStep(2)}
                 disabled={!quizName.trim()}
               >
@@ -514,7 +514,7 @@ export default function CreateQuiz() {
             <div className="step-nav-buttons">
               <button
                 type="button"
-                className="secondary-btn next-btn"
+                className="secondary-btn create-round-next-btn"
                 onClick={() => setStep(1)}
               >
                 <FaArrowLeft />
@@ -522,7 +522,7 @@ export default function CreateQuiz() {
               </button>
               <button
                 type="button"
-                className="primary-btn next-btn"
+                className="primary-btn create-round-next-btn"
                 onClick={() => setStep(3)}
                 disabled={teams.some((t) => !t.name.trim())}
               >
@@ -1077,7 +1077,7 @@ export default function CreateQuiz() {
             <div className="step-nav-buttons">
               <button
                 type="button"
-                className="secondary-btn next-btn"
+                className="secondary-btn create-round-next-btn"
                 onClick={() => setStep(2)}
               >
                 <FaArrowLeft />

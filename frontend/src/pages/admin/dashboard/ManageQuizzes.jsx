@@ -99,7 +99,7 @@ export default function ManageQuizzes() {
                   <th>Quiz Name</th>
                   <th>Rounds</th>
                   <th>Teams</th>
-                  <th className="text-center">Actions</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>

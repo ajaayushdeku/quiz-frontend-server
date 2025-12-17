@@ -136,7 +136,7 @@ const ResultsPage = () => {
                     >
                       {rankIndex === 0 && <FaCrown className="podium-crown" />}
 
-                      <h3>{team.name}</h3>
+                      <h3 style={{ color: "white" }}>{team.name}</h3>
                       <p className="points">{team.points} pts</p>
 
                       <div

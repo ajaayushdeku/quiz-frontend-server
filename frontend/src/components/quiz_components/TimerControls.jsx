@@ -50,6 +50,7 @@ const TimerControls = ({
             justifyContent: "center",
             alignItems: "center",
             gap: "1rem",
+            color: "white",
           }}
         >
           Timer Controls

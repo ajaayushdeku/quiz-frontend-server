@@ -7,12 +7,6 @@ const History = () => {
   const navigate = useNavigate();
 
   const cards = [
-    // {
-    //   icon: <BsJournalCheck className="card-icon" />,
-    //   title: "Quiz History",
-    //   description: "View your quizzes' history to find detailed stats.",
-    //   path: "quiz-history",
-    // },
     {
       icon: <MdGroups className="card-icon" />,
       title: "Teams Quiz Histories",

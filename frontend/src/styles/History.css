@@ -1,24 +1,25 @@
 /* ===== BASE STYLES ===== */
 .white-theme {
-  background-color: #ffffff;
-  color: #222;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
   padding: 20px;
   min-height: 100vh;
   font-family: "Segoe UI", sans-serif;
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .team-stats-heading {
   text-align: center;
   font-size: 2rem;
   margin-bottom: 30px;
-  color: #333;
+  color: var(--text-primary);
 }
 
 .section-heading {
   text-align: center;
   font-size: 2.5rem;
   margin-bottom: 30px;
-  color: #ffffff;
+  color: var(--text-primary);
   font-weight: 800;
 }
 
@@ -37,6 +38,7 @@
   border-radius: 12px;
   font-size: 1.1rem;
   cursor: pointer;
+  color: black;
   transition: all 0.3s ease;
 }
 
@@ -60,7 +62,7 @@
 .no-history-text {
   text-align: center;
   font-size: 1.3rem;
-  color: #666;
+  color: var(--text-secondary);
   padding: 3rem;
 }
 
@@ -78,17 +80,17 @@
 
 /* ===== USER GROUP CARD ===== */
 .user-group-card {
-  background: linear-gradient(135deg, #f0f4ff 0%, #e4ecff 100%);
+  background: var(--bg-card);
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 6px 20px rgba(49, 133, 250, 0.15);
+  box-shadow: var(--shadow-md);
   transition: all 0.3s ease;
-  border: 2px solid #c8d3f0;
+  border: 2px solid var(--border-primary);
 }
 
 .user-group-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(49, 133, 250, 0.25);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ===== USER HEADER ===== */
@@ -97,14 +99,21 @@
   justify-content: space-between;
   align-items: center;
   padding: 1.5rem 2rem;
-  /* background: linear-gradient(185deg, #3185fa 0%, #2a6fd8 100%); */
   cursor: pointer;
-  background: #3a6bb0;
+  background: linear-gradient(185deg, #3185fa 0%, #2a6fd8 100%);
   transition: all 0.3s ease;
 }
 
+[data-theme="dark"] .user-header {
+  background: linear-gradient(185deg, #2563eb 0%, #1d4ed8 100%);
+}
+
 .user-header:hover {
-  background: #193a6b;
+  background: linear-gradient(185deg, #2a6fd8 0%, #1e5bb8 100%);
+}
+
+[data-theme="dark"] .user-header:hover {
+  background: linear-gradient(185deg, #1d4ed8 0%, #1e40af 100%);
 }
 
 .user-info {
@@ -154,7 +163,7 @@
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.5s ease, padding 0.5s ease;
-  background: #1e1e1e;
+  background: var(--bg-tertiary);
 }
 
 .user-content.expanded {
@@ -164,8 +173,8 @@
 
 /* ===== SESSION BLOCK ===== */
 .session-block {
-  background: #1e1e1e;
-  border-bottom: 2px dashed rgb(122, 122, 122);
+  background: var(--bg-tertiary);
+  border-bottom: 2px dashed var(--border-secondary);
   padding: 1rem;
   margin-bottom: 1.5rem;
 }
@@ -181,6 +190,10 @@
   align-items: center;
   flex-wrap: wrap;
   gap: 1rem;
+}
+
+[data-theme="dark"] .session-info-box {
+  background: #2563eb;
 }
 
 .session-time {
@@ -207,18 +220,18 @@
 
 /* ===== TEAM COLLAPSE CARD ===== */
 .team-collapse-card {
-  background: #f0f4ff0b;
+  background: var(--bg-card);
   border-radius: 12px;
   overflow: hidden;
   margin-bottom: 1rem;
-  /* border: 2px solid #c8d3f0; */
-  box-shadow: 0 4px 12px rgba(96, 152, 232, 0.15);
+  border: 2px solid var(--border-primary);
+  box-shadow: var(--shadow-sm);
   transition: all 0.3s ease;
 }
 
 .team-collapse-card:hover {
   border-color: #6098e8;
-  box-shadow: 0 4px 12px rgba(96, 152, 232, 0.15);
+  box-shadow: var(--shadow-md);
 }
 
 /* ===== TEAM COLLAPSE HEADER ===== */
@@ -234,9 +247,17 @@
   border-bottom: 2px solid transparent;
 }
 
+[data-theme="dark"] .team-collapse-header {
+  background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 100%);
+  color: #93c5fd;
+}
+
 .team-collapse-header:hover {
   background: linear-gradient(135deg, #d4e3ff 0%, #c4d9ff 100%);
-  /* border-bottom-color: #6098e8; */
+}
+
+[data-theme="dark"] .team-collapse-header:hover {
+  background: linear-gradient(135deg, #1e40af 0%, #2563eb 100%);
 }
 
 .winner-team-collapse-header {
@@ -250,10 +271,17 @@
     rgb(224, 197, 85) 100%
   );
   color: black;
-
   cursor: pointer;
   transition: all 0.3s ease;
   border-bottom: 2px solid transparent;
+}
+
+[data-theme="dark"] .winner-team-collapse-header {
+  background: linear-gradient(
+    135deg,
+    rgb(202, 179, 78) 0%,
+    rgb(184, 159, 45) 100%
+  );
 }
 
 .winner-team-collapse-header:hover {
@@ -263,6 +291,14 @@
     rgb(233, 220, 167) 100%
   );
   border-bottom-color: rgb(224, 197, 85);
+}
+
+[data-theme="dark"] .winner-team-collapse-header:hover {
+  background: linear-gradient(
+    135deg,
+    rgb(184, 159, 45) 0%,
+    rgb(202, 179, 78) 100%
+  );
 }
 
 .team-header-info {
@@ -275,6 +311,10 @@
   font-size: 1rem;
   width: 2rem;
   color: #063e8d;
+}
+
+[data-theme="dark"] .team-icon {
+  color: #93c5fd;
 }
 
 .winner-team-icon {
@@ -292,6 +332,10 @@
   margin: 0;
 }
 
+[data-theme="dark"] .team-collapse-name {
+  color: #dbeafe;
+}
+
 .winner-team-collapse-name {
   font-size: 1.2rem;
   font-weight: 700;
@@ -302,6 +346,10 @@
 .team-expand-icon {
   color: #3185fa;
   transition: transform 0.3s ease;
+}
+
+[data-theme="dark"] .team-expand-icon {
+  color: #93c5fd;
 }
 
 .winner-team-expand-icon {
@@ -336,7 +384,7 @@
 }
 
 .rounds-scroll::-webkit-scrollbar-track {
-  background: #e4ecff;
+  background: var(--bg-hover);
   border-radius: 4px;
 }
 
@@ -356,6 +404,12 @@
   transition: transform 0.3s ease, box-shadow 0.3s ease;
   border-left: 4px solid #3c6fb5;
   border-bottom: 4px solid #3c6fb5;
+}
+
+[data-theme="dark"] .round-tab {
+  background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+  border-left: 4px solid #1e40af;
+  border-bottom: 4px solid #1e40af;
 }
 
 .round-tab:hover {
@@ -387,10 +441,6 @@
 
 /* ===== OVERALL SUMMARY ===== */
 .overall-summary {
-  /* background: linear-gradient(135deg, #e4c33f 0%, #d4b32f 100%);
-  border-left: 4px solid #c4a93c;
-  border-bottom: 4px solid #c4a93c; */
-
   background: linear-gradient(135deg, #0dc575 0%, #137d4f 100%);
   border-left: 4px solid #137d4f;
   border-bottom: 4px solid #137d4f;
@@ -398,6 +448,12 @@
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(25, 255, 136, 0.3);
   margin-top: 15px;
+}
+
+[data-theme="dark"] .overall-summary {
+  background: linear-gradient(135deg, #059669 0%, #065f46 100%);
+  border-left: 4px solid #065f46;
+  border-bottom: 4px solid #065f46;
 }
 
 .summary-title {
@@ -430,12 +486,12 @@
 
 .summary-left span {
   margin-right: 1rem;
-  font-size: 0.9rem; /* default font size for other stats */
+  font-size: 0.9rem;
 }
 
 .summary-points {
   font-weight: bold;
-  font-size: 1.2rem; /* larger font for points */
+  font-size: 1.2rem;
 }
 
 /* ===== RESPONSIVE DESIGN ===== */
@@ -539,7 +595,7 @@
   }
 
   .summary-points {
-    font-size: 1.2rem; /* larger font for points */
+    font-size: 1.2rem;
   }
 }
 

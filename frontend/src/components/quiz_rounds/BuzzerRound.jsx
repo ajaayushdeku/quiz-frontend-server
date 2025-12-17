@@ -543,7 +543,8 @@ const BuzzerRound = ({ onFinish, sessionId }) => {
                       } else setQuizCompleted(true);
                     }}
                   >
-                    <h3>NEXT QUESTION</h3> <FaArrowRight />
+                    NEXT QUESTION
+                    <FaArrowRight />
                   </Button>
                 </div>
               </>
